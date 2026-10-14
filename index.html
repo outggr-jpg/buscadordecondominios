@@ -36,6 +36,7 @@
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
     .badge-trial { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-grace { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     
     .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .btn { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-decoration: none; }
@@ -89,14 +90,10 @@
     .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: #0f172a; }
     .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .media-preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    .media-type-tag { position: absolute; bottom: 2px; left: 2px; background: rgba(15, 23, 42, 0.85); color: #38bdf8; font-size: 8px; font-weight: bold; padding: 1px 4px; border-radius: 4px; pointer-events: none; }
 
     .report-card { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
     .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     .report-text { font-size: 12px; color: var(--text-main); white-space: pre-wrap; margin: 4px 0; }
-
-    .route-item { display: flex; align-items: center; gap: 10px; background: var(--bg-main); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
-    .route-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0284c7; cursor: pointer; }
 
     .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .lightbox-modal.hidden { display: none; }
@@ -225,17 +222,17 @@
     </div>
   </div>
 
-  <!-- TELA DE BLOQUEIO / PAYWALL -->
+  <!-- TELA DE BLOQUEIO / PAYWALL (DADOS PRESERVADOS) -->
   <div id="paywallScreen" class="modal-overlay" style="background-color: #0f172a; display: none;">
     <div class="paywall-container">
-      <div style="font-size: 44px; margin-bottom: 12px;">⏰</div>
-      <h2 style="font-size: 20px; font-weight: bold; color: white; margin-bottom: 8px;">Período de Testes Encerrado</h2>
+      <div style="font-size: 44px; margin-bottom: 12px;">🔒</div>
+      <h2 style="font-size: 20px; font-weight: bold; color: white; margin-bottom: 8px;">Assinatura Pendente ou Expirada</h2>
       <p id="paywallMessage" style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 18px;">
-        O teste grátis de 3 dias da sua empresa chegou ao fim. **Todos os dados continuam salvos com segurança!**
+        Seu período de testes ou assinatura mensal encerrou e o prazo de tolerância de 7 dias passou. **Todos os seus dados (condomínios e histórico) estão guardados com total segurança no servidor!** Para voltar a operar imediatamente, regularize sua assinatura.
       </p>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button id="paywallSubscribeBtn" onclick="triggerSubscribeAction()" class="btn btn-emerald" style="justify-content: center; padding: 12px; font-size: 14px;">💳 Assinar Agora (PIX / Cartão)</button>
+        <button onclick="triggerRenewSubscription()" class="btn btn-emerald" style="justify-content: center; padding: 12px; font-size: 14px;">💳 Renovar / Assinar (PIX / Cartão)</button>
         <button onclick="handleLogout()" class="btn btn-slate" style="justify-content: center; padding: 10px;">Sair da Conta</button>
       </div>
     </div>
@@ -253,8 +250,9 @@
             <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
             <div class="company-row">
               <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.8.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.0</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
+              <span id="graceBadgeDisplay" class="badge badge-grace" style="display:none;">⚠️ Tolerância</span>
             </div>
           </div>
         </div>
@@ -506,10 +504,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 5.8.0</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 5.9.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Service Worker (sw.js) integrado para suporte completo a PWA offline.</li>
-            <li>Menus reorganizados e customização de logotipo e nome da empresa.</li>
+            <li>Controle de assinatura independente via gateway externo e Firebase.</li>
+            <li>Tolerância de 7 dias pós-vencimento/cancelamento com retenção permanente de dados.</li>
           </ul>
         </div>
       </div>
@@ -518,7 +516,6 @@
   </div>
 
   <script>
-    // REGISTRO AUTOMÁTICO DO SERVICE WORKER (PWA)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
@@ -548,7 +545,6 @@
     let selectedMediaFiles = [];
     let deferredPrompt = null;
     let currentInviteToken = null;
-    let filteredGlobalVisits = [];
     let selectedRegRole = 'owner';
     let currentCompanyName = '';
     let currentCompanyLogo = '';
@@ -751,8 +747,8 @@
         const now = Date.now();
         firebase.auth().createUserWithEmailAndPassword(email, password).then((cred) => {
           currentUser = cred.user; ownerEmail = email; userRole = 'owner';
-          db.collection("empresas").doc(email).set({ companyName, companyLogo: '', ownerEmail: email, subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000), teamMembers: {}, pendingTeam: [] }).then(() => {
-            showMainApp(companyName, '', ownerEmail, { subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000) });
+          db.collection("empresas").doc(email).set({ companyName, companyLogo: '', ownerEmail: email, subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000), subscriptionExpiresAt: now + (3*86400000), teamMembers: {}, pendingTeam: [] }).then(() => {
+            showMainApp(companyName, '', ownerEmail, { subscriptionStatus: 'trial' });
             showToast('Empresa criada com 3 dias de teste!');
           });
         }).catch(err => showToast('Erro: ' + err.message));
@@ -810,7 +806,8 @@
               if (validateSubscription(dataDoc)) showMainApp(found.companyName, found.companyLogo, ownerEmail, dataDoc);
             } else {
               ownerEmail = userEmail; userRole = 'owner'; userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-              const defData = { companyName: "Empresa de " + userEmail.split('@')[0], companyLogo: '', ownerEmail: userEmail, subscriptionStatus: 'trial', trialEndsAt: Date.now() + (3*86400000), teamMembers: {}, pendingTeam: [] };
+              const now = Date.now();
+              const defData = { companyName: "Empresa de " + userEmail.split('@')[0], companyLogo: '', ownerEmail: userEmail, subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000), subscriptionExpiresAt: now + (3*86400000), teamMembers: {}, pendingTeam: [] };
               db.collection("empresas").doc(userEmail).set(defData).then(() => showMainApp(defData.companyName, '', ownerEmail, defData));
             }
           });
@@ -818,17 +815,34 @@
       });
     }
 
+    // VALIDAÇÃO DE ASSINATURA E TOLERÂNCIA DE 7 DIAS (COM DADOS PRESERVADOS)
     function validateSubscription(data) {
       if (!data) return true;
       if (data.subscriptionStatus === 'active') return true;
-      if (data.subscriptionStatus === 'trial' && Date.now() < (data.trialEndsAt || 0)) return true;
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('paywallScreen').style.display = 'flex';
-      return false;
+
+      const now = Date.now();
+      const expiresAt = data.subscriptionExpiresAt || data.trialEndsAt || 0;
+      const gracePeriodMs = 7 * 86400000; // 7 dias de tolerância pós vencimento/cancelamento
+
+      if (now <= expiresAt) {
+        // Dentro do prazo (Trial ou Assinatura ativa)
+        return true;
+      } else if (now <= (expiresAt + gracePeriodMs)) {
+        // Período de carência de 7 dias pós-vencimento/cancelamento
+        document.getElementById('graceBadgeDisplay').style.display = 'inline-block';
+        return true;
+      } else {
+        // Expirou além da tolerância de 7 dias -> Exibe Paywall, mas dados continuam intactos no Firestore
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('paywallScreen').style.display = 'flex';
+        return false;
+      }
     }
 
-    function triggerSubscribeAction() { alert('Redirecionando para checkout...'); }
+    function triggerRenewSubscription() {
+      alert('Redirecionando para o portal de pagamento (PIX / Cartão). Após a confirmação, seu acesso será liberado instantaneamente e seus dados estarão intactos!');
+    }
 
     function showMainApp(companyName, companyLogo, rootOwnerEmail, companyData) {
       currentCompanyName = companyName || 'Protech Condomínios';
@@ -845,7 +859,6 @@
         condos = [];
         snapshot.forEach(doc => condos.push({ id: doc.id, ...doc.data() }));
         renderCondos();
-        populateReportFilters();
       });
     }
 
@@ -1023,8 +1036,6 @@
       document.getElementById('condoModal').classList.remove('hidden');
     }
     function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
-    function openGlobalReportModal() { document.getElementById('globalReportModal').classList.remove('hidden'); generateGlobalReport(); }
-    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
     function openHistoryModal(id) {
       const c = condos.find(x => x.id === id);
       document.getElementById('historyModalTitle').textContent = `Histórico: ${c.name}`;
