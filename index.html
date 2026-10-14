@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador de Condomínios - Protech</title>
+  <title>Protech Condomínios</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   <!-- SDKs do Firebase Compat -->
@@ -48,10 +48,6 @@
     .btn-slate:hover { background-color: #475569; }
     .btn-rose { background-color: #e11d48; color: white; }
     .btn-rose:hover { background-color: #be123c; }
-    .btn-amber { background-color: #d97706; color: white; }
-    .btn-amber:hover { background-color: #b45309; }
-    .btn-purple { background-color: #7c3aed; color: white; }
-    .btn-purple:hover { background-color: #6d28d9; }
     
     main { max-width: 1100px; width: 100%; margin: 0 auto; padding: 20px 16px; flex-grow: 1; }
     
@@ -213,7 +209,6 @@
         <div class="form-group" id="groupCompanyOwnerEmail" style="display: none;">
           <label>E-mail da Empresa (Proprietário) *</label>
           <input type="email" id="regCompanyOwnerEmail" placeholder="dono@empresa.com" class="form-control">
-          <span style="font-size: 10px; color: #94a3b8; margin-top: 2px; display: block;">Acesso inicial somente leitura para consulta e relatórios.</span>
         </div>
 
         <div class="form-group">
@@ -236,18 +231,8 @@
       <div style="font-size: 44px; margin-bottom: 12px;">⏰</div>
       <h2 style="font-size: 20px; font-weight: bold; color: white; margin-bottom: 8px;">Período de Testes Encerrado</h2>
       <p id="paywallMessage" style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 18px;">
-        O teste grátis de 3 dias da sua empresa chegou ao fim. **Todos os dados e condomínios continuam salvos com segurança!**
+        O teste grátis de 3 dias da sua empresa chegou ao fim. **Todos os dados continuam salvos com segurança!**
       </p>
-
-      <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 14px; margin-bottom: 20px; text-align: left;">
-        <div style="font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 6px;">O PLANO DA EMPRESA INCLUI:</div>
-        <div style="font-size: 11px; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
-          <span>✅ Acesso ilimitado para toda a equipe de campo</span>
-          <span>✅ Otimizador de rotas e geofencing GPS de 500m</span>
-          <span>✅ Relatórios em PDF com marca d'água automática</span>
-          <span>✅ Painel consolidado e relatórios gerenciais</span>
-        </div>
-      </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <button id="paywallSubscribeBtn" onclick="triggerSubscribeAction()" class="btn btn-emerald" style="justify-content: center; padding: 12px; font-size: 14px;">💳 Assinar Agora (PIX / Cartão)</button>
@@ -265,10 +250,10 @@
             <div class="brand-icon">🏢</div>
           </div>
           <div>
-            <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
+            <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
             <div class="company-row">
               <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.7.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.8.0</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
             </div>
           </div>
@@ -301,7 +286,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE CONFIGURAÇÕES (AGORA COM EQUIPE, RELATÓRIOS E INSTALAÇÃO) -->
+  <!-- MODAL DE CONFIGURAÇÕES -->
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 480px;">
       <div class="modal-header">
@@ -310,7 +295,6 @@
       </div>
 
       <div class="modal-body">
-        <!-- PERFIL DO USUÁRIO -->
         <div style="display:flex; align-items:center; gap:14px; background:var(--bg-main); padding:12px; border-radius:12px; border:1px solid var(--border-color);">
           <div style="position:relative;">
             <img id="settingsAvatarImg" class="user-avatar" style="width:50px; height:50px; font-size:18px;" src="" alt="Avatar" onclick="document.getElementById('avatarFileInput').click()">
@@ -332,10 +316,8 @@
           </div>
         </div>
 
-        <!-- CONFIGURAÇÕES DA EMPRESA (LOGOTIPO E NOME) -->
         <div id="companySettingsSection" style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px; display:none;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🏢 Dados da Empresa (Matriz):</label>
-          
           <div class="form-group" style="margin-top:6px;">
             <label>Nome da Empresa:</label>
             <div style="display:flex; gap:6px;">
@@ -355,7 +337,6 @@
           </div>
         </div>
 
-        <!-- BOTÕES DO MENU GERAL (EQUIPE, RELATÓRIOS E INSTALAÇÃO) -->
         <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">📋 Menu Operacional e Gestão:</label>
           <div style="display:flex; flex-direction:column; gap:6px;">
@@ -365,7 +346,6 @@
           </div>
         </div>
 
-        <!-- TEMA VISUAL -->
         <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🎨 Personalizar Cor de Fundo do App:</label>
           <div class="theme-color-picker">
@@ -384,54 +364,28 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIOS GERAIS -->
+  <!-- DEMAIS MODAIS -->
   <div id="globalReportModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 650px;">
       <div class="modal-header">
         <h3 style="color:var(--text-main); font-size: 16px;">📊 Relatório Geral de Atendimentos</h3>
         <button onclick="closeGlobalReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <div class="modal-body">
         <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:10px;">
           <div class="form-row">
-            <div class="form-group">
-              <label>Filtrar por Mês/Ano</label>
-              <input type="month" id="filterMonthInput" class="form-control" onchange="generateGlobalReport()">
-            </div>
-            <div class="form-group">
-              <label>Filtrar por Técnico</label>
-              <select id="filterTechSelect" class="form-control" onchange="generateGlobalReport()">
-                <option value="">Todos os Técnicos</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Filtrar por Condomínio</label>
-              <select id="filterCondoSelect" class="form-control" onchange="generateGlobalReport()">
-                <option value="">Todos os Condomínios</option>
-              </select>
-            </div>
+            <div class="form-group"><label>Filtrar por Mês/Ano</label><input type="month" id="filterMonthInput" class="form-control" onchange="generateGlobalReport()"></div>
+            <div class="form-group"><label>Filtrar por Técnico</label><select id="filterTechSelect" class="form-control" onchange="generateGlobalReport()"><option value="">Todos os Técnicos</option></select></div>
+            <div class="form-group"><label>Filtrar por Condomínio</label><select id="filterCondoSelect" class="form-control" onchange="generateGlobalReport()"><option value="">Todos os Condomínios</option></select></div>
           </div>
         </div>
-
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px;">
-          <div class="stat-card">
-            <div id="statTotalVisits" class="stat-num">0</div>
-            <div class="stat-label">Total Atendimentos</div>
-          </div>
-          <div class="stat-card">
-            <div id="statTotalCondos" class="stat-num">0</div>
-            <div class="stat-label">Condomínios Atendidos</div>
-          </div>
-          <div class="stat-card">
-            <div id="statTotalHours" class="stat-num">0h</div>
-            <div class="stat-label">Tempo Total em Campo</div>
-          </div>
+          <div class="stat-card"><div id="statTotalVisits" class="stat-num">0</div><div class="stat-label">Total Atendimentos</div></div>
+          <div class="stat-card"><div id="statTotalCondos" class="stat-num">0</div><div class="stat-label">Condomínios</div></div>
+          <div class="stat-card"><div id="statTotalHours" class="stat-num">0h</div><div class="stat-label">Tempo Total</div></div>
         </div>
-
         <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
-
       <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px;">
         <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
         <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Resumo em PDF</button>
@@ -439,21 +393,16 @@
     </div>
   </div>
 
-  <!-- MODAL DE OTIMIZAÇÃO DE ROTA -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
         <h3 style="color:var(--text-main); font-size: 16px;">🚗 Fazer sua Rota Otimizada</h3>
         <button onclick="closeRouteModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <div class="modal-body">
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
-          Selecione os condomínios que precisa visitar hoje. O sistema vai calcular a rota mais rápida partindo da sua localização atual:
-        </p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Selecione os condomínios que precisa visitar hoje:</p>
         <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
-
       <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
         <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
         <div style="display: flex; gap: 8px;">
@@ -464,62 +413,29 @@
     </div>
   </div>
 
-  <!-- MODAL DE CADASTRO / EDIÇÃO DE CONDOMÍNIO -->
   <div id="condoModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
         <h3 id="modalTitle" style="color:var(--text-main); font-size: 16px;">Cadastrar Condomínio</h3>
         <button onclick="closeModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <form id="condoForm" onsubmit="saveCondo(event)">
         <input type="hidden" id="condoId">
-        
-        <div class="form-group">
-          <label>Nome do Condomínio *</label>
-          <input type="text" id="condoName" required placeholder="Ex: Residencial Parque das Flores" class="form-control">
-        </div>
-
+        <div class="form-group"><label>Nome do Condomínio *</label><input type="text" id="condoName" required class="form-control"></div>
         <div class="form-row">
-          <div class="form-group" style="flex:2;">
-            <label>Endereço (Rua / Av) *</label>
-            <input type="text" id="condoAddress" required placeholder="Ex: Av. Ipiranga" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Número *</label>
-            <input type="text" id="condoNumber" required placeholder="Ex: 1234" class="form-control">
-          </div>
+          <div class="form-group" style="flex:2;"><label>Endereço *</label><input type="text" id="condoAddress" required class="form-control"></div>
+          <div class="form-group"><label>Número *</label><input type="text" id="condoNumber" required class="form-control"></div>
         </div>
-
         <div class="form-row">
-          <div class="form-group">
-            <label>Bairro</label>
-            <input type="text" id="condoNeighborhood" placeholder="Ex: Petrópolis" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Telefone / Contato</label>
-            <input type="text" id="condoPhone" placeholder="(51) 99999-9999" class="form-control">
-          </div>
+          <div class="form-group"><label>Bairro</label><input type="text" id="condoNeighborhood" class="form-control"></div>
+          <div class="form-group"><label>Telefone</label><input type="text" id="condoPhone" class="form-control"></div>
         </div>
-
         <div class="form-row">
-          <div class="form-group">
-            <label>Latitude *</label>
-            <input type="text" id="condoLat" required placeholder="Ex: -30.0346" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Longitude *</label>
-            <input type="text" id="condoLng" required placeholder="Ex: -51.2177" class="form-control">
-          </div>
+          <div class="form-group"><label>Latitude *</label><input type="text" id="condoLat" required class="form-control"></div>
+          <div class="form-group"><label>Longitude *</label><input type="text" id="condoLng" required class="form-control"></div>
         </div>
-
-        <button type="button" onclick="captureCurrentGPS()" class="btn btn-slate" style="width: 100%; justify-content: center; margin-bottom: 12px;">📍 Capturar Coordenadas GPS Atuais</button>
-
-        <div class="form-group">
-          <label>Observações / Acesso</label>
-          <textarea id="condoNotes" rows="2" placeholder="Ex: Portaria 24h, tag nos portões..." class="form-control" style="resize:none;"></textarea>
-        </div>
-
+        <button type="button" onclick="captureCurrentGPS()" class="btn btn-slate" style="width: 100%; justify-content: center; margin-bottom: 12px;">📍 Capturar Coordenadas GPS</button>
+        <div class="form-group"><label>Observações</label><textarea id="condoNotes" rows="2" class="form-control" style="resize:none;"></textarea></div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
           <button type="button" onclick="closeModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" class="btn btn-slate">Salvar</button>
@@ -528,30 +444,16 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO DE VISITA -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="reportModalTitle" style="color:var(--text-main); font-size: 16px;">📝 Relatório de Visita Técnico</h3>
+        <h3 id="reportModalTitle" style="color:var(--text-main); font-size: 16px;">📝 Relatório de Visita</h3>
         <button onclick="closeReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
         <input type="hidden" id="reportCondoId">
-        
-        <div class="form-group">
-          <label>Relatório do Serviço Realizado *</label>
-          <textarea id="reportText" rows="3" required placeholder="Descreva detalhadamente o que foi feito..." class="form-control" style="resize:none;"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>Fotos e Vídeos (Marca d'Água Ativa):</label>
-          <input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;">
-          <span style="font-size:10px; color:var(--text-muted); margin-top:4px; display:block;">Toque no 🔴 para remover itens enviados por engano.</span>
-          
-          <div id="mediaPreviewContainer" class="media-preview-container"></div>
-        </div>
-
+        <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
+        <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
@@ -560,95 +462,71 @@
     </div>
   </div>
 
-  <!-- MODAL DE HISTÓRICO DE RELATÓRIOS -->
   <div id="historyModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 id="historyModalTitle" style="color:var(--text-main); font-size: 16px;">📋 Histórico de Visitas</h3>
+        <h3 id="historyModalTitle" style="color:var(--text-main); font-size: 16px;">📋 Histórico</h3>
         <button onclick="closeHistoryModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <div class="modal-body" id="historyListContainer"></div>
-
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button>
-      </div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button></div>
     </div>
   </div>
 
-  <!-- MODAL DE EQUIPE E CONVITES -->
   <div id="teamModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Permissões</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe</h3>
         <button onclick="closeTeamModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <div class="modal-body">
         <div style="background: var(--bg-main); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px;">
           <h4 style="font-size: 12px; color: #38bdf8; font-weight: bold;">📩 Convidar Novo Colaborador</h4>
-          <div style="display: flex; gap: 8px;">
-            <input type="email" id="inviteUserEmailInput" placeholder="Digite o e-mail do colaborador..." class="form-control" style="flex:1;">
-            <button onclick="sendDirectInvite()" class="btn btn-slate">Convidar por E-mail</button>
-          </div>
+          <div style="display: flex; gap: 8px;"><input type="email" id="inviteUserEmailInput" placeholder="E-mail..." class="form-control" style="flex:1;"><button onclick="sendDirectInvite()" class="btn btn-slate">Convidar</button></div>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px;">
-            <span style="font-size: 11px; color: var(--text-muted);">Ou crie um link único com expiração em 24h:</span>
-            <button onclick="generateInviteLink()" class="btn btn-slate" style="font-size: 11px;">🔗 Gerar Link de Convite</button>
+            <span style="font-size: 11px; color: var(--text-muted);">Ou link de convite (24h):</span>
+            <button onclick="generateInviteLink()" class="btn btn-slate" style="font-size: 11px;">🔗 Gerar Link</button>
           </div>
           <div id="generatedLinkContainer" style="display: none; background: var(--bg-card); padding: 8px; border-radius: 8px; border: 1px solid #0284c7; margin-top: 4px;">
-            <div style="font-size: 10px; color: #38bdf8; margin-bottom: 4px;">Link válido por 24 horas (uso único):</div>
-            <div style="display: flex; gap: 6px;">
-              <input type="text" id="generatedLinkInput" readonly class="form-control" style="font-size: 11px;">
-              <button onclick="copyGeneratedLink()" class="btn btn-slate" style="padding: 4px 8px; font-size: 11px;">Copiar Link</button>
-            </div>
+            <div style="display: flex; gap: 6px;"><input type="text" id="generatedLinkInput" readonly class="form-control" style="font-size: 11px;"><button onclick="copyGeneratedLink()" class="btn btn-slate" style="padding: 4px 8px; font-size: 11px;">Copiar</button></div>
           </div>
         </div>
-
-        <div>
-          <h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px; margin-top: 10px;">Solicitações / Convites Pendentes:</h4>
-          <div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;"></div>
-        </div>
-
-        <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Ativos e Permissões de Acesso:</h4>
-          <div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
+        <div><h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px; margin-top: 10px;">Pendentes:</h4><div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;"></div></div>
+        <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;"><h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Ativos:</h4><div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 10px;"></div></div>
       </div>
-
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <button onclick="closeTeamModal()" class="btn btn-slate">Fechar</button>
-      </div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeTeamModal()" class="btn btn-slate">Fechar</button></div>
     </div>
   </div>
 
-  <!-- MODAL HISTÓRICO DE VERSÕES -->
   <div id="changelogModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
         <h3 style="color:var(--text-main); font-size: 16px;">🚀 Histórico de Versões</h3>
         <button onclick="closeChangelogModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title">
-            <span>Versão 5.7.0</span>
-            <span class="version-date">Atual</span>
-          </div>
+          <div class="version-title"><span>Versão 5.8.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Menus de Equipe, Relatórios e Instalação movidos para dentro das Configurações (Engrenagem).</li>
-            <li>Exibição do nome e logotipo personalizado da empresa no cabeçalho do aplicativo.</li>
+            <li>Service Worker (sw.js) integrado para suporte completo a PWA offline.</li>
+            <li>Menus reorganizados e customização de logotipo e nome da empresa.</li>
           </ul>
         </div>
       </div>
-
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <button onclick="closeChangelogModal()" class="btn btn-slate">Fechar</button>
-      </div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeChangelogModal()" class="btn btn-slate">Fechar</button></div>
     </div>
   </div>
 
   <script>
+    // REGISTRO AUTOMÁTICO DO SERVICE WORKER (PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registrado:', reg.scope))
+          .catch((err) => console.log('Erro no Service Worker:', err));
+      });
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyARDZDxNAPu86dpcwj148-CRDXYvIKN-o0",
       authDomain: "buscador-de-condominios.firebaseapp.com",
@@ -688,7 +566,7 @@
           deferredPrompt = null;
         });
       } else {
-        alert('Instalação PWA:\n\nToque nos 3 pontos (⋮) do Chrome e selecione "Adicionar à tela inicial" ou "Instalar aplicativo".');
+        alert('Instalação PWA:\n\nToque nos 3 pontos (⋮) do seu navegador e selecione "Adicionar à tela inicial" ou "Instalar aplicativo".');
       }
     }
 
@@ -701,8 +579,7 @@
       if (inviteToken) { checkInviteToken(inviteToken); }
 
       const now = new Date();
-      const monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-      document.getElementById('filterMonthInput').value = monthStr;
+      document.getElementById('filterMonthInput').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
       try {
         firebase.auth().onAuthStateChanged((user) => {
@@ -719,42 +596,21 @@
       document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('selected'));
 
       if (themeName === 'oled') {
-        root.style.setProperty('--bg-main', '#000000');
-        root.style.setProperty('--bg-card', '#121212');
-        root.style.setProperty('--border-color', '#27272a');
-        root.style.setProperty('--text-main', '#ffffff');
-        root.style.setProperty('--text-muted', '#a1a1aa');
-        const dot = document.getElementById('theme-oled'); if(dot) dot.classList.add('selected');
+        root.style.setProperty('--bg-main', '#000000'); root.style.setProperty('--bg-card', '#121212'); root.style.setProperty('--border-color', '#27272a'); root.style.setProperty('--text-main', '#ffffff'); root.style.setProperty('--text-muted', '#a1a1aa');
+        const d = document.getElementById('theme-oled'); if(d) d.classList.add('selected');
       } else if (themeName === 'emerald') {
-        root.style.setProperty('--bg-main', '#064e3b');
-        root.style.setProperty('--bg-card', '#022c22');
-        root.style.setProperty('--border-color', '#047857');
-        root.style.setProperty('--text-main', '#ecfdf5');
-        root.style.setProperty('--text-muted', '#a7f3d0');
-        const dot = document.getElementById('theme-emerald'); if(dot) dot.classList.add('selected');
+        root.style.setProperty('--bg-main', '#064e3b'); root.style.setProperty('--bg-card', '#022c22'); root.style.setProperty('--border-color', '#047857'); root.style.setProperty('--text-main', '#ecfdf5'); root.style.setProperty('--text-muted', '#a7f3d0');
+        const d = document.getElementById('theme-emerald'); if(d) d.classList.add('selected');
       } else if (themeName === 'navy') {
-        root.style.setProperty('--bg-main', '#1e1b4b');
-        root.style.setProperty('--bg-card', '#312e81');
-        root.style.setProperty('--border-color', '#4338ca');
-        root.style.setProperty('--text-main', '#e0e7ff');
-        root.style.setProperty('--text-muted', '#c7d2fe');
-        const dot = document.getElementById('theme-navy'); if(dot) dot.classList.add('selected');
+        root.style.setProperty('--bg-main', '#1e1b4b'); root.style.setProperty('--bg-card', '#312e81'); root.style.setProperty('--border-color', '#4338ca'); root.style.setProperty('--text-main', '#e0e7ff'); root.style.setProperty('--text-muted', '#c7d2fe');
+        const d = document.getElementById('theme-navy'); if(d) d.classList.add('selected');
       } else if (themeName === 'light') {
-        root.style.setProperty('--bg-main', '#f1f5f9');
-        root.style.setProperty('--bg-card', '#ffffff');
-        root.style.setProperty('--border-color', '#cbd5e1');
-        root.style.setProperty('--text-main', '#0f172a');
-        root.style.setProperty('--text-muted', '#64748b');
-        const dot = document.getElementById('theme-light'); if(dot) dot.classList.add('selected');
+        root.style.setProperty('--bg-main', '#f1f5f9'); root.style.setProperty('--bg-card', '#ffffff'); root.style.setProperty('--border-color', '#cbd5e1'); root.style.setProperty('--text-main', '#0f172a'); root.style.setProperty('--text-muted', '#64748b');
+        const d = document.getElementById('theme-light'); if(d) d.classList.add('selected');
       } else {
-        root.style.setProperty('--bg-main', '#0f172a');
-        root.style.setProperty('--bg-card', '#1e293b');
-        root.style.setProperty('--border-color', '#334155');
-        root.style.setProperty('--text-main', '#f8fafc');
-        root.style.setProperty('--text-muted', '#94a3b8');
-        const dot = document.getElementById('theme-default'); if(dot) dot.classList.add('selected');
+        root.style.setProperty('--bg-main', '#0f172a'); root.style.setProperty('--bg-card', '#1e293b'); root.style.setProperty('--border-color', '#334155'); root.style.setProperty('--text-main', '#f8fafc'); root.style.setProperty('--text-muted', '#94a3b8');
+        const d = document.getElementById('theme-default'); if(d) d.classList.add('selected');
       }
-
       localStorage.setItem('protech_app_theme', themeName);
     }
 
@@ -772,10 +628,8 @@
       else if (userRole === 'user') roleLabel = 'Usuário / Técnico';
       document.getElementById('settingsUserRole').textContent = `Cargo: ${roleLabel}`;
 
-      const avatarImg = document.getElementById('settingsAvatarImg');
-      avatarImg.src = storedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
+      document.getElementById('settingsAvatarImg').src = storedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
 
-      // Configurações da Empresa (Apenas para Proprietários/Admins)
       const companySec = document.getElementById('companySettingsSection');
       const teamMenuBtn = document.getElementById('settingsTeamMenuBtn');
 
@@ -783,9 +637,7 @@
         companySec.style.display = 'block';
         teamMenuBtn.style.display = 'flex';
         document.getElementById('settingsCompanyNameInput').value = currentCompanyName;
-        
-        const logoImg = document.getElementById('settingsCompanyLogoImg');
-        logoImg.src = currentCompanyLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCompanyName)}&background=0284c7&color=fff`;
+        document.getElementById('settingsCompanyLogoImg').src = currentCompanyLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCompanyName)}&background=0284c7&color=fff`;
       } else {
         companySec.style.display = 'none';
         teamMenuBtn.style.display = 'none';
@@ -810,20 +662,18 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (evt) => {
-        const base64Img = evt.target.result;
         const email = currentUser ? currentUser.email : 'usuario';
-        localStorage.setItem('protech_user_avatar_' + email, base64Img);
-        document.getElementById('settingsAvatarImg').src = base64Img;
-        showToast('Foto de perfil atualizada!');
+        localStorage.setItem('protech_user_avatar_' + email, evt.target.result);
+        document.getElementById('settingsAvatarImg').src = evt.target.result;
+        showToast('Foto atualizada!');
       };
       reader.readAsDataURL(file);
     }
 
     function saveCompanyName() {
-      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas administradores podem alterar o nome da empresa.'); return; }
+      if (userRole !== 'owner' && userRole !== 'admin') return;
       const newName = document.getElementById('settingsCompanyNameInput').value.trim();
-      if (!newName) { alert('Informe um nome válido.'); return; }
-
+      if (!newName) return;
       db.collection("empresas").doc(ownerEmail).update({ companyName: newName }).then(() => {
         currentCompanyName = newName;
         updateHeaderBrandDisplay();
@@ -832,41 +682,32 @@
     }
 
     function handleCompanyLogoUpload(e) {
-      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas administradores podem alterar o logotipo.'); return; }
+      if (userRole !== 'owner' && userRole !== 'admin') return;
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = (evt) => {
-        const base64Logo = evt.target.result;
-        db.collection("empresas").doc(ownerEmail).update({ companyLogo: base64Logo }).then(() => {
-          currentCompanyLogo = base64Logo;
-          document.getElementById('settingsCompanyLogoImg').src = base64Logo;
+        db.collection("empresas").doc(ownerEmail).update({ companyLogo: evt.target.result }).then(() => {
+          currentCompanyLogo = evt.target.result;
+          document.getElementById('settingsCompanyLogoImg').src = evt.target.result;
           updateHeaderBrandDisplay();
-          showToast('Logotipo da empresa atualizado!');
+          showToast('Logotipo atualizado!');
         });
       };
       reader.readAsDataURL(file);
     }
 
     function updateHeaderBrandDisplay() {
-      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Buscador de Condomínios';
+      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Protech Condomínios';
       const logoContainer = document.getElementById('headerBrandLogoContainer');
-      
-      if (currentCompanyLogo) {
-        logoContainer.innerHTML = `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">`;
-      } else {
-        logoContainer.innerHTML = `<div class="brand-icon">🏢</div>`;
-      }
+      logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
     function checkInviteToken(token) {
       db.collection("convites").doc(token).get().then((doc) => {
-        if (!doc.exists) { alert('Este link de convite é inválido ou já foi removido.'); return; }
+        if (!doc.exists) { alert('Convite inválido.'); return; }
         const invite = doc.data();
-        if (invite.used) { alert('Este link de convite já foi utilizado.'); return; }
-        if (Date.now() > invite.expiresAt) { alert('Este link de convite expirou (validade de 24 horas).'); return; }
-
+        if (invite.used || Date.now() > invite.expiresAt) { alert('Convite expirado ou já utilizado.'); return; }
         currentInviteToken = token;
         document.getElementById('inviteNotice').style.display = 'block';
         document.getElementById('regCompanyOwnerEmail').value = invite.ownerEmail;
@@ -886,37 +727,17 @@
       selectedRegRole = role;
       document.getElementById('roleProprietario').classList.toggle('active', role === 'owner');
       document.getElementById('roleUsuario').classList.toggle('active', role === 'user');
-
-      const groupCompanyName = document.getElementById('groupCompanyName');
-      const groupUserName = document.getElementById('groupUserName');
-      const groupCompanyOwnerEmail = document.getElementById('groupCompanyOwnerEmail');
-      const submitBtn = document.getElementById('regSubmitBtn');
-
-      if (role === 'owner') {
-        groupCompanyName.style.display = 'block';
-        groupUserName.style.display = 'none';
-        groupCompanyOwnerEmail.style.display = 'none';
-        submitBtn.textContent = 'Criar Conta (3 Dias de Teste Grátis)';
-      } else {
-        groupCompanyName.style.display = 'none';
-        groupUserName.style.display = 'block';
-        groupCompanyOwnerEmail.style.display = 'block';
-        submitBtn.textContent = 'Solicitar Acesso à Empresa';
-      }
+      document.getElementById('groupCompanyName').style.display = role === 'owner' ? 'block' : 'none';
+      document.getElementById('groupUserName').style.display = role === 'owner' ? 'none' : 'block';
+      document.getElementById('groupCompanyOwnerEmail').style.display = role === 'owner' ? 'none' : 'block';
+      document.getElementById('regSubmitBtn').textContent = role === 'owner' ? 'Criar Conta (3 Dias Grátis)' : 'Solicitar Acesso';
     }
 
     function handleLogin(e) {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
-
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          currentUser = userCredential.user;
-          resolveUserSession(email);
-          showToast('Login realizado com sucesso!');
-        })
-        .catch(() => { showToast('Erro: E-mail ou senha incorretos.'); });
+      firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim())
+        .then((cred) => { currentUser = cred.user; resolveUserSession(cred.user.email); showToast('Login bem-sucedido!'); })
+        .catch(() => showToast('Erro: E-mail ou senha incorretos.'));
     }
 
     function handleUnifiedRegister(e) {
@@ -926,57 +747,29 @@
 
       if (selectedRegRole === 'owner') {
         const companyName = document.getElementById('regCompanyName').value.trim();
-        if (!companyName) { alert('Informe o nome da sua empresa.'); return; }
-
+        if (!companyName) { alert('Informe o nome da empresa.'); return; }
         const now = Date.now();
-        const trialDuration = 3 * 24 * 60 * 60 * 1000;
-
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then((userCredential) => {
-            currentUser = userCredential.user;
-            ownerEmail = email;
-            userRole = 'owner';
-            userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-
-            db.collection("empresas").doc(email).set({
-              companyName: companyName,
-              companyLogo: '',
-              ownerEmail: email,
-              subscriptionStatus: 'trial',
-              trialStartDate: now,
-              trialEndsAt: now + trialDuration,
-              teamMembers: {},
-              pendingTeam: []
-            }).then(() => {
-              showMainApp(companyName, '', ownerEmail, { subscriptionStatus: 'trial', trialEndsAt: now + trialDuration });
-              showToast('Empresa criada com 3 dias de teste grátis!');
-            });
-          })
-          .catch((error) => { showToast('Erro ao criar empresa: ' + error.message); });
-
+        firebase.auth().createUserWithEmailAndPassword(email, password).then((cred) => {
+          currentUser = cred.user; ownerEmail = email; userRole = 'owner';
+          db.collection("empresas").doc(email).set({ companyName, companyLogo: '', ownerEmail: email, subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000), teamMembers: {}, pendingTeam: [] }).then(() => {
+            showMainApp(companyName, '', ownerEmail, { subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000) });
+            showToast('Empresa criada com 3 dias de teste!');
+          });
+        }).catch(err => showToast('Erro: ' + err.message));
       } else {
         const userName = document.getElementById('regUserName').value.trim();
         const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
-
-        if (!userName || !companyOwnerEmail) { alert('Preencha seu nome e o e-mail da empresa.'); return; }
-
         db.collection("empresas").doc(companyOwnerEmail).get().then((doc) => {
-          if (!doc.exists) { alert('Erro: E-mail da empresa proprietária não encontrado.'); return; }
-
-          firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then(() => {
-              let pending = doc.data().pendingTeam || [];
-              if (!pending.some(p => (typeof p === 'string' ? p : p.email) === email)) {
-                pending.push({ email: email, name: userName, requestedRole: 'user' });
-              }
-
-              db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
-                if (currentInviteToken) { db.collection("convites").doc(currentInviteToken).update({ used: true }); }
-                showToast('Solicitação enviada ao proprietário da empresa!');
-                resolveUserSession(email);
-              });
-            })
-            .catch((error) => { showToast('Erro ao criar conta: ' + error.message); });
+          if (!doc.exists) { alert('E-mail da empresa proprietária não encontrado.'); return; }
+          firebase.auth().createUserWithEmailAndPassword(email, password).then(() => {
+            let pending = doc.data().pendingTeam || [];
+            if (!pending.some(p => (p.email || p) === email)) pending.push({ email, name: userName, requestedRole: 'user' });
+            db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
+              if (currentInviteToken) db.collection("convites").doc(currentInviteToken).update({ used: true });
+              showToast('Solicitação enviada!');
+              resolveUserSession(email);
+            });
+          }).catch(err => showToast('Erro: ' + err.message));
         });
       }
     }
@@ -986,16 +779,13 @@
       ownerEmail = 'visitante@protech.com';
       userRole = 'owner';
       userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-      showMainApp('Protech Segurança (Visitante)', '', ownerEmail, { subscriptionStatus: 'active' });
+      showMainApp('Protech Visitante', '', ownerEmail, { subscriptionStatus: 'active' });
       showToast('Entrou no modo de teste.');
     }
 
     function handleLogout() {
       try { firebase.auth().signOut(); } catch(e) {}
-      currentUser = null;
-      ownerEmail = null;
-      userRole = 'user';
-      userPermissions = { canAdd: false, canEdit: false, canDelete: false };
+      currentUser = null; ownerEmail = null;
       document.getElementById('authScreen').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('paywallScreen').style.display = 'none';
@@ -1005,201 +795,64 @@
     function resolveUserSession(userEmail) {
       db.collection("empresas").doc(userEmail).get().then((doc) => {
         if (doc.exists) {
-          ownerEmail = userEmail;
-          userRole = 'owner';
-          userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-          const data = doc.data();
-          
-          if (validateSubscription(data)) {
-            showMainApp(data.companyName, data.companyLogo || '', ownerEmail, data);
-          }
+          ownerEmail = userEmail; userRole = 'owner'; userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+          if (validateSubscription(doc.data())) showMainApp(doc.data().companyName, doc.data().companyLogo || '', ownerEmail, doc.data());
         } else {
-          db.collection("empresas").get().then((querySnapshot) => {
-            let foundCompany = null;
-            let companyDocData = null;
-
-            querySnapshot.forEach(d => {
+          db.collection("empresas").get().then((snapshot) => {
+            let found = null, dataDoc = null;
+            snapshot.forEach(d => {
               const data = d.data();
-              const members = data.teamMembers || {};
-              if (data.ownerEmail === userEmail) {
-                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: 'owner' };
-                companyDocData = data;
-              } else if (members[userEmail]) {
-                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: members[userEmail].role, permissions: members[userEmail] };
-                companyDocData = data;
-              }
+              if (data.ownerEmail === userEmail) { found = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: 'owner' }; dataDoc = data; }
+              else if (data.teamMembers && data.teamMembers[userEmail]) { found = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: data.teamMembers[userEmail].role, permissions: data.teamMembers[userEmail] }; dataDoc = data; }
             });
-
-            if (foundCompany) {
-              ownerEmail = foundCompany.ownerEmail;
-              userRole = foundCompany.role;
-              userPermissions = userRole === 'owner' ? { canAdd: true, canEdit: true, canDelete: true } : (foundCompany.permissions || { canAdd: false, canEdit: false, canDelete: false });
-
-              if (validateSubscription(companyDocData)) {
-                showMainApp(foundCompany.companyName, foundCompany.companyLogo, ownerEmail, companyDocData);
-              }
+            if (found) {
+              ownerEmail = found.ownerEmail; userRole = found.role; userPermissions = userRole === 'owner' ? { canAdd: true, canEdit: true, canDelete: true } : (found.permissions || {});
+              if (validateSubscription(dataDoc)) showMainApp(found.companyName, found.companyLogo, ownerEmail, dataDoc);
             } else {
-              db.collection("empresas").get().then((companySnapshots) => {
-                let pendingMatch = null;
-                companySnapshots.forEach(cdoc => {
-                  const pList = cdoc.data().pendingTeam || [];
-                  if (pList.some(p => (typeof p === 'string' ? p : p.email) === userEmail)) {
-                    pendingMatch = cdoc;
-                  }
-                });
-
-                if (pendingMatch) {
-                  const cData = pendingMatch.data();
-                  ownerEmail = cData.ownerEmail;
-                  userRole = 'user';
-                  userPermissions = { canAdd: false, canEdit: false, canDelete: false };
-
-                  if (validateSubscription(cData)) {
-                    showMainApp(cData.companyName, cData.companyLogo || '', ownerEmail, cData);
-                    showToast('Aguardando o proprietário aprovar sua conta.');
-                  }
-                } else {
-                  ownerEmail = userEmail;
-                  userRole = 'owner';
-                  userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-                  const now = Date.now();
-                  const defaultData = {
-                    companyName: "Empresa de " + userEmail.split('@')[0],
-                    companyLogo: '',
-                    ownerEmail: userEmail,
-                    subscriptionStatus: 'trial',
-                    trialStartDate: now,
-                    trialEndsAt: now + (3 * 24 * 60 * 60 * 1000),
-                    teamMembers: {},
-                    pendingTeam: []
-                  };
-                  db.collection("empresas").doc(userEmail).set(defaultData).then(() => {
-                    showMainApp(defaultData.companyName, '', ownerEmail, defaultData);
-                  });
-                }
-              });
+              ownerEmail = userEmail; userRole = 'owner'; userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+              const defData = { companyName: "Empresa de " + userEmail.split('@')[0], companyLogo: '', ownerEmail: userEmail, subscriptionStatus: 'trial', trialEndsAt: Date.now() + (3*86400000), teamMembers: {}, pendingTeam: [] };
+              db.collection("empresas").doc(userEmail).set(defData).then(() => showMainApp(defData.companyName, '', ownerEmail, defData));
             }
           });
         }
       });
     }
 
-    function validateSubscription(companyData) {
-      if (!companyData) return true;
-      const status = companyData.subscriptionStatus || 'trial';
-      const now = Date.now();
-
-      if (status === 'active') { return true; }
-
-      if (status === 'trial') {
-        const trialEndsAt = companyData.trialEndsAt || (now + (3 * 24 * 60 * 60 * 1000));
-        if (now < trialEndsAt) {
-          return true;
-        } else {
-          showPaywall(companyData.ownerEmail === (currentUser ? currentUser.email : ''));
-          return false;
-        }
-      }
-
-      showPaywall(companyData.ownerEmail === (currentUser ? currentUser.email : ''));
-      return false;
-    }
-
-    function showPaywall(isOwner) {
+    function validateSubscription(data) {
+      if (!data) return true;
+      if (data.subscriptionStatus === 'active') return true;
+      if (data.subscriptionStatus === 'trial' && Date.now() < (data.trialEndsAt || 0)) return true;
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('paywallScreen').style.display = 'flex';
-
-      const msg = document.getElementById('paywallMessage');
-      const btn = document.getElementById('paywallSubscribeBtn');
-
-      if (isOwner) {
-        msg.innerHTML = `O teste grátis de 3 dias da sua empresa chegou ao fim.<br><b>Seus dados e condomínios continuam salvos com segurança!</b> Assine para reativar o acesso.`;
-        btn.style.display = 'inline-flex';
-      } else {
-        msg.innerHTML = `O período de testes da sua empresa expirou.<br><b>Entre em contato com o gestor da sua empresa</b> para reativar o acesso.`;
-        btn.style.display = 'none';
-      }
+      return false;
     }
 
-    function triggerSubscribeAction() {
-      alert('Integração de Pagamento:\n\nAqui será aberto o Link de Checkout do Asaas/Mercado Pago para pagamento via PIX ou Cartão.');
-    }
+    function triggerSubscribeAction() { alert('Redirecionando para checkout...'); }
 
-    function showMainApp(companyName, companyLogo, rootOwnerEmail, companyData = null) {
+    function showMainApp(companyName, companyLogo, rootOwnerEmail, companyData) {
       currentCompanyName = companyName || 'Protech Condomínios';
       currentCompanyLogo = companyLogo || '';
-
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('paywallScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'flex';
-
       updateHeaderBrandDisplay();
-
-      const trialBadge = document.getElementById('trialBadgeDisplay');
-      if (companyData && companyData.subscriptionStatus === 'trial' && companyData.trialEndsAt) {
-        const diffMs = companyData.trialEndsAt - Date.now();
-        const daysLeft = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-        trialBadge.textContent = `⏳ Teste: ${daysLeft}d`;
-        trialBadge.style.display = 'inline-block';
-      } else {
-        trialBadge.style.display = 'none';
-      }
-
-      const newBtn = document.getElementById('newCondoBtn');
-      newBtn.style.display = (userRole === 'user' && !userPermissions.canAdd) ? 'none' : 'inline-flex';
-
       loadCondosForOwner(rootOwnerEmail);
     }
 
     function loadCondosForOwner(rootOwnerEmail) {
-      db.collection("condominios")
-        .where("ownerEmail", "==", rootOwnerEmail)
-        .get()
-        .then((querySnapshot) => {
-          condos = [];
-          querySnapshot.forEach((doc) => { condos.push({ id: doc.id, ...doc.data() }); });
-          if (condos.length === 0 && userRole === 'owner') {
-            loadDefaultDataForNewCompany(rootOwnerEmail);
-          } else {
-            renderCondos();
-            populateReportFilters();
-          }
-        });
-    }
-
-    function loadDefaultDataForNewCompany(rootOwnerEmail) {
-      const defaultData = [{
-        name: 'Residencial Bela Vista',
-        address: 'Av. Protásio Alves',
-        number: '2450',
-        neighborhood: 'Petrópolis',
-        phone: '(51) 98888-1122',
-        notes: 'Portaria central.',
-        lat: '-30.040000',
-        lng: '-51.170000',
-        ownerEmail: rootOwnerEmail,
-        reports: [],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }];
-
-      const batch = db.batch();
-      defaultData.forEach(item => {
-        const docRef = db.collection("condominios").doc();
-        batch.set(docRef, item);
+      db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get().then((snapshot) => {
+        condos = [];
+        snapshot.forEach(doc => condos.push({ id: doc.id, ...doc.data() }));
+        renderCondos();
+        populateReportFilters();
       });
-      batch.commit().then(() => { loadCondosForOwner(rootOwnerEmail); });
     }
 
     function saveCondo(e) {
       e.preventDefault();
-      if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) {
-        alert('Sem permissão para adicionar ou editar condomínios.');
-        return;
-      }
-
       const id = document.getElementById('condoId').value;
-      const condoData = {
+      const data = {
         name: document.getElementById('condoName').value.trim(),
         address: document.getElementById('condoAddress').value.trim(),
         number: document.getElementById('condoNumber').value.trim(),
@@ -1210,798 +863,193 @@
         notes: document.getElementById('condoNotes').value.trim(),
         ownerEmail: ownerEmail
       };
-
-      if (!condoData.lat || !condoData.lng) { alert('Informe a Latitude e Longitude.'); return; }
-
+      if (!data.lat || !data.lng) { alert('Informe Latitude e Longitude.'); return; }
       if (id) {
-        if (userRole === 'user' && !userPermissions.canEdit) { alert('Sem permissão para editar.'); return; }
-        db.collection("condominios").doc(id).update(condoData).then(() => {
-          showToast('Condomínio atualizado!');
-          loadCondosForOwner(ownerEmail);
-          closeModal();
-        });
+        db.collection("condominios").doc(id).update(data).then(() => { showToast('Atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       } else {
-        if (userRole === 'user' && !userPermissions.canAdd) { alert('Sem permissão para adicionar.'); return; }
-        condoData.reports = [];
-        condoData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        db.collection("condominios").add(condoData).then(() => {
-          showToast('Condomínio cadastrado!');
-          loadCondosForOwner(ownerEmail);
-          closeModal();
-        });
+        data.reports = [];
+        db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       }
     }
 
     function captureCurrentGPS() {
-      if (!navigator.geolocation) { alert('Geolocalização não suportada.'); return; }
+      if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
       showToast('Capturando GPS...');
       navigator.geolocation.getCurrentPosition((pos) => {
         document.getElementById('condoLat').value = pos.coords.latitude.toFixed(6);
         document.getElementById('condoLng').value = pos.coords.longitude.toFixed(6);
         showToast('GPS capturado!');
-      }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true });
+      }, () => alert('Erro no GPS'), { enableHighAccuracy: true });
     }
 
     function deleteCondo(id) {
-      if (userRole === 'user' && !userPermissions.canDelete) { alert('Sem permissão para apagar.'); return; }
-      if (confirm('Deseja excluir este condomínio?')) {
-        db.collection("condominios").doc(id).delete().then(() => {
-          showToast('Condomínio removido.');
-          loadCondosForOwner(ownerEmail);
-        });
+      if (confirm('Excluir este condomínio?')) {
+        db.collection("condominios").doc(id).delete().then(() => { showToast('Removido.'); loadCondosForOwner(ownerEmail); });
       }
     }
 
     function editCondo(id) {
-      if (userRole === 'user' && !userPermissions.canEdit) { alert('Sem permissão para editar.'); return; }
-      const condo = condos.find(c => c.id === id);
-      if (condo) openModal(condo);
+      const c = condos.find(x => x.id === id);
+      if (c) openModal(c);
     }
 
     function toggleCheckIn(id) {
-      const condo = condos.find(c => c.id === id);
-      if (!condo) return;
-      if (!condo.lat || !condo.lng) { alert('Check-in bloqueado: Sem GPS cadastrado.'); return; }
-
-      if (!condo.checkedIn) {
-        if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
-        showToast('Validando GPS...');
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+      if (!c.lat || !c.lng) { alert('Sem GPS cadastrado.'); return; }
+      if (!c.checkedIn) {
         navigator.geolocation.getCurrentPosition((pos) => {
-          const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(condo.lat), parseFloat(condo.lng));
-          if (dist > 500) { alert(`Check-in negado! Está a ${Math.round(dist)}m (limite 500m).`); return; }
-          performDirectCheckIn(id);
-        }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true, timeout: 10000 });
+          const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(c.lat), parseFloat(c.lng));
+          if (dist > 500) { alert(`Fora do raio de 500m (${Math.round(dist)}m).`); return; }
+          const now = new Date();
+          db.collection("condominios").doc(id).update({ checkedIn: true, checkInTimestamp: now.getTime(), checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), checkInDate: now.toLocaleDateString('pt-BR') }).then(() => { showToast('Check-in realizado!'); loadCondosForOwner(ownerEmail); });
+        }, () => alert('Erro de GPS'), { enableHighAccuracy: true });
       } else {
         openReportModal(id);
       }
     }
 
-    function performDirectCheckIn(id) {
-      const now = new Date();
-      db.collection("condominios").doc(id).update({
-        checkedIn: true,
-        checkInTimestamp: now.getTime(),
-        checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        checkInDate: now.toLocaleDateString('pt-BR')
-      }).then(() => {
-        showToast('Check-in realizado!');
-        loadCondosForOwner(ownerEmail);
-      });
-    }
-
-    function openReportModal(condoId) {
-      const condo = condos.find(c => c.id === condoId);
-      if (!condo) return;
-      document.getElementById('reportCondoId').value = condoId;
+    function openReportModal(id) {
+      document.getElementById('reportCondoId').value = id;
       document.getElementById('reportText').value = '';
-      document.getElementById('reportMediaInput').value = '';
       selectedMediaFiles = [];
       renderMediaPreviews();
-      document.getElementById('reportModalTitle').textContent = `📝 Relatório: ${condo.name}`;
       document.getElementById('reportModal').classList.remove('hidden');
     }
-
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     async function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-
-      const condoId = document.getElementById('reportCondoId').value;
-      const condo = condos.find(c => c.id === condoId);
-      const condoName = condo ? condo.name : 'Condomínio';
-      const techName = currentUser ? currentUser.email.split('@')[0] : 'Técnico';
-
-      showToast(`Processando ${files.length} arquivo(s)...`);
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        try {
-          if (file.type.startsWith('image')) {
-            const dataUrl = await readFileAsDataURL(file);
-            const watermarkedUrl = await applyWatermarkAsync(dataUrl, condoName, techName);
-            selectedMediaFiles.push({ name: file.name, type: 'image', dataUrl: watermarkedUrl });
-          } else if (file.type.startsWith('video')) {
-            const dataUrl = await readFileAsDataURL(file);
-            selectedMediaFiles.push({ name: file.name, type: 'video', dataUrl: dataUrl });
-          }
-          renderMediaPreviews();
-        } catch (err) { console.error("Erro ao processar mídia:", err); }
+      for (let f of files) {
+        if (f.type.startsWith('image')) {
+          const dataUrl = await readFileAsDataURL(f);
+          const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
+          selectedMediaFiles.push({ name: f.name, type: 'image', dataUrl: watermarked });
+        }
       }
-      showToast('Pronto para finalizar!');
+      renderMediaPreviews();
     }
 
     function readFileAsDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (evt) => resolve(evt.target.result);
-        reader.onerror = (err) => reject(err);
-        reader.readAsDataURL(file);
-      });
+      return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
     }
 
     function applyWatermarkAsync(dataUrl, condoName, techName) {
-      return new Promise((resolve) => {
+      return new Promise((res) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const MAX_WIDTH = 900;
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
+          let w = img.width, h = img.height;
+          if (w > 900) { h = Math.round((h * 900) / w); w = 900; }
+          canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const bannerHeight = Math.max(28, height * 0.08);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-          ctx.fillRect(0, height - bannerHeight, width, bannerHeight);
-
-          const fontSize = Math.max(11, Math.floor(bannerHeight * 0.36));
-          ctx.font = `bold ${fontSize}px sans-serif`;
-          ctx.fillStyle = '#ffffff';
-
-          const nowStr = new Date().toLocaleString('pt-BR');
-          const textLine1 = `📍 ${condoName} | 👤 ${techName}`;
-          const textLine2 = `📅 ${nowStr} (${currentCompanyName})`;
-
-          ctx.fillText(textLine1, 12, height - (bannerHeight * 0.52));
-          ctx.font = `${Math.floor(fontSize * 0.85)}px sans-serif`;
+          ctx.drawImage(img, 0, 0, w, h);
+          const bh = Math.max(28, h * 0.08);
+          ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, h - bh, w, bh);
+          ctx.font = `bold ${Math.max(11, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
+          ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
-          ctx.fillText(textLine2, 12, height - (bannerHeight * 0.18));
-
-          resolve(canvas.toDataURL('image/jpeg', 0.75));
+          ctx.fillText(`📅 ${new.toLocaleString ? new Date().toLocaleString('pt-BR') : ''}`, 12, h - (bh * 0.18));
+          res(canvas.toDataURL('image/jpeg', 0.75));
         };
         img.src = dataUrl;
       });
     }
 
     function renderMediaPreviews() {
-      const container = document.getElementById('mediaPreviewContainer');
-      if (selectedMediaFiles.length === 0) {
-        container.innerHTML = '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia anexada ainda.</span>';
-        return;
-      }
-
-      container.innerHTML = selectedMediaFiles.map((m, idx) => `
-        <div class="media-preview-item" title="Anexo ${idx + 1}">
-          <button type="button" class="media-preview-remove" onclick="removeMedia(${idx})" title="Excluir Mídia">✕</button>
-          ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video><span class="media-type-tag">🎥 VÍDEO</span>` : `<img src="${m.dataUrl}" onclick="openLightbox('${m.dataUrl}')" alt="Foto Anexada"><span class="media-type-tag">📷 FOTO</span>`}
-        </div>
-      `).join('');
-    }
-
-    function removeMedia(idx) { 
-      selectedMediaFiles.splice(idx, 1); 
-      renderMediaPreviews(); 
-      showToast('Anexo removido!');
+      document.getElementById('mediaPreviewContainer').innerHTML = selectedMediaFiles.length === 0 ? '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia.</span>' :
+        selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.dataUrl}"></div>`).join('');
     }
 
     function saveReportAndCheckOut(e) {
       e.preventDefault();
-      const condoId = document.getElementById('reportCondoId').value;
-      const condo = condos.find(c => c.id === condoId);
-      if (!condo) return;
-
-      const submitBtn = document.getElementById('checkoutSubmitBtn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Salvando...';
-
+      const id = document.getElementById('reportCondoId').value;
+      const c = condos.find(x => x.id === id);
       const now = new Date();
-      const reportText = document.getElementById('reportText').value.trim();
-      const outTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-      let durationMinutes = 0;
-      let durationText = 'N/A';
-      if (condo.checkInTimestamp) {
-        const diffMs = now.getTime() - condo.checkInTimestamp;
-        durationMinutes = Math.max(1, Math.round(diffMs / (1000 * 60)));
-        const hrs = Math.floor(durationMinutes / 60);
-        const mins = durationMinutes % 60;
-        durationText = hrs > 0 ? `${hrs}h ${mins}min` : `${mins} min`;
-      }
-
-      const newReport = {
+      const newRep = {
         date: now.toLocaleDateString('pt-BR'),
         isoDate: now.toISOString().split('T')[0],
-        checkInTime: condo.checkInTime || '--:--',
-        checkOutTime: outTime,
-        durationMinutes: durationMinutes,
-        durationText: durationText,
-        userEmail: currentUser ? currentUser.email : 'técnico',
-        text: reportText,
+        checkInTime: c.checkInTime || '--:--',
+        checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        userEmail: currentUser.email,
+        text: document.getElementById('reportText').value.trim(),
         media: selectedMediaFiles
       };
-
-      let reports = condo.reports || [];
-      reports.unshift(newReport);
-
-      db.collection("condominios").doc(condoId).update({
-        checkedIn: false,
-        lastCheckOut: outTime,
-        reports: reports
-      }).then(() => {
-        showToast('Check-out concluído com sucesso!');
+      let reps = c.reports || []; reps.unshift(newRep);
+      db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps }).then(() => {
+        showToast('Check-out concluído!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Finalizar e Check-out';
-      }).catch(() => {
-        alert('Erro ao salvar no banco de dados. Tente anexar menos fotos.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Finalizar e Check-out';
-      });
-    }
-
-    function openGlobalReportModal() {
-      generateGlobalReport();
-      document.getElementById('globalReportModal').classList.remove('hidden');
-    }
-    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
-
-    function populateReportFilters() {
-      const techSelect = document.getElementById('filterTechSelect');
-      const condoSelect = document.getElementById('filterCondoSelect');
-
-      condoSelect.innerHTML = '<option value="">Todos os Condomínios</option>' +
-        condos.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-
-      let techs = new Set();
-      condos.forEach(c => { (c.reports || []).forEach(r => { if (r.userEmail) techs.add(r.userEmail); }); });
-
-      techSelect.innerHTML = '<option value="">Todos os Técnicos</option>' +
-        Array.from(techs).map(t => `<option value="${t}">${escapeHtml(t)}</option>`).join('');
-    }
-
-    function generateGlobalReport() {
-      const monthFilter = document.getElementById('filterMonthInput').value;
-      const techFilter = document.getElementById('filterTechSelect').value;
-      const condoFilter = document.getElementById('filterCondoSelect').value;
-
-      filteredGlobalVisits = [];
-      let totalMinutes = 0;
-      let visitedCondoIds = new Set();
-
-      condos.forEach(c => {
-        if (condoFilter && c.id !== condoFilter) return;
-        (c.reports || []).forEach(r => {
-          if (techFilter && r.userEmail !== techFilter) return;
-          let isoDate = r.isoDate;
-          if (!isoDate && r.date) {
-            const parts = r.date.split('/');
-            if (parts.length === 3) isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-          }
-          if (monthFilter && isoDate && !isoDate.startsWith(monthFilter)) return;
-
-          filteredGlobalVisits.push({ condoName: c.name, ...r });
-          totalMinutes += (r.durationMinutes || 0);
-          visitedCondoIds.add(c.id);
-        });
-      });
-
-      document.getElementById('statTotalVisits').textContent = filteredGlobalVisits.length;
-      document.getElementById('statTotalCondos').textContent = visitedCondoIds.size;
-      const totalHrs = Math.floor(totalMinutes / 60);
-      const totalMins = totalMinutes % 60;
-      document.getElementById('statTotalHours').textContent = `${totalHrs}h ${totalMins}m`;
-
-      const container = document.getElementById('globalReportListContainer');
-      if (filteredGlobalVisits.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum atendimento encontrado.</div>';
-      } else {
-        container.innerHTML = filteredGlobalVisits.map(r => `
-          <div class="report-card">
-            <div class="report-header">
-              <span>🏢 ${escapeHtml(r.condoName)}</span>
-              <span style="color:#10b981;">⏱️ ${r.durationText || 'N/A'}</span>
-            </div>
-            <div style="font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; margin-top:2px;">
-              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
-              <span>👤 ${escapeHtml(r.userEmail)}</span>
-            </div>
-            <div class="report-text">${escapeHtml(r.text)}</div>
-          </div>
-        `).join('');
-      }
-    }
-
-    function downloadGlobalReportPDF() {
-      if (filteredGlobalVisits.length === 0) { alert('Nenhum dado para exportar.'); return; }
-      if (!window.jspdf) { alert('Biblioteca de PDF carregando...'); return; }
-
-      try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(15);
-        doc.text("RELATORIO CONSOLIDADO DE ATENDIMENTOS", 14, 20);
-        doc.setFontSize(10);
-        doc.setFont("Helvetica", "normal");
-        doc.text(`Empresa: ${currentCompanyName}`, 14, 27);
-        doc.text(`Total de Visitas: ${filteredGlobalVisits.length}`, 14, 33);
-        doc.line(14, 37, 196, 37);
-
-        let y = 45;
-        filteredGlobalVisits.forEach((r, idx) => {
-          if (y > 260) { doc.addPage(); y = 20; }
-          doc.setFont("Helvetica", "bold");
-          doc.text(`${idx + 1}. ${r.condoName} - ${r.date}`, 14, y);
-          doc.setFont("Helvetica", "normal");
-          doc.text(`Horario: ${r.checkInTime} as ${r.checkOutTime} (${r.durationText || 'N/A'}) | Tecnico: ${r.userEmail}`, 14, y + 5);
-          const splitText = doc.splitTextToSize(`Servico: ${r.text}`, 180);
-          doc.text(splitText, 14, y + 11);
-          y += 13 + (splitText.length * 5);
-          doc.setDrawColor(220, 220, 220);
-          doc.line(14, y - 3, 196, y - 3);
-        });
-
-        doc.save(`Relatorio_Geral_${currentCompanyName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
-        showToast('PDF Consolidado Baixado!');
-      } catch(err) { alert('Erro ao gerar PDF.'); }
-    }
-
-    function openHistoryModal(condoId) {
-      const condo = condos.find(c => c.id === condoId);
-      if (!condo) return;
-      document.getElementById('historyModalTitle').textContent = `📋 Histórico: ${condo.name}`;
-      const container = document.getElementById('historyListContainer');
-      const reports = condo.reports || [];
-      
-      if (reports.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum relatório registrado.</div>';
-      } else {
-        container.innerHTML = reports.map((r, idx) => `
-          <div class="report-card">
-            <div class="report-header">
-              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
-              <button onclick="downloadReportPDF('${condo.id}', ${idx})" class="btn btn-slate" style="padding:2px 8px; font-size:10px;">📄 Baixar PDF</button>
-            </div>
-            <div style="font-size:11px; color:#10b981; font-weight:bold; margin-top:2px;">⏱️ Duração: ${r.durationText || 'N/A'}</div>
-            <div style="font-size:10px; color:var(--text-muted);">👤 Técnico: ${escapeHtml(r.userEmail)}</div>
-            <div class="report-text">${escapeHtml(r.text)}</div>
-            ${r.media && r.media.length > 0 ? `
-              <div class="media-preview-container">
-                ${r.media.map(m => `
-                  <div class="media-preview-item">
-                    ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video><span class="media-type-tag">🎥 VÍDEO</span>` : `<img src="${m.dataUrl}" onclick="openLightbox('${m.dataUrl}')"><span class="media-type-tag">📷 FOTO</span>`}
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `).join('');
-      }
-      document.getElementById('historyModal').classList.remove('hidden');
-    }
-
-    function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
-
-    function downloadReportPDF(condoId, reportIndex) {
-      const condo = condos.find(c => c.id === condoId);
-      if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
-
-      const report = condo.reports[reportIndex];
-      if (!window.jspdf) { alert('A biblioteca de PDF ainda está carregando.'); return; }
-
-      try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("RELATORIO DE VISITA TECNICA", 14, 20);
-        doc.setFontSize(10);
-        doc.setFont("Helvetica", "normal");
-        doc.text(`Empresa: ${currentCompanyName}`, 14, 28);
-        doc.text(`Condominio: ${condo.name}`, 14, 34);
-        doc.text(`Endereco: ${condo.address}, ${condo.number} ${condo.neighborhood ? '- ' + condo.neighborhood : ''}`, 14, 40);
-        doc.line(14, 44, 196, 44);
-
-        doc.setFont("Helvetica", "bold");
-        doc.text(`Data da Visita: ${report.date}`, 14, 52);
-        doc.text(`Horario: Check-in ${report.checkInTime} as ${report.checkOutTime} (Duracao: ${report.durationText || 'N/A'})`, 14, 58);
-        doc.text(`Tecnico Responsavel: ${report.userEmail}`, 14, 64);
-        doc.line(14, 68, 196, 68);
-
-        doc.setFont("Helvetica", "bold");
-        doc.text("Descricao dos Servicos Realizados:", 14, 76);
-        doc.setFont("Helvetica", "normal");
-        const splitText = doc.splitTextToSize(report.text, 180);
-        doc.text(splitText, 14, 84);
-
-        let currentY = 84 + (splitText.length * 6) + 10;
-        if (report.media && report.media.length > 0) {
-          const images = report.media.filter(m => m.type === 'image');
-          if (images.length > 0) {
-            if (currentY > 230) { doc.addPage(); currentY = 20; }
-            doc.setFont("Helvetica", "bold");
-            doc.text("Fotos Anexadas com Marca d'Agua Comprovatoria:", 14, currentY);
-            currentY += 8;
-
-            let imgX = 14, imgWidth = 55, imgHeight = 40;
-            images.forEach((img) => {
-              if (imgX + imgWidth > 196) { imgX = 14; currentY += imgHeight + 6; }
-              if (currentY + imgHeight > 270) { doc.addPage(); currentY = 20; imgX = 14; }
-              try { doc.addImage(img.dataUrl, 'JPEG', imgX, currentY, imgWidth, imgHeight); } catch(e){}
-              imgX += imgWidth + 6;
-            });
-          }
-        }
-
-        doc.save(`Relatorio_${condo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
-        showToast('Download do PDF concluído!');
-      } catch (err) { alert('Erro ao gerar o PDF.'); }
-    }
-
-    function openRouteModal() {
-      const container = document.getElementById('routeSelectionList');
-      if (condos.length === 0) {
-        container.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">Nenhum condomínio cadastrado.</span>';
-      } else {
-        container.innerHTML = condos.map(c => `
-          <label class="route-item">
-            <input type="checkbox" class="route-checkbox" value="${c.id}" ${c.lat && c.lng ? 'checked' : 'disabled'}>
-            <div style="display:flex; flex-direction:column;">
-              <span style="color:var(--text-main); font-size:13px; font-weight:bold;">${escapeHtml(c.name)}</span>
-              <span style="color:var(--text-muted); font-size:11px;">${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
-              ${!c.lat || !c.lng ? '<span style="color:#f43f5e; font-size:10px;">⚠️ Sem GPS cadastrado</span>' : ''}
-            </div>
-          </label>
-        `).join('');
-      }
-      document.getElementById('routeModal').classList.remove('hidden');
-    }
-
-    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
-
-    function toggleSelectAllRoutes() {
-      const checkboxes = document.querySelectorAll('.route-checkbox:not([disabled])');
-      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-      checkboxes.forEach(cb => cb.checked = !allChecked);
-    }
-
-    function generateOptimizedRoute() {
-      const selectedBoxes = Array.from(document.querySelectorAll('.route-checkbox:checked'));
-      if (selectedBoxes.length === 0) { alert('Selecione pelo menos um condomínio.'); return; }
-
-      const selectedIds = selectedBoxes.map(cb => cb.value);
-      let selectedCondos = condos.filter(c => selectedIds.includes(c.id));
-
-      showToast('Obtendo sua localização atual...');
-      navigator.geolocation.getCurrentPosition((pos) => {
-        let currentLat = pos.coords.latitude;
-        let currentLng = pos.coords.longitude;
-        let orderedRoute = [], unvisited = [...selectedCondos];
-
-        while (unvisited.length > 0) {
-          let nearestIdx = 0, minDistance = Infinity;
-          for (let i = 0; i < unvisited.length; i++) {
-            let dist = calculateHaversineDistance(currentLat, currentLng, parseFloat(unvisited[i].lat), parseFloat(unvisited[i].lng));
-            if (dist < minDistance) { minDistance = dist; nearestIdx = i; }
-          }
-          let nextCondo = unvisited.splice(nearestIdx, 1)[0];
-          orderedRoute.push(nextCondo);
-          currentLat = parseFloat(nextCondo.lat);
-          currentLng = parseFloat(nextCondo.lng);
-        }
-
-        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
-        const destination = `${orderedRoute[orderedRoute.length - 1].lat},${orderedRoute[orderedRoute.length - 1].lng}`;
-        let waypoints = orderedRoute.length > 1 ? orderedRoute.slice(0, orderedRoute.length - 1).map(c => `${c.lat},${c.lng}`).join('|') : '';
-
-        let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
-        if (waypoints) { mapsUrl += `&waypoints=${encodeURIComponent(waypoints)}`; }
-
-        window.open(mapsUrl, '_blank');
-        closeRouteModal();
-        showToast('Rota aberta no Google Maps!');
-      }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true });
-    }
-
-    function openLightbox(imageUrl) {
-      document.getElementById('lightboxImg').src = imageUrl;
-      document.getElementById('lightboxModal').classList.remove('hidden');
-    }
-    function closeLightbox() {
-      document.getElementById('lightboxModal').classList.add('hidden');
-      document.getElementById('lightboxImg').src = '';
-    }
-
-    function openTeamModal() {
-      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas administradores.'); return; }
-      renderTeamLists();
-      document.getElementById('teamModal').classList.remove('hidden');
-    }
-    function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
-
-    function renderTeamLists() {
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        if (!doc.exists) return;
-        const data = doc.data();
-        const pending = data.pendingTeam || [];
-        const members = data.teamMembers || {};
-
-        const pendingList = document.getElementById('pendingTeamList');
-        pendingList.innerHTML = pending.length === 0 ? '<span style="color:var(--text-muted); font-size:11px;">Nenhuma solicitação pendente.</span>' :
-          pending.map(item => {
-            const email = typeof item === 'string' ? item : item.email;
-            const name = typeof item === 'object' && item.name ? item.name : '';
-            return `
-              <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 10px; border-radius:8px; border:1px solid var(--border-color);">
-                <div>
-                  <div style="color:var(--text-main); font-size:12px; font-weight:bold;">${escapeHtml(email)}</div>
-                  ${name ? `<div style="color:#38bdf8; font-size:10px;">${escapeHtml(name)}</div>` : ''}
-                </div>
-                <div style="display:flex; gap:6px;">
-                  <button onclick="approveMember('${email}')" class="btn btn-slate" style="padding:4px 8px; font-size:11px; background:#059669; color:white;">Aprovar</button>
-                  <button onclick="rejectMember('${email}')" class="btn btn-rose" style="padding:4px 8px; font-size:11px;">Recusar</button>
-                </div>
-              </div>
-            `;
-          }).join('');
-
-        const approvedList = document.getElementById('approvedTeamList');
-        const memberEmails = Object.keys(members);
-        approvedList.innerHTML = memberEmails.length === 0 ? '<span style="color:var(--text-muted); font-size:11px;">Nenhum colaborador.</span>' :
-          memberEmails.map(email => {
-            const m = members[email];
-            return `
-              <div style="background:var(--bg-card); padding:10px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:8px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="color:var(--text-main); font-weight:bold; font-size:12px;">${escapeHtml(email)}</span>
-                  <button onclick="removeMember('${email}')" class="icon-btn delete" title="Remover">🗑️</button>
-                </div>
-                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:11px;">
-                  <label>Nível:
-                    <select onchange="updateMemberRole('${email}', this.value)" class="form-control" style="width:auto; display:inline-block; padding:2px 6px; font-size:11px;">
-                      <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Supervisor</option>
-                      <option value="user" ${m.role === 'user' ? 'selected' : ''}>Técnico</option>
-                    </select>
-                  </label>
-                  <label><input type="checkbox" ${m.canAdd ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canAdd', this.checked)"> Adicionar</label>
-                  <label><input type="checkbox" ${m.canEdit ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canEdit', this.checked)"> Editar</label>
-                  <label><input type="checkbox" ${m.canDelete ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canDelete', this.checked)"> Apagar</label>
-                </div>
-              </div>
-            `;
-          }).join('');
-      });
-    }
-
-    function approveMember(email) {
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let data = doc.data();
-        let pending = (data.pendingTeam || []).filter(p => (typeof p === 'string' ? p : p.email) !== email);
-        let members = data.teamMembers || {};
-        members[email] = { role: 'user', canAdd: false, canEdit: false, canDelete: false };
-
-        db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending, teamMembers: members }).then(() => {
-          renderTeamLists();
-          showToast('Membro aprovado!');
-        });
-      });
-    }
-
-    function rejectMember(email) {
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let pending = (doc.data().pendingTeam || []).filter(p => (typeof p === 'string' ? p : p.email) !== email);
-        db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
-          renderTeamLists();
-          showToast('Recusado.');
-        });
-      });
-    }
-
-    function removeMember(email) {
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let members = doc.data().teamMembers || {};
-        delete members[email];
-        db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
-          renderTeamLists();
-          showToast('Removido.');
-        });
-      });
-    }
-
-    function updateMemberRole(email, newRole) {
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let members = doc.data().teamMembers || {};
-        if (members[email]) {
-          members[email].role = newRole;
-          if (newRole === 'admin') {
-            members[email].canAdd = true; members[email].canEdit = true; members[email].canDelete = true;
-          } else {
-            members[email].canAdd = false; members[email].canEdit = false; members[email].canDelete = false;
-          }
-          db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
-            renderTeamLists();
-            showToast('Cargo atualizado!');
-          });
-        }
-      });
-    }
-
-    function updateMemberPermission(email, permKey, value) {
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let members = doc.data().teamMembers || {};
-        if (members[email]) {
-          members[email][permKey] = value;
-          db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => showToast('Permissão atualizada!'));
-        }
-      });
-    }
-
-    function sendDirectInvite() {
-      const email = document.getElementById('inviteUserEmailInput').value.trim();
-      if (!email) { alert('Digite o e-mail.'); return; }
-
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let pending = doc.data().pendingTeam || [];
-        if (!pending.some(p => (typeof p === 'string' ? p : p.email) === email)) {
-          pending.push({ email: email, name: '', requestedRole: 'user' });
-          db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
-            document.getElementById('inviteUserEmailInput').value = '';
-            renderTeamLists();
-            showToast('Convite enviado!');
-          });
-        } else {
-          showToast('Já está na lista.');
-        }
-      });
-    }
-
-    function generateInviteLink() {
-      const token = 'invite_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-
-      db.collection("convites").doc(token).set({
-        ownerEmail: ownerEmail,
-        createdAt: Date.now(),
-        expiresAt: expiresAt,
-        used: false
-      }).then(() => {
-        const baseUrl = window.location.href.split('?')[0];
-        document.getElementById('generatedLinkInput').value = `${baseUrl}?invite=${token}`;
-        document.getElementById('generatedLinkContainer').style.display = 'block';
-        showToast('Link gerado!');
-      });
-    }
-
-    function copyGeneratedLink() {
-      const input = document.getElementById('generatedLinkInput');
-      input.select();
-      navigator.clipboard.writeText(input.value).then(() => showToast('Link copiado!'));
+      }).catch(() => alert('Erro ao salvar no banco. Reduza o número de fotos.'));
     }
 
     function renderCondos() {
-      const grid = document.getElementById('condoGrid');
-      const empty = document.getElementById('emptyState');
-      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-
-      const filtered = condos.filter(c => 
-        (c.name && c.name.toLowerCase().includes(searchVal)) ||
-        (c.address && c.address.toLowerCase().includes(searchVal)) ||
-        (c.number && c.number.toLowerCase().includes(searchVal)) ||
-        (c.neighborhood && c.neighborhood.toLowerCase().includes(searchVal)) ||
-        (c.notes && c.notes.toLowerCase().includes(searchVal))
-      );
-
-      document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length} condomínios`;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
-        return;
-      }
-
-      empty.style.display = 'none';
-      grid.innerHTML = filtered.map(c => {
-        const reportsCount = (c.reports || []).length;
-        const canEditThis = userRole === 'owner' || userPermissions.canEdit;
-        const canDeleteThis = userRole === 'owner' || userPermissions.canDelete;
-
-        return `
-          <div class="card ${c.checkedIn ? 'checked-in' : ''}">
-            <div>
-              <div class="card-header">
-                <div class="card-title">${escapeHtml(c.name)}</div>
-                <div class="card-actions">
-                  ${canEditThis ? `<button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>` : ''}
-                  ${canDeleteThis ? `<button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>` : ''}
-                </div>
-              </div>
-
-              <div class="card-body">
-                <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)} ${c.neighborhood ? `- ${escapeHtml(c.neighborhood)}` : ''}</div>
-                ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 GPS Ativo</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado</div>`}
-                ${c.phone ? `<div>📞 ${escapeHtml(c.phone)}</div>` : ''}
-                ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
-                ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in ativo desde ${c.checkInTime}</div>` : ''}
-                ${c.lastCheckOut && !c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:var(--text-muted);">⚪ Último Check-out: ${c.lastCheckOut}</div>` : ''}
-              </div>
-            </div>
-
-            <div class="card-footer">
-              <div class="card-footer-row">
-                <button onclick="copyAddress('${escapeHtml(c.address)}', '${escapeHtml(c.number)}', '${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">📋 Copiar</button>
-                <button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${reportsCount})</button>
-              </div>
-              <div class="card-footer-row">
-                <a href="https://www.google.com/maps/search/?api=1&query=${c.lat && c.lng ? encodeURIComponent(c.lat + ',' + c.lng) : encodeURIComponent(c.address + ', ' + c.number)}" target="_blank" class="btn btn-slate" style="text-decoration:none;">🗺️ GPS</a>
-                <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">
-                  ${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}
-                </button>
-              </div>
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = condos.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
+      document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length}`;
+      document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
+      document.getElementById('condoGrid').innerHTML = filtered.map(c => `
+        <div class="card ${c.checkedIn ? 'checked-in' : ''}">
+          <div>
+            <div class="card-header"><div class="card-title">${escapeHtml(c.name)}</div><div><button onclick="editCondo('${c.id}')" class="icon-btn">✏️</button><button onclick="deleteCondo('${c.id}')" class="icon-btn delete">🗑️</button></div></div>
+            <div class="card-body">
+              <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</div>
+              ${c.lat && c.lng ? '<div style="font-size:10px; color:#10b981;">🌐 GPS Ativo</div>' : '<div style="font-size:10px; color:#f43f5e;">⚠️ Sem GPS</div>'}
+              ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
+              ${c.checkedIn ? `<div style="font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in desde ${c.checkInTime}</div>` : ''}
             </div>
           </div>
-        `;
-      }).join('');
+          <div class="card-footer">
+            <div class="card-footer-row"><button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${(c.reports||[]).length})</button></div>
+            <div class="card-footer-row">
+              <a href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}" target="_blank" class="btn btn-slate" style="text-decoration:none;">🗺️ GPS</a>
+              <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function copyAddress(address, number, neighborhood) {
-      navigator.clipboard.writeText(`${address}, ${number}${neighborhood ? ' - ' + neighborhood : ''}`).then(() => showToast('Endereço copiado!'));
-    }
-
-    function openModal(condo = null) {
-      if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) { alert('Sem permissão.'); return; }
+    function openModal(c = null) {
       document.getElementById('condoForm').reset();
-      document.getElementById('condoId').value = condo ? condo.id : '';
-      document.getElementById('modalTitle').textContent = condo ? 'Editar Condomínio' : 'Cadastrar Condomínio';
-      
-      if (condo) {
-        document.getElementById('condoName').value = condo.name;
-        document.getElementById('condoAddress').value = condo.address;
-        document.getElementById('condoNumber').value = condo.number || '';
-        document.getElementById('condoNeighborhood').value = condo.neighborhood || '';
-        document.getElementById('condoPhone').value = condo.phone || '';
-        document.getElementById('condoLat').value = condo.lat || '';
-        document.getElementById('condoLng').value = condo.lng || '';
-        document.getElementById('condoNotes').value = condo.notes || '';
+      document.getElementById('condoId').value = c ? c.id : '';
+      document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
+      if (c) {
+        ['Name', 'Address', 'Number', 'Neighborhood', 'Phone', 'Lat', 'Lng', 'Notes'].forEach(k => {
+          const el = document.getElementById('condo' + k);
+          if (el) el.value = c[k.toLowerCase()] || '';
+        });
       }
       document.getElementById('condoModal').classList.remove('hidden');
     }
-
     function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
+    function openGlobalReportModal() { document.getElementById('globalReportModal').classList.remove('hidden'); generateGlobalReport(); }
+    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
+    function openHistoryModal(id) {
+      const c = condos.find(x => x.id === id);
+      document.getElementById('historyModalTitle').textContent = `Histórico: ${c.name}`;
+      document.getElementById('historyListContainer').innerHTML = (c.reports || []).length === 0 ? '<div style="text-align:center; color:#94a3b8; padding:20px;">Nenhum relatório.</div>' :
+        c.reports.map(r => `<div class="report-card"><div class="report-header"><span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span></div><div class="report-text">${escapeHtml(r.text)}</div></div>`).join('');
+      document.getElementById('historyModal').classList.remove('hidden');
+    }
+    function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
+    function openRouteModal() { document.getElementById('routeModal').classList.remove('hidden'); }
+    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
+    function openTeamModal() { document.getElementById('teamModal').classList.remove('hidden'); }
+    function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
     function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
 
     function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      const R = 6371e3; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
       return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => { toast.classList.remove('show'); }, 2500);
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
     }
 
     function escapeHtml(str) {
