@@ -10,6 +10,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Biblioteca jsPDF para exportação de PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
@@ -68,20 +70,26 @@
     .card-footer-row { display: flex; gap: 8px; }
     .card-footer-row .btn { flex: 1; justify-content: center; }
     
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
     .modal-overlay.hidden { display: none; }
     .modal { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; max-width: 520px; width: 100%; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; font-size: 12px; color: #cbd5e1; }
     
     .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 8px; }
-    .media-preview-item { position: relative; width: 100%; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #334155; background: #0f172a; }
+    .media-preview-item { position: relative; width: 100%; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #334155; background: #0f172a; cursor: pointer; }
     .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; }
-    .media-preview-remove { position: absolute; top: 2px; right: 2px; background: rgba(225, 29, 72, 0.8); color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+    .media-preview-remove { position: absolute; top: 2px; right: 2px; background: rgba(225, 29, 72, 0.8); color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; z-index: 5; }
 
-    .report-card { background-color: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px; margin-top: 6px; }
-    .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between; }
-    .report-text { font-size: 12px; color: #e2e8f0; white-space: pre-wrap; margin-bottom: 6px; }
+    .report-card { background-color: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .report-text { font-size: 12px; color: #e2e8f0; white-space: pre-wrap; margin: 4px 0; }
+
+    /* LIGHTBOX TELA CHEIA */
+    .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .lightbox-modal.hidden { display: none; }
+    .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+    .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
     .version-item { border-left: 2px solid #0284c7; padding-left: 10px; }
     .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
@@ -111,6 +119,12 @@
 
   <div id="toast" class="toast">Ação realizada com sucesso!</div>
 
+  <!-- LIGHTBOX TELA CHEIA -->
+  <div id="lightboxModal" class="lightbox-modal hidden">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" class="lightbox-img" src="" alt="Imagem ampliada">
+  </div>
+
   <!-- TELA DE AUTENTICAÇÃO -->
   <div id="authScreen" class="modal-overlay" style="background-color: #0f172a; display: flex;">
     <div class="auth-container">
@@ -139,24 +153,24 @@
         <button type="submit" class="btn btn-sky" style="justify-content: center; padding: 10px; margin-top: 4px;">Entrar na Conta</button>
       </form>
 
-      <!-- FORMULÁRIO DE CRIAR EMPRESA (DONO) -->
+      <!-- FORMULÁRIO DE CRIAR EMPRESA -->
       <form id="registerCompanyForm" onsubmit="handleRegisterCompany(event)" style="display: none; flex-direction: column; gap: 10px;">
         <div class="form-group">
           <label>Nome da Empresa (Matriz)</label>
           <input type="text" id="regCompanyName" required placeholder="Ex: Protech Segurança" class="form-control">
         </div>
         <div class="form-group">
-          <label>E-mail do Administrador (Dono)</label>
-          <input type="email" id="regCompanyEmail" required placeholder="admin@empresa.com" class="form-control">
+          <label>E-mail do Proprietário (Dono)</label>
+          <input type="email" id="regCompanyEmail" required placeholder="dono@empresa.com" class="form-control">
         </div>
         <div class="form-group">
           <label>Senha (mínimo 6 dígitos)</label>
           <input type="password" id="regCompanyPassword" required minlength="6" placeholder="••••••••" class="form-control">
         </div>
-        <button type="submit" class="btn btn-emerald" style="justify-content: center; padding: 10px; margin-top: 4px;">Cadastrar Empresa (Dono)</button>
+        <button type="submit" class="btn btn-emerald" style="justify-content: center; padding: 10px; margin-top: 4px;">Cadastrar Empresa (Proprietário)</button>
       </form>
 
-      <!-- FORMULÁRIO DE CRIAR USUÁRIO (TÉCNICO) -->
+      <!-- FORMULÁRIO DE CRIAR USUÁRIO -->
       <form id="registerUserForm" onsubmit="handleRegisterUser(event)" style="display: none; flex-direction: column; gap: 10px;">
         <div class="form-group">
           <label>Seu Nome</label>
@@ -167,14 +181,14 @@
           <input type="email" id="regUserEmail" required placeholder="tecnico@empresa.com" class="form-control">
         </div>
         <div class="form-group">
-          <label>E-mail da Empresa (Matriz) para aprovação</label>
-          <input type="email" id="regUserCompanyOwner" required placeholder="admin@empresa.com" class="form-control">
+          <label>E-mail da Empresa (Proprietário/Matriz)</label>
+          <input type="email" id="regUserCompanyOwner" required placeholder="dono@empresa.com" class="form-control">
         </div>
         <div class="form-group">
           <label>Senha (mínimo 6 dígitos)</label>
           <input type="password" id="regUserPassword" required minlength="6" placeholder="••••••••" class="form-control">
         </div>
-        <button type="submit" class="btn btn-sky" style="justify-content: center; padding: 10px; margin-top: 4px;">Solicitar Acesso à Empresa</button>
+        <button type="submit" class="btn btn-sky" style="justify-content: center; padding: 10px; margin-top: 4px;">Solicitar Acesso</button>
       </form>
 
       <div style="margin-top: 14px; text-align: center; border-top: 1px solid #334155; padding-top: 12px;">
@@ -193,14 +207,14 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.2.1</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.4.0</span>
             </div>
           </div>
         </div>
 
         <div class="actions">
           <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar App</button>
-          <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe">👥 Equipe</button>
+          <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe e Permissões">👥 Equipe</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-sky">+ Novo</button>
           <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
         </div>
@@ -215,8 +229,8 @@
       <div class="meta-bar">
         <span id="resultCount">Exibindo 0 condomínios</span>
         <div class="meta-actions">
-          <button onclick="exportData()" class="meta-btn">📤 Exportar</button>
-          <button onclick="importDataTrigger()" class="meta-btn">📥 Importar</button>
+          <button onclick="exportData()" class="meta-btn">📤 Exportar Backup</button>
+          <button onclick="importDataTrigger()" class="meta-btn">📥 Importar Backup</button>
           <input type="file" id="importInput" style="display:none;" accept=".json" onchange="importData(event)">
         </div>
       </div>
@@ -228,7 +242,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE CADASTRO / EDIÇÃO DE CONDOMÍNIO COM GPS -->
+  <!-- MODAL DE CADASTRO / EDIÇÃO DE CONDOMÍNIO -->
   <div id="condoModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -305,7 +319,7 @@
         
         <div class="form-group">
           <label>Relatório do Serviço Realizado *</label>
-          <textarea id="reportText" rows="4" required placeholder="Descreva detalhadamente o que foi feito durante a visita..." class="form-control" style="resize:none;"></textarea>
+          <textarea id="reportText" rows="4" required placeholder="Descreva detalhadamente o que foi feito..." class="form-control" style="resize:none;"></textarea>
         </div>
 
         <div class="form-group">
@@ -324,15 +338,13 @@
 
   <!-- MODAL DE HISTÓRICO DE RELATÓRIOS -->
   <div id="historyModal" class="modal-overlay hidden">
-    <div class="modal">
+    <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
         <h3 id="historyModalTitle" style="color:white; font-size: 16px;">📋 Histórico de Visitas</h3>
         <button onclick="closeHistoryModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
       </div>
 
-      <div class="modal-body" id="historyListContainer">
-        <!-- Carregado dinamicamente -->
-      </div>
+      <div class="modal-body" id="historyListContainer"></div>
 
       <div style="margin-top:16px; text-align:right; border-top: 1px solid #334155; padding-top: 12px;">
         <button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button>
@@ -340,27 +352,23 @@
     </div>
   </div>
 
-  <!-- MODAL DE EQUIPE (APROVAÇÕES E MEMBROS) -->
+  <!-- MODAL DE EQUIPE E PERMISSÕES -->
   <div id="teamModal" class="modal-overlay hidden">
-    <div class="modal">
+    <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 style="color:white; font-size: 16px;">👥 Aprovações e Equipe</h3>
+        <h3 style="color:white; font-size: 16px;">👥 Gestão de Equipe e Níveis de Acesso</h3>
         <button onclick="closeTeamModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
       </div>
 
       <div class="modal-body">
         <div>
-          <h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px;">Solicitações Pendentes de Aprovação:</h4>
-          <div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;">
-            <!-- Carregado dinamicamente -->
-          </div>
+          <h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px;">Solicitações Pendentes:</h4>
+          <div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
 
         <div style="margin-top: 14px; border-top: 1px solid #334155; padding-top: 12px;">
-          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Autorizados:</h4>
-          <div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 6px;">
-            <!-- Carregado dinamicamente -->
-          </div>
+          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros e Permissões Customizáveis:</h4>
+          <div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
       </div>
 
@@ -381,11 +389,12 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.2.1</span>
+            <span>Versão 4.4.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Aprimoramento do instalador PWA nativo com suporte direto ao evento do navegador Android e alertas explicativos.</li>
+            <li>Download de relatórios de visita em arquivo PDF.</li>
+            <li>Visualizador de imagens em tela cheia (Lightbox) ao clicar nas fotos do relatório.</li>
           </ul>
         </div>
       </div>
@@ -397,7 +406,6 @@
   </div>
 
   <script>
-    // CONFIGURAÇÃO DO FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyARDZDxNAPu86dpcwj148-CRDXYvIKN-o0",
       authDomain: "buscador-de-condominios.firebaseapp.com",
@@ -408,20 +416,17 @@
       measurementId: "G-BQ1ECYGF8T"
     };
 
-    try {
-      firebase.initializeApp(firebaseConfig);
-    } catch(err) {}
-
+    try { firebase.initializeApp(firebaseConfig); } catch(err) {}
     const db = firebase.firestore();
 
     let condos = [];
     let currentUser = null;
     let ownerEmail = null;
-    let isUserOwner = false;
+    let userRole = 'user';
+    let userPermissions = { canAdd: false, canEdit: false, canDelete: false };
     let selectedMediaFiles = [];
     let deferredPrompt = null;
 
-    // CAPTURA DO EVENTO DE INSTALAÇÃO PWA
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -433,13 +438,11 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            showToast('Aplicativo instalado com sucesso!');
-          }
+          if (choiceResult.outcome === 'accepted') { showToast('Instalado com sucesso!'); }
           deferredPrompt = null;
         });
       } else {
-        alert('Instalação PWA:\n\n1. No Chrome do Android, toque nos 3 pontos (⋮) no canto superior direito.\n2. Selecione "Adicionar à tela inicial" ou "Instalar aplicativo".');
+        alert('Instalação PWA:\n\nToque nos 3 pontos (⋮) do Chrome e selecione "Adicionar à tela inicial" ou "Instalar aplicativo".');
       }
     }
 
@@ -455,31 +458,13 @@
     });
 
     function switchTab(tab) {
-      const loginForm = document.getElementById('loginForm');
-      const registerCompanyForm = document.getElementById('registerCompanyForm');
-      const registerUserForm = document.getElementById('registerUserForm');
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'flex' : 'none';
+      document.getElementById('registerCompanyForm').style.display = tab === 'registerCompany' ? 'flex' : 'none';
+      document.getElementById('registerUserForm').style.display = tab === 'registerUser' ? 'flex' : 'none';
       
-      const tabLoginBtn = document.getElementById('tabLoginBtn');
-      const tabRegisterCompanyBtn = document.getElementById('tabRegisterCompanyBtn');
-      const tabRegisterUserBtn = document.getElementById('tabRegisterUserBtn');
-
-      loginForm.style.display = 'none';
-      registerCompanyForm.style.display = 'none';
-      registerUserForm.style.display = 'none';
-      tabLoginBtn.classList.remove('active');
-      tabRegisterCompanyBtn.classList.remove('active');
-      tabRegisterUserBtn.classList.remove('active');
-
-      if (tab === 'login') {
-        loginForm.style.display = 'flex';
-        tabLoginBtn.classList.add('active');
-      } else if (tab === 'registerCompany') {
-        registerCompanyForm.style.display = 'flex';
-        tabRegisterCompanyBtn.classList.add('active');
-      } else if (tab === 'registerUser') {
-        registerUserForm.style.display = 'flex';
-        tabRegisterUserBtn.classList.add('active');
-      }
+      document.getElementById('tabLoginBtn').classList.toggle('active', tab === 'login');
+      document.getElementById('tabRegisterCompanyBtn').classList.toggle('active', tab === 'registerCompany');
+      document.getElementById('tabRegisterUserBtn').classList.toggle('active', tab === 'registerUser');
     }
 
     function handleLogin(e) {
@@ -493,9 +478,7 @@
           resolveUserSession(email);
           showToast('Login realizado com sucesso!');
         })
-        .catch((error) => {
-          showToast('Erro: E-mail ou senha incorretos.');
-        });
+        .catch(() => { showToast('Erro: E-mail ou senha incorretos.'); });
     }
 
     function handleRegisterCompany(e) {
@@ -508,21 +491,20 @@
         .then((userCredential) => {
           currentUser = userCredential.user;
           ownerEmail = email;
-          isUserOwner = true;
+          userRole = 'owner';
+          userPermissions = { canAdd: true, canEdit: true, canDelete: true };
 
           db.collection("empresas").doc(email).set({
             companyName: companyName,
             ownerEmail: email,
-            team: [],
+            teamMembers: {},
             pendingTeam: []
           }).then(() => {
-            showMainApp(companyName, ownerEmail, true);
+            showMainApp(companyName, ownerEmail);
             showToast('Empresa criada com sucesso!');
           });
         })
-        .catch((error) => {
-          showToast('Erro ao criar empresa: ' + error.message);
-        });
+        .catch((error) => { showToast('Erro ao criar empresa: ' + error.message); });
     }
 
     function handleRegisterUser(e) {
@@ -533,33 +515,30 @@
 
       db.collection("empresas").doc(companyOwnerEmail).get().then((doc) => {
         if (!doc.exists) {
-          showToast('Erro: E-mail da empresa matriz não encontrado.');
+          showToast('Erro: E-mail da empresa proprietária não encontrado.');
           return;
         }
 
         firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then((userCredential) => {
-            currentUser = userCredential.user;
-
+          .then(() => {
             let pending = doc.data().pendingTeam || [];
             if (!pending.includes(email)) pending.push(email);
 
             db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
-              showToast('Solicitação enviada! Aguardando aprovação do administrador.');
+              showToast('Solicitação enviada! Aguardando aprovação.');
               handleLogout();
             });
           })
-          .catch((error) => {
-            showToast('Erro ao criar usuário: ' + error.message);
-          });
+          .catch((error) => { showToast('Erro ao criar usuário: ' + error.message); });
       });
     }
 
     function enterGuestMode() {
       currentUser = { email: 'visitante@protech.com' };
       ownerEmail = 'visitante@protech.com';
-      isUserOwner = true;
-      showMainApp('Modo Visitante / Teste', ownerEmail, true);
+      userRole = 'owner';
+      userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+      showMainApp('Modo Visitante / Teste', ownerEmail);
       showToast('Entrou no modo de teste.');
     }
 
@@ -567,7 +546,8 @@
       try { firebase.auth().signOut(); } catch(e) {}
       currentUser = null;
       ownerEmail = null;
-      isUserOwner = false;
+      userRole = 'user';
+      userPermissions = { canAdd: false, canEdit: false, canDelete: false };
       document.getElementById('authScreen').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
       showToast('Sessão encerrada.');
@@ -577,30 +557,47 @@
       db.collection("empresas").doc(userEmail).get().then((doc) => {
         if (doc.exists) {
           ownerEmail = userEmail;
-          isUserOwner = true;
-          showMainApp(doc.data().companyName, ownerEmail, true);
+          userRole = 'owner';
+          userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+          showMainApp(doc.data().companyName, ownerEmail);
         } else {
-          db.collection("empresas").where("team", "array-contains", userEmail).get().then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-              const empresaDoc = querySnapshot.docs[0];
-              ownerEmail = empresaDoc.data().ownerEmail;
-              isUserOwner = false;
-              showMainApp(empresaDoc.data().companyName + " (Colaborador)", ownerEmail, false);
+          db.collection("empresas").where("ownerEmail", "!=", "").get().then((querySnapshot) => {
+            let foundCompany = null;
+            querySnapshot.forEach(d => {
+              const data = d.data();
+              const members = data.teamMembers || {};
+              if (data.ownerEmail === userEmail) {
+                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, role: 'owner' };
+              } else if (members[userEmail]) {
+                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, role: members[userEmail].role, permissions: members[userEmail] };
+              }
+            });
+
+            if (foundCompany) {
+              ownerEmail = foundCompany.ownerEmail;
+              userRole = foundCompany.role;
+              if (userRole === 'owner') {
+                userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+              } else {
+                userPermissions = foundCompany.permissions || { canAdd: false, canEdit: false, canDelete: false };
+              }
+              showMainApp(foundCompany.companyName + ` (${userRole.toUpperCase()})`, ownerEmail);
             } else {
               db.collection("empresas").where("pendingTeam", "array-contains", userEmail).get().then((pendingSnapshot) => {
                 if (!pendingSnapshot.empty) {
-                  alert('Sua conta ainda está aguardando aprovação do administrador da empresa matriz.');
+                  alert('Sua conta ainda está aguardando aprovação do proprietário.');
                   handleLogout();
                 } else {
                   ownerEmail = userEmail;
-                  isUserOwner = true;
+                  userRole = 'owner';
+                  userPermissions = { canAdd: true, canEdit: true, canDelete: true };
                   db.collection("empresas").doc(userEmail).set({
                     companyName: "Empresa de " + userEmail.split('@')[0],
                     ownerEmail: userEmail,
-                    team: [],
+                    teamMembers: {},
                     pendingTeam: []
                   }).then(() => {
-                    showMainApp("Empresa de " + userEmail.split('@')[0], ownerEmail, true);
+                    showMainApp("Empresa de " + userEmail.split('@')[0], ownerEmail);
                   });
                 }
               });
@@ -610,17 +607,16 @@
       });
     }
 
-    function showMainApp(companyTitle, rootOwnerEmail, ownerStatus) {
+    function showMainApp(companyTitle, rootOwnerEmail) {
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'flex';
       document.getElementById('companyNameDisplay').textContent = companyTitle;
 
+      const newBtn = document.getElementById('newCondoBtn');
       const teamBtn = document.getElementById('teamBtn');
-      if (ownerStatus) {
-        teamBtn.style.display = 'inline-flex';
-      } else {
-        teamBtn.style.display = 'none';
-      }
+
+      newBtn.style.display = (userRole === 'user' && !userPermissions.canAdd) ? 'none' : 'inline-flex';
+      teamBtn.style.display = (userRole === 'user') ? 'none' : 'inline-flex';
 
       loadCondosForOwner(rootOwnerEmail);
     }
@@ -631,11 +627,8 @@
         .get()
         .then((querySnapshot) => {
           condos = [];
-          querySnapshot.forEach((doc) => {
-            condos.push({ id: doc.id, ...doc.data() });
-          });
-          
-          if (condos.length === 0 && isUserOwner) {
+          querySnapshot.forEach((doc) => { condos.push({ id: doc.id, ...doc.data() }); });
+          if (condos.length === 0 && userRole === 'owner') {
             loadDefaultDataForNewCompany(rootOwnerEmail);
           } else {
             renderCondos();
@@ -644,35 +637,35 @@
     }
 
     function loadDefaultDataForNewCompany(rootOwnerEmail) {
-      const defaultData = [
-        {
-          name: 'Residencial Bela Vista',
-          address: 'Av. Protásio Alves',
-          number: '2450',
-          neighborhood: 'Petrópolis',
-          phone: '(51) 98888-1122',
-          notes: 'Portaria central. Acesso de prestadores pela lateral.',
-          lat: '-30.040000',
-          lng: '-51.170000',
-          ownerEmail: rootOwnerEmail,
-          reports: [],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }
-      ];
+      const defaultData = [{
+        name: 'Residencial Bela Vista',
+        address: 'Av. Protásio Alves',
+        number: '2450',
+        neighborhood: 'Petrópolis',
+        phone: '(51) 98888-1122',
+        notes: 'Portaria central.',
+        lat: '-30.040000',
+        lng: '-51.170000',
+        ownerEmail: rootOwnerEmail,
+        reports: [],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }];
 
       const batch = db.batch();
       defaultData.forEach(item => {
         const docRef = db.collection("condominios").doc();
         batch.set(docRef, item);
       });
-
-      batch.commit().then(() => {
-        loadCondosForOwner(rootOwnerEmail);
-      });
+      batch.commit().then(() => { loadCondosForOwner(rootOwnerEmail); });
     }
 
     function saveCondo(e) {
       e.preventDefault();
+      if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) {
+        alert('Você não tem permissão para adicionar ou editar condomínios.');
+        return;
+      }
+
       const id = document.getElementById('condoId').value;
       const condoData = {
         name: document.getElementById('condoName').value.trim(),
@@ -687,102 +680,82 @@
       };
 
       if (!condoData.lat || !condoData.lng) {
-        alert('Por favor, informe ou capture a Latitude e a Longitude para garantir a validação de proximidade.');
+        alert('Por favor, informe a Latitude e Longitude.');
         return;
       }
 
       if (id) {
-        db.collection("condominios").doc(id).update(condoData)
-          .then(() => {
-            showToast('Condomínio atualizado!');
-            loadCondosForOwner(ownerEmail);
-            closeModal();
-          });
+        if (userRole === 'user' && !userPermissions.canEdit) { alert('Sem permissão para editar.'); return; }
+        db.collection("condominios").doc(id).update(condoData).then(() => {
+          showToast('Condomínio atualizado!');
+          loadCondosForOwner(ownerEmail);
+          closeModal();
+        });
       } else {
+        if (userRole === 'user' && !userPermissions.canAdd) { alert('Sem permissão para adicionar.'); return; }
         condoData.reports = [];
         condoData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        db.collection("condominios").add(condoData)
-          .then(() => {
-            showToast('Condomínio cadastrado!');
-            loadCondosForOwner(ownerEmail);
-            closeModal();
-          });
+        db.collection("condominios").add(condoData).then(() => {
+          showToast('Condomínio cadastrado!');
+          loadCondosForOwner(ownerEmail);
+          closeModal();
+        });
       }
     }
 
     function captureCurrentGPS() {
-      if (!navigator.geolocation) {
-        alert('Geolocalização não suportada.');
-        return;
-      }
-      showToast('Capturando GPS atual...');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          document.getElementById('condoLat').value = position.coords.latitude.toFixed(6);
-          document.getElementById('condoLng').value = position.coords.longitude.toFixed(6);
-          showToast('Coordenadas capturadas com sucesso!');
-        },
-        (error) => {
-          alert('Erro ao obter GPS. Verifique as permissões.');
-        },
-        { enableHighAccuracy: true }
-      );
+      if (!navigator.geolocation) { alert('Geolocalização não suportada.'); return; }
+      showToast('Capturando GPS...');
+      navigator.geolocation.getCurrentPosition((pos) => {
+        document.getElementById('condoLat').value = pos.coords.latitude.toFixed(6);
+        document.getElementById('condoLng').value = pos.coords.longitude.toFixed(6);
+        showToast('GPS capturado!');
+      }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true });
     }
 
     function deleteCondo(id) {
+      if (userRole === 'user' && !userPermissions.canDelete) {
+        alert('Você não tem permissão para apagar condomínios.');
+        return;
+      }
       if (confirm('Deseja excluir este condomínio?')) {
-        db.collection("condominios").doc(id).delete()
-          .then(() => {
-            showToast('Condomínio removido.');
-            loadCondosForOwner(ownerEmail);
-          });
+        db.collection("condominios").doc(id).delete().then(() => {
+          showToast('Condomínio removido.');
+          loadCondosForOwner(ownerEmail);
+        });
       }
     }
 
     function editCondo(id) {
+      if (userRole === 'user' && !userPermissions.canEdit) {
+        alert('Você não tem permissão para editar condomínios.');
+        return;
+      }
       const condo = condos.find(c => c.id === id);
       if (condo) openModal(condo);
     }
 
-    // --- CHECK-IN / CHECK-OUT E RELATÓRIO ---
+    // CHECK-IN / CHECK-OUT E RELATÓRIO
     function toggleCheckIn(id) {
       const condo = condos.find(c => c.id === id);
       if (!condo) return;
 
       if (!condo.lat || !condo.lng) {
-        alert('Check-in bloqueado: Este condomínio não possui Latitude e Longitude cadastradas. Edite o condomínio e informe as coordenadas GPS.');
+        alert('Check-in bloqueado: Sem coordenadas GPS cadastradas.');
         return;
       }
 
       if (!condo.checkedIn) {
-        if (!navigator.geolocation) {
-          alert('Geolocalização não é suportada.');
-          return;
-        }
-
-        showToast('Validando sua localização GPS...');
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
-
-            const targetLat = parseFloat(condo.lat);
-            const targetLng = parseFloat(condo.lng);
-            const distanceMeters = calculateHaversineDistance(userLat, userLng, targetLat, targetLng);
-
-            if (distanceMeters > 500) {
-              alert(`Check-in negado! Você está a ${Math.round(distanceMeters)} metros do condomínio. O limite máximo permitido é de 500 metros.`);
-              return;
-            }
-
-            performDirectCheckIn(id);
-          },
-          (error) => {
-            alert('Erro ao obter GPS do dispositivo. Certifique-se de que a localização está ativada.');
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-
+        if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
+        showToast('Validando GPS...');
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(condo.lat), parseFloat(condo.lng));
+          if (dist > 500) {
+            alert(`Check-in negado! Está a ${Math.round(dist)}m (limite de 500m).`);
+            return;
+          }
+          performDirectCheckIn(id);
+        }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true, timeout: 10000 });
       } else {
         openReportModal(id);
       }
@@ -794,7 +767,7 @@
         checkInTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         checkInDate: new Date().toLocaleDateString('pt-BR')
       }).then(() => {
-        showToast('Check-in realizado com sucesso!');
+        showToast('Check-in realizado!');
         loadCondosForOwner(ownerEmail);
       });
     }
@@ -802,31 +775,23 @@
     function openReportModal(condoId) {
       const condo = condos.find(c => c.id === condoId);
       if (!condo) return;
-
       document.getElementById('reportCondoId').value = condoId;
       document.getElementById('reportText').value = '';
       document.getElementById('reportMediaInput').value = '';
       selectedMediaFiles = [];
       renderMediaPreviews();
-
       document.getElementById('reportModalTitle').textContent = `📝 Relatório: ${condo.name}`;
       document.getElementById('reportModal').classList.remove('hidden');
     }
 
-    function closeReportModal() {
-      document.getElementById('reportModal').classList.add('hidden');
-    }
+    function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
       files.forEach(file => {
         const reader = new FileReader();
-        reader.onload = function(evt) {
-          selectedMediaFiles.push({
-            name: file.name,
-            type: file.type.startsWith('video') ? 'video' : 'image',
-            dataUrl: evt.target.result
-          });
+        reader.onload = (evt) => {
+          selectedMediaFiles.push({ name: file.name, type: file.type.startsWith('video') ? 'video' : 'image', dataUrl: evt.target.result });
           renderMediaPreviews();
         };
         reader.readAsDataURL(file);
@@ -835,18 +800,15 @@
 
     function renderMediaPreviews() {
       const container = document.getElementById('mediaPreviewContainer');
-      container.innerHTML = selectedMediaFiles.map((media, index) => `
+      container.innerHTML = selectedMediaFiles.map((m, idx) => `
         <div class="media-preview-item">
-          <button type="button" class="media-preview-remove" onclick="removeMedia(${index})">✕</button>
-          ${media.type === 'video' ? `<video src="${media.dataUrl}" controls></video>` : `<img src="${media.dataUrl}">`}
+          <button type="button" class="media-preview-remove" onclick="removeMedia(${idx})">✕</button>
+          ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video>` : `<img src="${m.dataUrl}" onclick="openLightbox('${m.dataUrl}')">`}
         </div>
       `).join('');
     }
 
-    function removeMedia(index) {
-      selectedMediaFiles.splice(index, 1);
-      renderMediaPreviews();
-    }
+    function removeMedia(idx) { selectedMediaFiles.splice(idx, 1); renderMediaPreviews(); }
 
     function saveReportAndCheckOut(e) {
       e.preventDefault();
@@ -855,28 +817,21 @@
       if (!condo) return;
 
       const reportText = document.getElementById('reportText').value.trim();
-      const checkOutTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const currentDate = new Date().toLocaleDateString('pt-BR');
-
+      const outTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const newReport = {
-        date: currentDate,
+        date: new Date().toLocaleDateString('pt-BR'),
         checkInTime: condo.checkInTime || '--:--',
-        checkOutTime: checkOutTime,
+        checkOutTime: outTime,
         userEmail: currentUser ? currentUser.email : 'técnico',
         text: reportText,
-        mediaCount: selectedMediaFiles.length,
         media: selectedMediaFiles
       };
 
-      let currentReports = condo.reports || [];
-      currentReports.unshift(newReport);
+      let reports = condo.reports || [];
+      reports.unshift(newReport);
 
-      db.collection("condominios").doc(condoId).update({
-        checkedIn: false,
-        lastCheckOut: checkOutTime,
-        reports: currentReports
-      }).then(() => {
-        showToast('Relatório salvo e Check-out concluído!');
+      db.collection("condominios").doc(condoId).update({ checkedIn: false, lastCheckOut: outTime, reports: reports }).then(() => {
+        showToast('Check-out concluído e relatório salvo!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
       });
@@ -885,26 +840,26 @@
     function openHistoryModal(condoId) {
       const condo = condos.find(c => c.id === condoId);
       if (!condo) return;
-
-      document.getElementById('historyModalTitle').textContent = `📋 Histórico de Visitas: ${condo.name}`;
+      document.getElementById('historyModalTitle').textContent = `📋 Histórico: ${condo.name}`;
       const container = document.getElementById('historyListContainer');
-
       const reports = condo.reports || [];
+      
       if (reports.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">Nenhum relatório de visita registrado.</div>';
+        container.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">Nenhum relatório registrado.</div>';
       } else {
-        container.innerHTML = reports.map(r => `
+        container.innerHTML = reports.map((r, idx) => `
           <div class="report-card">
             <div class="report-header">
-              <span>📅 ${r.date} (${r.checkInTime} às ${r.checkOutTime})</span>
-              <span>👤 ${escapeHtml(r.userEmail ? r.userEmail.split('@')[0] : 'técnico')}</span>
+              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
+              <button onclick="downloadReportPDF('${condo.id}', ${idx})" class="btn btn-sky" style="padding:2px 8px; font-size:10px;">📄 Baixar PDF</button>
             </div>
+            <div style="font-size:10px; color:#94a3b8;">👤 Técnico: ${escapeHtml(r.userEmail)}</div>
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
               <div class="media-preview-container">
                 ${r.media.map(m => `
                   <div class="media-preview-item">
-                    ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video>` : `<img src="${m.dataUrl}">`}
+                    ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video>` : `<img src="${m.dataUrl}" onclick="openLightbox('${m.dataUrl}')">`}
                   </div>
                 `).join('')}
               </div>
@@ -912,68 +867,116 @@
           </div>
         `).join('');
       }
-
       document.getElementById('historyModal').classList.remove('hidden');
     }
 
-    function closeHistoryModal() {
-      document.getElementById('historyModal').classList.add('hidden');
+    function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
+
+    // DOWNLOAD DE RELATÓRIO EM PDF (v4.4.0)
+    function downloadReportPDF(condoId, reportIndex) {
+      const condo = condos.find(c => c.id === condoId);
+      if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
+
+      const report = condo.reports[reportIndex];
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("RELATÓRIO DE VISITA TÉCNICA", 14, 20);
+
+      doc.setFontSize(10);
+      doc.setFont("Helvetica", "normal");
+      doc.text(`Empresa / Sistema: Protech Segurança Eletrônica`, 14, 28);
+      doc.text(`Condomínio: ${condo.name}`, 14, 34);
+      doc.text(`Endereço: ${condo.address}, ${condo.number} ${condo.neighborhood ? '- ' + condo.neighborhood : ''}`, 14, 40);
+
+      doc.line(14, 44, 196, 44);
+
+      doc.setFont("Helvetica", "bold");
+      doc.text(`Data da Visita: ${report.date}`, 14, 52);
+      doc.text(`Horário: Check-in ${report.checkInTime} às ${report.checkOutTime}`, 14, 58);
+      doc.text(`Técnico Responsável: ${report.userEmail}`, 14, 64);
+
+      doc.line(14, 68, 196, 68);
+
+      doc.setFont("Helvetica", "bold");
+      doc.text("Descrição dos Serviços Realizados:", 14, 76);
+      doc.setFont("Helvetica", "normal");
+
+      const splitText = doc.splitTextToSize(report.text, 180);
+      doc.text(splitText, 14, 84);
+
+      doc.save(`Relatorio_${condo.name.replace(/\s+/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
+      showToast('Download do PDF iniciado!');
     }
 
-    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
+    // LIGHTBOX TELA CHEIA (v4.4.0)
+    function openLightbox(imageUrl) {
+      document.getElementById('lightboxImg').src = imageUrl;
+      document.getElementById('lightboxModal').classList.remove('hidden');
     }
 
-    // GESTÃO DE EQUIPE
+    function closeLightbox() {
+      document.getElementById('lightboxModal').classList.add('hidden');
+      document.getElementById('lightboxImg').src = '';
+    }
+
+    // GESTÃO DE EQUIPE E PERMISSÕES GRANULARES
     function openTeamModal() {
+      if (userRole !== 'owner' && userRole !== 'admin') {
+        alert('Apenas Proprietários ou Administradores podem gerenciar a equipe.');
+        return;
+      }
       renderTeamLists();
       document.getElementById('teamModal').classList.remove('hidden');
     }
-    function closeTeamModal() {
-      document.getElementById('teamModal').classList.add('hidden');
-    }
+    function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
 
     function renderTeamLists() {
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         if (!doc.exists) return;
         const data = doc.data();
         const pending = data.pendingTeam || [];
-        const approved = data.team || [];
+        const members = data.teamMembers || {};
 
         const pendingList = document.getElementById('pendingTeamList');
-        if (pending.length === 0) {
-          pendingList.innerHTML = '<span style="color:#64748b; font-size:11px;">Nenhuma solicitação pendente.</span>';
-        } else {
-          pendingList.innerHTML = pending.map(email => `
+        pendingList.innerHTML = pending.length === 0 ? '<span style="color:#64748b; font-size:11px;">Nenhuma solicitação pendente.</span>' :
+          pending.map(email => `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
               <span style="color:white; font-size:12px;">${escapeHtml(email)}</span>
               <div style="display:flex; gap:6px;">
-                <button onclick="approveMember('${email}')" class="btn btn-emerald" style="padding:4px 8px; font-size:11px;">Autorizar</button>
+                <button onclick="approveMember('${email}')" class="btn btn-emerald" style="padding:4px 8px; font-size:11px;">Aprovar</button>
                 <button onclick="rejectMember('${email}')" class="btn btn-rose" style="padding:4px 8px; font-size:11px;">Recusar</button>
               </div>
             </div>
           `).join('');
-        }
 
         const approvedList = document.getElementById('approvedTeamList');
-        if (approved.length === 0) {
-          approvedList.innerHTML = '<span style="color:#64748b; font-size:11px;">Nenhum colaborador autorizado.</span>';
-        } else {
-          approvedList.innerHTML = approved.map(email => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
-              <span style="color:white; font-size:12px;">${escapeHtml(email)}</span>
-              <button onclick="removeApprovedMember('${email}')" class="icon-btn delete" title="Remover Acesso">🗑️</button>
-            </div>
-          `).join('');
-        }
+        const memberEmails = Object.keys(members);
+        approvedList.innerHTML = memberEmails.length === 0 ? '<span style="color:#64748b; font-size:11px;">Nenhum colaborador configurado.</span>' :
+          memberEmails.map(email => {
+            const m = members[email];
+            return `
+              <div style="background:#1e293b; padding:10px; border-radius:8px; border:1px solid #334155; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:white; font-weight:bold; font-size:12px;">${escapeHtml(email)}</span>
+                  <button onclick="removeMember('${email}')" class="icon-btn delete" title="Remover Acesso">🗑️ Remover</button>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:11px;">
+                  <label>Nível:
+                    <select onchange="updateMemberRole('${email}', this.value)" class="form-control" style="width:auto; display:inline-block; padding:2px 6px; font-size:11px;">
+                      <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Administrador</option>
+                      <option value="user" ${m.role === 'user' ? 'selected' : ''}>Usuário / Técnico</option>
+                    </select>
+                  </label>
+                  <label><input type="checkbox" ${m.canAdd ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canAdd', this.checked)"> Adicionar</label>
+                  <label><input type="checkbox" ${m.canEdit ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canEdit', this.checked)"> Editar</label>
+                  <label><input type="checkbox" ${m.canDelete ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canDelete', this.checked)"> Apagar</label>
+                </div>
+              </div>
+            `;
+          }).join('');
       });
     }
 
@@ -981,17 +984,14 @@
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         let data = doc.data();
         let pending = data.pendingTeam || [];
-        let approved = data.team || [];
+        let members = data.teamMembers || {};
 
         pending = pending.filter(e => e !== email);
-        if (!approved.includes(email)) approved.push(email);
+        members[email] = { role: 'user', canAdd: false, canEdit: false, canDelete: false };
 
-        db.collection("empresas").doc(ownerEmail).update({
-          pendingTeam: pending,
-          team: approved
-        }).then(() => {
+        db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending, teamMembers: members }).then(() => {
           renderTeamLists();
-          showToast('Colaborador autorizado com sucesso!');
+          showToast('Membro aprovado!');
         });
       });
     }
@@ -999,9 +999,7 @@
     function rejectMember(email) {
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         let data = doc.data();
-        let pending = data.pendingTeam || [];
-        pending = pending.filter(e => e !== email);
-
+        let pending = (data.pendingTeam || []).filter(e => e !== email);
         db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
           renderTeamLists();
           showToast('Solicitação recusada.');
@@ -1009,16 +1007,44 @@
       });
     }
 
-    function removeApprovedMember(email) {
+    function removeMember(email) {
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let data = doc.data();
-        let approved = data.team || [];
-        approved = approved.filter(e => e !== email);
-
-        db.collection("empresas").doc(ownerEmail).update({ team: approved }).then(() => {
+        let members = doc.data().teamMembers || {};
+        delete members[email];
+        db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
           renderTeamLists();
-          showToast('Acesso removido.');
+          showToast('Membro removido.');
         });
+      });
+    }
+
+    function updateMemberRole(email, newRole) {
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let members = doc.data().teamMembers || {};
+        if (members[email]) {
+          members[email].role = newRole;
+          if (newRole === 'admin') {
+            members[email].canAdd = true;
+            members[email].canEdit = true;
+            members[email].canDelete = true;
+          }
+          db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
+            renderTeamLists();
+            showToast('Nível atualizado!');
+          });
+        }
+      });
+    }
+
+    function updateMemberPermission(email, permKey, value) {
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let members = doc.data().teamMembers || {};
+        if (members[email]) {
+          members[email][permKey] = value;
+          db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
+            showToast('Permissão atualizada!');
+          });
+        }
       });
     }
 
@@ -1046,20 +1072,23 @@
       empty.style.display = 'none';
       grid.innerHTML = filtered.map(c => {
         const reportsCount = (c.reports || []).length;
+        const canEditThis = userRole === 'owner' || userPermissions.canEdit;
+        const canDeleteThis = userRole === 'owner' || userPermissions.canDelete;
+
         return `
           <div class="card">
             <div>
               <div class="card-header">
                 <div class="card-title">${escapeHtml(c.name)}</div>
                 <div class="card-actions">
-                  <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>
-                  <button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>
+                  ${canEditThis ? `<button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>` : ''}
+                  ${canDeleteThis ? `<button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>` : ''}
                 </div>
               </div>
 
               <div class="card-body">
                 <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)} ${c.neighborhood ? `- ${escapeHtml(c.neighborhood)}` : ''}</div>
-                ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 Coordenadas GPS cadastradas</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado (Check-in bloqueado)</div>`}
+                ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 Coordenadas GPS cadastradas</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado</div>`}
                 ${c.phone ? `<div>📞 ${escapeHtml(c.phone)}</div>` : ''}
                 ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
                 ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in ativo às ${c.checkInTime}</div>` : ''}
@@ -1085,15 +1114,14 @@
     }
 
     function copyAddress(address, number, neighborhood) {
-      const text = `${address}, ${number}${neighborhood ? ' - ' + neighborhood : ''}`;
-      navigator.clipboard.writeText(text).then(() => {
-        showToast('Endereço copiado!');
-      }).catch(() => {
-        showToast('Erro ao copiar.');
-      });
+      navigator.clipboard.writeText(`${address}, ${number}${neighborhood ? ' - ' + neighborhood : ''}`).then(() => showToast('Endereço copiado!'));
     }
 
     function openModal(condo = null) {
+      if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) {
+        alert('Sem permissão para adicionar ou editar.');
+        return;
+      }
       document.getElementById('condoForm').reset();
       document.getElementById('condoId').value = condo ? condo.id : '';
       document.getElementById('modalTitle').textContent = condo ? 'Editar Condomínio' : 'Cadastrar Condomínio';
@@ -1108,21 +1136,12 @@
         document.getElementById('condoLng').value = condo.lng || '';
         document.getElementById('condoNotes').value = condo.notes || '';
       }
-      
       document.getElementById('condoModal').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('condoModal').classList.add('hidden');
-    }
-
-    function openChangelogModal() {
-      document.getElementById('changelogModal').classList.remove('hidden');
-    }
-
-    function closeChangelogModal() {
-      document.getElementById('changelogModal').classList.add('hidden');
-    }
+    function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
+    function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
+    function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
 
     function exportData() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(condos, null, 2));
@@ -1134,16 +1153,12 @@
       downloadAnchor.remove();
     }
 
-    function importDataTrigger() {
-      document.getElementById('importInput').click();
-    }
-
+    function importDataTrigger() { document.getElementById('importInput').click(); }
     function importData(e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = function(evt) {
+      reader.onload = (evt) => {
         try {
           const imported = JSON.parse(evt.target.result);
           if (Array.isArray(imported)) {
@@ -1153,16 +1168,19 @@
               const docRef = db.collection("condominios").doc();
               batch.set(docRef, { ...item, ownerEmail: ownerEmail, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             });
-            batch.commit().then(() => {
-              loadCondosForOwner(ownerEmail);
-              showToast('Dados importados com sucesso!');
-            });
+            batch.commit().then(() => { loadCondosForOwner(ownerEmail); showToast('Importado com sucesso!'); });
           }
-        } catch (err) {
-          showToast('Erro ao importar.');
-        }
+        } catch (err) { showToast('Erro ao importar.'); }
       };
       reader.readAsText(file);
+    }
+
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     function showToast(msg) {
