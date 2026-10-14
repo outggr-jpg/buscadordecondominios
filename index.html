@@ -193,7 +193,7 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.2.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.2.1</span>
             </div>
           </div>
         </div>
@@ -292,11 +292,11 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO DE VISITA (ETAPA 2) -->
+  <!-- MODAL DE RELATÓRIO DE VISITA -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="reportModalTitle" style="color:white; font-size: 16px;">📝 Relatório de Visita Técnicos</h3>
+        <h3 id="reportModalTitle" style="color:white; font-size: 16px;">📝 Relatório de Visita Técnico</h3>
         <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
       </div>
 
@@ -305,7 +305,7 @@
         
         <div class="form-group">
           <label>Relatório do Serviço Realizado *</label>
-          <textarea id="reportText" rows="4" required placeholder="Descreva detalhadamente o que foi feito durante a visita (ex: Troca da fonte da fechadura, alinhamento de portão, testes de tags...)" class="form-control" style="resize:none;"></textarea>
+          <textarea id="reportText" rows="4" required placeholder="Descreva detalhadamente o que foi feito durante a visita..." class="form-control" style="resize:none;"></textarea>
         </div>
 
         <div class="form-group">
@@ -381,11 +381,11 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.2.0</span>
+            <span>Versão 4.2.1</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Etapa 2 concluída: Adicionado Relatório de Visita com texto, anexos de fotos e vídeos, pré-visualização e histórico de visitas arquivadas por condomínio.</li>
+            <li>Aprimoramento do instalador PWA nativo com suporte direto ao evento do navegador Android e alertas explicativos.</li>
           </ul>
         </div>
       </div>
@@ -419,6 +419,29 @@
     let ownerEmail = null;
     let isUserOwner = false;
     let selectedMediaFiles = [];
+    let deferredPrompt = null;
+
+    // CAPTURA DO EVENTO DE INSTALAÇÃO PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('installAppBtn');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+
+    function triggerPWAInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('Aplicativo instalado com sucesso!');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        alert('Instalação PWA:\n\n1. No Chrome do Android, toque nos 3 pontos (⋮) no canto superior direito.\n2. Selecione "Adicionar à tela inicial" ou "Instalar aplicativo".');
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       try {
@@ -721,7 +744,7 @@
       if (condo) openModal(condo);
     }
 
-    // --- CHECK-IN / CHECK-OUT E RELATÓRIO (ETAPA 2) ---
+    // --- CHECK-IN / CHECK-OUT E RELATÓRIO ---
     function toggleCheckIn(id) {
       const condo = condos.find(c => c.id === id);
       if (!condo) return;
@@ -732,7 +755,6 @@
       }
 
       if (!condo.checkedIn) {
-        // REALIZAR CHECK-IN
         if (!navigator.geolocation) {
           alert('Geolocalização não é suportada.');
           return;
@@ -762,7 +784,6 @@
         );
 
       } else {
-        // ABRIR FORMULÁRIO DE CHECK-OUT + RELATÓRIO DE VISITA
         openReportModal(id);
       }
     }
@@ -844,11 +865,11 @@
         userEmail: currentUser ? currentUser.email : 'técnico',
         text: reportText,
         mediaCount: selectedMediaFiles.length,
-        media: selectedMediaFiles // Salva mídias locais
+        media: selectedMediaFiles
       };
 
       let currentReports = condo.reports || [];
-      currentReports.unshift(newReport); // Adiciona ao topo
+      currentReports.unshift(newReport);
 
       db.collection("condominios").doc(condoId).update({
         checkedIn: false,
