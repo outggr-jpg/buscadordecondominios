@@ -265,7 +265,7 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.5.1</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.6.0</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
             </div>
           </div>
@@ -495,7 +495,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO DE VISITA COM FILA SEGURA DE MÍDIA (v5.5.1) -->
+  <!-- MODAL DE RELATÓRIO DE VISITA OTIMIZADO (v5.6.0) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -516,13 +516,13 @@
           <input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;">
           <span style="font-size:10px; color:var(--text-muted); margin-top:4px; display:block;">Toque no 🔴 para remover itens enviados por engano.</span>
           
-          <!-- CONTÊINER DA GALERIA EXPANDIDO -->
+          <!-- CONTÊINER DA GALERIA -->
           <div id="mediaPreviewContainer" class="media-preview-container"></div>
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
-          <button type="submit" class="btn btn-rose">Finalizar e Check-out</button>
+          <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
         </div>
       </form>
     </div>
@@ -600,12 +600,12 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 5.5.1</span>
+            <span>Versão 5.6.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Processamento em fila sequencial para carregamento 100% garantido de todas as fotos selecionadas.</li>
-            <li>Redimensionamento automático de imagens pesadas para evitar travamentos em celulares.</li>
+            <li>Compressão otimizada de imagens para evitar o limite de 1MB do banco de dados e garantir salvamento rápido.</li>
+            <li>Tratamento de erros e feedback no botão de check-out.</li>
           </ul>
         </div>
       </div>
@@ -1239,7 +1239,7 @@
 
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
-    // FILA SEQUENCIAL SEGURA PARA PROCESSAMENTO DE MÍDIA (v5.5.1)
+    // PROCESSAMENTO E COMPRESSÃO OTIMIZADA (v5.6.0)
     async function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
@@ -1267,7 +1267,7 @@
           console.error("Erro ao processar mídia:", err);
         }
       }
-      showToast('Arquivos carregados com sucesso!');
+      showToast('Pronto para finalizar!');
     }
 
     function readFileAsDataURL(file) {
@@ -1287,8 +1287,8 @@
           let width = img.width;
           let height = img.height;
 
-          // Limite máximo de largura para evitar estouro de memória no celular
-          const MAX_WIDTH = 1280;
+          // Redimensionamento rigoroso para evitar limite de 1MB do Firestore
+          const MAX_WIDTH = 900;
           if (width > MAX_WIDTH) {
             height = Math.round((height * MAX_WIDTH) / width);
             width = MAX_WIDTH;
@@ -1300,11 +1300,11 @@
 
           ctx.drawImage(img, 0, 0, width, height);
 
-          const bannerHeight = Math.max(30, height * 0.08);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+          const bannerHeight = Math.max(28, height * 0.08);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
           ctx.fillRect(0, height - bannerHeight, width, bannerHeight);
 
-          const fontSize = Math.max(12, Math.floor(bannerHeight * 0.35));
+          const fontSize = Math.max(11, Math.floor(bannerHeight * 0.36));
           ctx.font = `bold ${fontSize}px sans-serif`;
           ctx.fillStyle = '#ffffff';
 
@@ -1312,12 +1312,13 @@
           const textLine1 = `📍 ${condoName} | 👤 ${techName}`;
           const textLine2 = `📅 ${nowStr} (Protech Segurança)`;
 
-          ctx.fillText(textLine1, 15, height - (bannerHeight * 0.52));
+          ctx.fillText(textLine1, 12, height - (bannerHeight * 0.52));
           ctx.font = `${Math.floor(fontSize * 0.85)}px sans-serif`;
           ctx.fillStyle = '#38bdf8';
-          ctx.fillText(textLine2, 15, height - (bannerHeight * 0.18));
+          ctx.fillText(textLine2, 12, height - (bannerHeight * 0.18));
 
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          // Compressão JPEG a 75% para garantir leveza máxima no banco
+          resolve(canvas.toDataURL('image/jpeg', 0.75));
         };
         img.src = dataUrl;
       });
@@ -1353,6 +1354,10 @@
       const condo = condos.find(c => c.id === condoId);
       if (!condo) return;
 
+      const submitBtn = document.getElementById('checkoutSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Salvando...';
+
       const now = new Date();
       const reportText = document.getElementById('reportText').value.trim();
       const outTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1382,10 +1387,21 @@
       let reports = condo.reports || [];
       reports.unshift(newReport);
 
-      db.collection("condominios").doc(condoId).update({ checkedIn: false, lastCheckOut: outTime, reports: reports }).then(() => {
-        showToast('Check-out concluído e relatório salvo!');
+      db.collection("condominios").doc(condoId).update({
+        checkedIn: false,
+        lastCheckOut: outTime,
+        reports: reports
+      }).then(() => {
+        showToast('Check-out concluído com sucesso!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Finalizar e Check-out';
+      }).catch((err) => {
+        console.error("Erro ao salvar check-out:", err);
+        alert('Erro ao salvar no banco de dados. Tente anexar menos fotos ou reduzir o tamanho.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Finalizar e Check-out';
       });
     }
 
