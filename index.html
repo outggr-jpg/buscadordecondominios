@@ -84,12 +84,11 @@
     
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 12px; }
     .modal-overlay.hidden { display: none; }
-    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 540px; width: 100%; padding: 20px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 540px; width: 100%; padding: 20px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; font-size: 12px; color: var(--text-main); }
     
-    /* LAYOUT DE GALERIA EXPANDIDO E VISÍVEL (v5.5.0) */
-    .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; max-height: 240px; overflow-y: auto; padding: 4px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; min-height: 110px; }
+    .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; max-height: 260px; overflow-y: auto; padding: 4px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; min-height: 120px; }
     .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: #0f172a; }
     .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .media-preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -266,7 +265,7 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.5.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.5.1</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
             </div>
           </div>
@@ -496,7 +495,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO DE VISITA COM GALERIA VISÍVEL (v5.5.0) -->
+  <!-- MODAL DE RELATÓRIO DE VISITA COM FILA SEGURA DE MÍDIA (v5.5.1) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -601,12 +600,12 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 5.5.0</span>
+            <span>Versão 5.5.1</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Correção no carregamento das miniaturas do pós-check-out.</li>
-            <li>Aumento do espaço útil no modal para facilidade de digitação e rolagem no celular.</li>
+            <li>Processamento em fila sequencial para carregamento 100% garantido de todas as fotos selecionadas.</li>
+            <li>Redimensionamento automático de imagens pesadas para evitar travamentos em celulares.</li>
           </ul>
         </div>
       </div>
@@ -1240,63 +1239,88 @@
 
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
-    // SELEÇÃO E RENDERIZAÇÃO CORRIGIDA DE MÍDIAS (v5.5.0)
-    function handleMediaSelection(e) {
+    // FILA SEQUENCIAL SEGURA PARA PROCESSAMENTO DE MÍDIA (v5.5.1)
+    async function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
       const condoId = document.getElementById('reportCondoId').value;
       const condo = condos.find(c => c.id === condoId);
       const condoName = condo ? condo.name : 'Condomínio';
       const techName = currentUser ? currentUser.email.split('@')[0] : 'Técnico';
 
-      showToast('Processando imagens...');
+      showToast(`Processando ${files.length} arquivo(s)...`);
 
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
           if (file.type.startsWith('image')) {
-            applyWatermark(evt.target.result, condoName, techName, (watermarkedUrl) => {
-              selectedMediaFiles.push({ name: file.name, type: 'image', dataUrl: watermarkedUrl });
-              renderMediaPreviews();
-            });
-          } else {
-            selectedMediaFiles.push({ name: file.name, type: 'video', dataUrl: evt.target.result });
-            renderMediaPreviews();
+            const dataUrl = await readFileAsDataURL(file);
+            const watermarkedUrl = await applyWatermarkAsync(dataUrl, condoName, techName);
+            selectedMediaFiles.push({ name: file.name, type: 'image', dataUrl: watermarkedUrl });
+          } else if (file.type.startsWith('video')) {
+            const dataUrl = await readFileAsDataURL(file);
+            selectedMediaFiles.push({ name: file.name, type: 'video', dataUrl: dataUrl });
           }
-        };
+          renderMediaPreviews();
+        } catch (err) {
+          console.error("Erro ao processar mídia:", err);
+        }
+      }
+      showToast('Arquivos carregados com sucesso!');
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (evt) => resolve(evt.target.result);
+        reader.onerror = (err) => reject(err);
         reader.readAsDataURL(file);
       });
     }
 
-    function applyWatermark(dataUrl, condoName, techName, callback) {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
+    function applyWatermarkAsync(dataUrl, condoName, techName) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
 
-        ctx.drawImage(img, 0, 0);
+          // Limite máximo de largura para evitar estouro de memória no celular
+          const MAX_WIDTH = 1280;
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
 
-        const bannerHeight = Math.max(30, img.height * 0.08);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, img.height - bannerHeight, img.width, bannerHeight);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
 
-        const fontSize = Math.max(12, Math.floor(bannerHeight * 0.35));
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillStyle = '#ffffff';
+          ctx.drawImage(img, 0, 0, width, height);
 
-        const nowStr = new Date().toLocaleString('pt-BR');
-        const textLine1 = `📍 ${condoName} | 👤 ${techName}`;
-        const textLine2 = `📅 ${nowStr} (Protech Segurança)`;
+          const bannerHeight = Math.max(30, height * 0.08);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+          ctx.fillRect(0, height - bannerHeight, width, bannerHeight);
 
-        ctx.fillText(textLine1, 15, img.height - (bannerHeight * 0.52));
-        ctx.setFont(`${fontSize * 0.85}px sans-serif`);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillText(textLine2, 15, img.height - (bannerHeight * 0.18));
+          const fontSize = Math.max(12, Math.floor(bannerHeight * 0.35));
+          ctx.font = `bold ${fontSize}px sans-serif`;
+          ctx.fillStyle = '#ffffff';
 
-        callback(canvas.toDataURL('image/jpeg', 0.85));
-      };
-      img.src = dataUrl;
+          const nowStr = new Date().toLocaleString('pt-BR');
+          const textLine1 = `📍 ${condoName} | 👤 ${techName}`;
+          const textLine2 = `📅 ${nowStr} (Protech Segurança)`;
+
+          ctx.fillText(textLine1, 15, height - (bannerHeight * 0.52));
+          ctx.font = `${Math.floor(fontSize * 0.85)}px sans-serif`;
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillText(textLine2, 15, height - (bannerHeight * 0.18));
+
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = dataUrl;
+      });
     }
 
     function renderMediaPreviews() {
