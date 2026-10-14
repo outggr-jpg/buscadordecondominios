@@ -27,7 +27,7 @@
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
     
-    .actions { display: flex; align-items: center; gap: 8px; }
+    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; text-decoration: none; }
     .btn-emerald { background-color: #059669; color: white; }
     .btn-emerald:hover { background-color: #10b981; }
@@ -84,6 +84,10 @@
     .report-card { background-color: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
     .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     .report-text { font-size: 12px; color: #e2e8f0; white-space: pre-wrap; margin: 4px 0; }
+
+    /* SELEÇÃO DE ROTA */
+    .route-item { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
+    .route-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0284c7; cursor: pointer; }
 
     /* LIGHTBOX TELA CHEIA */
     .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -207,12 +211,13 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.4.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.5.0</span>
             </div>
           </div>
         </div>
 
         <div class="actions">
+          <button onclick="openRouteModal()" class="btn btn-amber">🚗 Fazer sua Rota</button>
           <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar App</button>
           <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe e Permissões">👥 Equipe</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-sky">+ Novo</button>
@@ -240,6 +245,33 @@
         Nenhum condomínio encontrado.
       </div>
     </main>
+  </div>
+
+  <!-- MODAL DE OTIMIZAÇÃO DE ROTA (NOVO v4.5.0) -->
+  <div id="routeModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 style="color:white; font-size: 16px;">🚗 Fazer sua Rota Otimizada</h3>
+        <button onclick="closeRouteModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
+          Selecione os condomínios que precisa visitar hoje. O sistema vai calcular a rota mais rápida partindo da sua localização atual:
+        </p>
+        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Carregado dinamicamente -->
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 12px;">
+        <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="closeRouteModal()" class="btn btn-slate">Cancelar</button>
+          <button onclick="generateOptimizedRoute()" class="btn btn-amber">🗺️ Abrir Rota no Google Maps</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL DE CADASTRO / EDIÇÃO DE CONDOMÍNIO -->
@@ -389,12 +421,22 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.4.0</span>
+            <span>Versão 4.5.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
+            <li>Inclusão de imagens/fotos anexadas diretamente no PDF gerado do relatório de visita.</li>
+            <li>Nova funcionalidade "Fazer sua Rota": seleção múltipla de condomínios e cálculo automático da rota mais rápida no Google Maps.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.4.0</span>
+          </div>
+          <ul class="version-list">
             <li>Download de relatórios de visita técnica formatados em arquivo PDF.</li>
-            <li>Visualizador de imagens em tela cheia (Lightbox modal) para analisar fotos anexadas em alta definição.</li>
+            <li>Visualizador de imagens em tela cheia (Lightbox modal) para analisar fotos anexadas.</li>
           </ul>
         </div>
 
@@ -404,43 +446,6 @@
           </div>
           <ul class="version-list">
             <li>Gestão granular de permissões e 3 níveis de usuário (Proprietário, Administrador e Técnico/Usuário).</li>
-            <li>Opções para habilitar/desabilitar permissões de Adicionar, Editar e Apagar dados individualmente.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 4.2.1</span>
-          </div>
-          <ul class="version-list">
-            <li>Aprimoramento do instalador PWA no Android e suporte direto ao evento de instalação nativo do navegador.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 4.2.0</span>
-          </div>
-          <ul class="version-list">
-            <li>Etapa 2: Módulo de Relatório de Visita com texto, anexo de fotos/vídeos e histórico de visitas por condomínio.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 4.1.2</span>
-          </div>
-          <ul class="version-list">
-            <li>Validação estrita de Geofencing (raio de 500m) utilizando coordenadas de Latitude e Longitude capturadas via GPS.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 4.0.0</span>
-          </div>
-          <ul class="version-list">
-            <li>Migração completa para banco de dados isolado por empresa no Firebase Firestore com autenticação corporativa.</li>
           </ul>
         </div>
       </div>
@@ -918,7 +923,7 @@
 
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
 
-    // DOWNLOAD DE RELATÓRIO EM PDF
+    // DOWNLOAD DE RELATÓRIO EM PDF COM IMAGENS INCORPORADAS (v4.5.0)
     function downloadReportPDF(condoId, reportIndex) {
       const condo = condos.find(c => c.id === condoId);
       if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
@@ -960,6 +965,43 @@
         const splitText = doc.splitTextToSize(report.text, 180);
         doc.text(splitText, 14, 84);
 
+        let currentY = 84 + (splitText.length * 6) + 10;
+
+        // Adiciona Imagens anexadas no PDF
+        if (report.media && report.media.length > 0) {
+          const images = report.media.filter(m => m.type === 'image');
+          if (images.length > 0) {
+            if (currentY > 230) { doc.addPage(); currentY = 20; }
+            
+            doc.setFont("Helvetica", "bold");
+            doc.text("Fotos Anexadas da Visita:", 14, currentY);
+            currentY += 8;
+
+            let imgX = 14;
+            let imgWidth = 55;
+            let imgHeight = 40;
+
+            images.forEach((img, idx) => {
+              if (imgX + imgWidth > 196) {
+                imgX = 14;
+                currentY += imgHeight + 6;
+              }
+              if (currentY + imgHeight > 270) {
+                doc.addPage();
+                currentY = 20;
+                imgX = 14;
+              }
+
+              try {
+                doc.addImage(img.dataUrl, 'JPEG', imgX, currentY, imgWidth, imgHeight);
+              } catch(e) {
+                try { doc.addImage(img.dataUrl, 'PNG', imgX, currentY, imgWidth, imgHeight); } catch(err){}
+              }
+              imgX += imgWidth + 6;
+            });
+          }
+        }
+
         const fileName = `Relatorio_${condo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`;
         doc.save(fileName);
         showToast('Download do PDF concluído!');
@@ -967,6 +1009,100 @@
         console.error(err);
         alert('Erro ao gerar o PDF. Tente novamente.');
       }
+    }
+
+    // "FAZER SUA ROTA" - OTIMIZAÇÃO E SELEÇÃO DE ROTA (NOVO v4.5.0)
+    function openRouteModal() {
+      const container = document.getElementById('routeSelectionList');
+      if (condos.length === 0) {
+        container.innerHTML = '<span style="color:#64748b; font-size:12px;">Nenhum condomínio cadastrado para rota.</span>';
+      } else {
+        container.innerHTML = condos.map(c => `
+          <label class="route-item">
+            <input type="checkbox" class="route-checkbox" value="${c.id}" ${c.lat && c.lng ? 'checked' : 'disabled'}>
+            <div style="display:flex; flex-direction:column;">
+              <span style="color:white; font-size:13px; font-weight:bold;">${escapeHtml(c.name)}</span>
+              <span style="color:#94a3b8; font-size:11px;">${escapeHtml(c.address)}, ${escapeHtml(c.number)} ${c.neighborhood ? '- ' + escapeHtml(c.neighborhood) : ''}</span>
+              ${!c.lat || !c.lng ? '<span style="color:#f43f5e; font-size:10px;">⚠️ Sem GPS cadastrado</span>' : ''}
+            </div>
+          </label>
+        `).join('');
+      }
+      document.getElementById('routeModal').classList.remove('hidden');
+    }
+
+    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
+
+    function toggleSelectAllRoutes() {
+      const checkboxes = document.querySelectorAll('.route-checkbox:not([disabled])');
+      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+      checkboxes.forEach(cb => cb.checked = !allChecked);
+    }
+
+    function generateOptimizedRoute() {
+      const selectedBoxes = Array.from(document.querySelectorAll('.route-checkbox:checked'));
+      if (selectedBoxes.length === 0) {
+        alert('Por favor, selecione pelo menos um condomínio para montar a rota.');
+        return;
+      }
+
+      const selectedIds = selectedBoxes.map(cb => cb.value);
+      let selectedCondos = condos.filter(c => selectedIds.includes(c.id));
+
+      showToast('Obtendo sua localização atual...');
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          let currentLat = pos.coords.latitude;
+          let currentLng = pos.coords.longitude;
+
+          // Algoritmo do Vizinho Mais Próximo para ordenar os condomínios
+          let orderedRoute = [];
+          let unvisited = [...selectedCondos];
+
+          while (unvisited.length > 0) {
+            let nearestIdx = 0;
+            let minDistance = Infinity;
+
+            for (let i = 0; i < unvisited.length; i++) {
+              let dist = calculateHaversineDistance(currentLat, currentLng, parseFloat(unvisited[i].lat), parseFloat(unvisited[i].lng));
+              if (dist < minDistance) {
+                minDistance = dist;
+                nearestIdx = i;
+              }
+            }
+
+            let nextCondo = unvisited.splice(nearestIdx, 1)[0];
+            orderedRoute.push(nextCondo);
+            currentLat = parseFloat(nextCondo.lat);
+            currentLng = parseFloat(nextCondo.lng);
+          }
+
+          // Monta a URL do Google Maps com Múltiplas Paradas (Waypoints)
+          const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
+          const destination = `${orderedRoute[orderedRoute.length - 1].lat},${orderedRoute[orderedRoute.length - 1].lng}`;
+          
+          let waypoints = '';
+          if (orderedRoute.length > 1) {
+            waypoints = orderedRoute.slice(0, orderedRoute.length - 1)
+              .map(c => `${c.lat},${c.lng}`)
+              .join('|');
+          }
+
+          let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
+          if (waypoints) {
+            mapsUrl += `&waypoints=${encodeURIComponent(waypoints)}`;
+          }
+
+          window.open(mapsUrl, '_blank');
+          closeRouteModal();
+          showToast('Rota otimizada aberta no Google Maps!');
+        },
+        (err) => {
+          alert('Erro ao obter sua localização GPS. Verifique se o GPS do celular está ativado.');
+        },
+        { enableHighAccuracy: true }
+      );
     }
 
     // LIGHTBOX TELA CHEIA
