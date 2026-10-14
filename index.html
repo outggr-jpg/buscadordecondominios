@@ -91,10 +91,10 @@
     .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-    .version-item { border-left: 2px solid #0284c7; padding-left: 10px; }
+    .version-item { border-left: 2px solid #0284c7; padding-left: 10px; margin-bottom: 12px; }
     .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
     .version-date { font-size: 10px; color: #64748b; font-family: monospace; }
-    .version-list { list-style-type: disc; padding-left: 14px; color: #94a3b8; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+    .version-list { list-style-type: disc; padding-left: 14px; color: #94a3b8; margin-top: 4px; display: flex; flex-direction: column; gap: 3px; }
 
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 11px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; }
@@ -378,11 +378,11 @@
     </div>
   </div>
 
-  <!-- MODAL HISTÓRICO DE VERSÕES -->
+  <!-- MODAL HISTÓRICO DE VERSÕES COMPLETO -->
   <div id="changelogModal" class="modal-overlay hidden">
-    <div class="modal">
+    <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
-        <h3 style="color:white; font-size: 16px;">Histórico de Atualizações</h3>
+        <h3 style="color:white; font-size: 16px;">🚀 Histórico de Versões</h3>
         <button onclick="closeChangelogModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
       </div>
 
@@ -393,8 +393,54 @@
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Download de relatórios de visita em arquivo PDF.</li>
-            <li>Visualizador de imagens em tela cheia (Lightbox) ao clicar nas fotos do relatório.</li>
+            <li>Download de relatórios de visita técnica formatados em arquivo PDF.</li>
+            <li>Visualizador de imagens em tela cheia (Lightbox modal) para analisar fotos anexadas em alta definição.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.3.0</span>
+          </div>
+          <ul class="version-list">
+            <li>Gestão granular de permissões e 3 níveis de usuário (Proprietário, Administrador e Técnico/Usuário).</li>
+            <li>Opções para habilitar/desabilitar permissões de Adicionar, Editar e Apagar dados individualmente.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.2.1</span>
+          </div>
+          <ul class="version-list">
+            <li>Aprimoramento do instalador PWA no Android e suporte direto ao evento de instalação nativo do navegador.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.2.0</span>
+          </div>
+          <ul class="version-list">
+            <li>Etapa 2: Módulo de Relatório de Visita com texto, anexo de fotos/vídeos e histórico de visitas por condomínio.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.1.2</span>
+          </div>
+          <ul class="version-list">
+            <li>Validação estrita de Geofencing (raio de 500m) utilizando coordenadas de Latitude e Longitude capturadas via GPS.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.0.0</span>
+          </div>
+          <ul class="version-list">
+            <li>Migração completa para banco de dados isolado por empresa no Firebase Firestore com autenticação corporativa.</li>
           </ul>
         </div>
       </div>
@@ -872,46 +918,58 @@
 
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
 
-    // DOWNLOAD DE RELATÓRIO EM PDF (v4.4.0)
+    // DOWNLOAD DE RELATÓRIO EM PDF
     function downloadReportPDF(condoId, reportIndex) {
       const condo = condos.find(c => c.id === condoId);
       if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
 
       const report = condo.reports[reportIndex];
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+      
+      if (!window.jspdf) {
+        alert('A biblioteca de PDF ainda está a carregar. Verifique sua conexão.');
+        return;
+      }
 
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(16);
-      doc.text("RELATÓRIO DE VISITA TÉCNICA", 14, 20);
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-      doc.setFontSize(10);
-      doc.setFont("Helvetica", "normal");
-      doc.text(`Empresa / Sistema: Protech Segurança Eletrônica`, 14, 28);
-      doc.text(`Condomínio: ${condo.name}`, 14, 34);
-      doc.text(`Endereço: ${condo.address}, ${condo.number} ${condo.neighborhood ? '- ' + condo.neighborhood : ''}`, 14, 40);
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("RELATORIO DE VISITA TECNICA", 14, 20);
 
-      doc.line(14, 44, 196, 44);
+        doc.setFontSize(10);
+        doc.setFont("Helvetica", "normal");
+        doc.text(`Empresa / Sistema: Protech Seguranca Eletronica`, 14, 28);
+        doc.text(`Condominio: ${condo.name}`, 14, 34);
+        doc.text(`Endereco: ${condo.address}, ${condo.number} ${condo.neighborhood ? '- ' + condo.neighborhood : ''}`, 14, 40);
 
-      doc.setFont("Helvetica", "bold");
-      doc.text(`Data da Visita: ${report.date}`, 14, 52);
-      doc.text(`Horário: Check-in ${report.checkInTime} às ${report.checkOutTime}`, 14, 58);
-      doc.text(`Técnico Responsável: ${report.userEmail}`, 14, 64);
+        doc.line(14, 44, 196, 44);
 
-      doc.line(14, 68, 196, 68);
+        doc.setFont("Helvetica", "bold");
+        doc.text(`Data da Visita: ${report.date}`, 14, 52);
+        doc.text(`Horario: Check-in ${report.checkInTime} as ${report.checkOutTime}`, 14, 58);
+        doc.text(`Tecnico Responsavel: ${report.userEmail}`, 14, 64);
 
-      doc.setFont("Helvetica", "bold");
-      doc.text("Descrição dos Serviços Realizados:", 14, 76);
-      doc.setFont("Helvetica", "normal");
+        doc.line(14, 68, 196, 68);
 
-      const splitText = doc.splitTextToSize(report.text, 180);
-      doc.text(splitText, 14, 84);
+        doc.setFont("Helvetica", "bold");
+        doc.text("Descricao dos Servicos Realizados:", 14, 76);
+        doc.setFont("Helvetica", "normal");
 
-      doc.save(`Relatorio_${condo.name.replace(/\s+/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
-      showToast('Download do PDF iniciado!');
+        const splitText = doc.splitTextToSize(report.text, 180);
+        doc.text(splitText, 14, 84);
+
+        const fileName = `Relatorio_${condo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+        showToast('Download do PDF concluído!');
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao gerar o PDF. Tente novamente.');
+      }
     }
 
-    // LIGHTBOX TELA CHEIA (v4.4.0)
+    // LIGHTBOX TELA CHEIA
     function openLightbox(imageUrl) {
       document.getElementById('lightboxImg').src = imageUrl;
       document.getElementById('lightboxModal').classList.remove('hidden');
