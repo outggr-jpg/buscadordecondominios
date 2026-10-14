@@ -138,6 +138,10 @@
       <h2 class="auth-title">Protech Condomínios</h2>
       <p class="auth-subtitle">Sistema de Gestão e Acesso Corporativo</p>
 
+      <div id="inviteNotice" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; text-align: center;">
+        🎉 Você foi convidado para entrar em uma equipe! Crie sua conta ou faça login para se juntar.
+      </div>
+
       <div class="tab-nav">
         <button id="tabLoginBtn" onclick="switchTab('login')" class="tab-btn active">Entrar</button>
         <button id="tabRegisterCompanyBtn" onclick="switchTab('registerCompany')" class="tab-btn">Criar Empresa</button>
@@ -184,7 +188,7 @@
           <label>E-mail do Colaborador</label>
           <input type="email" id="regUserEmail" required placeholder="tecnico@empresa.com" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group" id="companyOwnerFieldGroup">
           <label>E-mail da Empresa (Proprietário/Matriz)</label>
           <input type="email" id="regUserCompanyOwner" required placeholder="dono@empresa.com" class="form-control">
         </div>
@@ -211,7 +215,7 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.5.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.6.0</span>
             </div>
           </div>
         </div>
@@ -247,7 +251,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE OTIMIZAÇÃO DE ROTA (NOVO v4.5.0) -->
+  <!-- MODAL DE OTIMIZAÇÃO DE ROTA -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -259,9 +263,7 @@
         <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
           Selecione os condomínios que precisa visitar hoje. O sistema vai calcular a rota mais rápida partindo da sua localização atual:
         </p>
-        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px;">
-          <!-- Carregado dinamicamente -->
-        </div>
+        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
 
       <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 12px;">
@@ -384,22 +386,42 @@
     </div>
   </div>
 
-  <!-- MODAL DE EQUIPE E PERMISSÕES -->
+  <!-- MODAL DE EQUIPE E CONVITES (v4.6.0) -->
   <div id="teamModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 style="color:white; font-size: 16px;">👥 Gestão de Equipe e Níveis de Acesso</h3>
+        <h3 style="color:white; font-size: 16px;">👥 Gestão de Equipe e Convites</h3>
         <button onclick="closeTeamModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
       </div>
 
       <div class="modal-body">
+        <!-- CONVITAR NOVO MEMBRO DIRETO OU GERAR LINK -->
+        <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="font-size: 12px; color: #38bdf8; font-weight: bold;">📩 Convidar Novo Colaborador</h4>
+          <div style="display: flex; gap: 8px;">
+            <input type="email" id="inviteUserEmailInput" placeholder="Digite o e-mail do colaborador..." class="form-control" style="flex:1;">
+            <button onclick="sendDirectInvite()" class="btn btn-sky">Convidar por E-mail</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #334155; padding-top: 8px; margin-top: 4px;">
+            <span style="font-size: 11px; color: #94a3b8;">Ou crie um link único com expiração em 24h:</span>
+            <button onclick="generateInviteLink()" class="btn btn-emerald" style="font-size: 11px;">🔗 Gerar Link de Convite</button>
+          </div>
+          <div id="generatedLinkContainer" style="display: none; background: #1e293b; padding: 8px; border-radius: 8px; border: 1px solid #0284c7; margin-top: 4px;">
+            <div style="font-size: 10px; color: #38bdf8; margin-bottom: 4px;">Link válido por 24 horas (uso único):</div>
+            <div style="display: flex; gap: 6px;">
+              <input type="text" id="generatedLinkInput" readonly class="form-control" style="font-size: 11px;">
+              <button onclick="copyGeneratedLink()" class="btn btn-sky" style="padding: 4px 8px; font-size: 11px;">Copiar Link</button>
+            </div>
+          </div>
+        </div>
+
         <div>
-          <h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px;">Solicitações Pendentes:</h4>
+          <h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px; margin-top: 10px;">Solicitações / Convites Pendentes:</h4>
           <div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
 
         <div style="margin-top: 14px; border-top: 1px solid #334155; padding-top: 12px;">
-          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros e Permissões Customizáveis:</h4>
+          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Ativos e Permissões Customizáveis:</h4>
           <div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
       </div>
@@ -421,12 +443,22 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.5.0</span>
+            <span>Versão 4.6.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
+            <li>Sistema completo de convites por e-mail e criação de links temporários com expiração automática em 24h.</li>
+            <li>Entrada automática no sistema ao aceitar convite ou registrar-se via link seguro.</li>
+          </ul>
+        </div>
+
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.5.0</span>
+          </div>
+          <ul class="version-list">
             <li>Inclusão de imagens/fotos anexadas diretamente no PDF gerado do relatório de visita.</li>
-            <li>Nova funcionalidade "Fazer sua Rota": seleção múltipla de condomínios e cálculo automático da rota mais rápida no Google Maps.</li>
+            <li>Funcionalidade "Fazer sua Rota": seleção múltipla de condomínios e cálculo automático da rota mais rápida no Google Maps.</li>
           </ul>
         </div>
 
@@ -436,16 +468,7 @@
           </div>
           <ul class="version-list">
             <li>Download de relatórios de visita técnica formatados em arquivo PDF.</li>
-            <li>Visualizador de imagens em tela cheia (Lightbox modal) para analisar fotos anexadas.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 4.3.0</span>
-          </div>
-          <ul class="version-list">
-            <li>Gestão granular de permissões e 3 níveis de usuário (Proprietário, Administrador e Técnico/Usuário).</li>
+            <li>Visualizador de imagens em tela cheia (Lightbox modal).</li>
           </ul>
         </div>
       </div>
@@ -477,6 +500,7 @@
     let userPermissions = { canAdd: false, canEdit: false, canDelete: false };
     let selectedMediaFiles = [];
     let deferredPrompt = null;
+    let currentInviteToken = null;
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -498,6 +522,13 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      // VERIFICA SE ENTROU ATRAVÉS DE UM LINK DE CONVITE (?invite=TOKEN)
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteToken = urlParams.get('invite');
+      if (inviteToken) {
+        checkInviteToken(inviteToken);
+      }
+
       try {
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
@@ -507,6 +538,35 @@
         });
       } catch(e) {}
     });
+
+    function checkInviteToken(token) {
+      db.collection("convites").doc(token).get().then((doc) => {
+        if (!doc.exists) {
+          alert('Este link de convite é inválido ou já foi removido.');
+          return;
+        }
+
+        const invite = doc.data();
+        const now = Date.now();
+
+        if (invite.used) {
+          alert('Este link de convite já foi utilizado.');
+          return;
+        }
+
+        if (now > invite.expiresAt) {
+          alert('Este link de convite expirou (validade de 24 horas). Peça um novo convite ao seu administrador.');
+          return;
+        }
+
+        // Token Válido!
+        currentInviteToken = token;
+        document.getElementById('inviteNotice').style.display = 'block';
+        document.getElementById('companyOwnerFieldGroup').style.display = 'none'; // Preenche automático
+        document.getElementById('regUserCompanyOwner').value = invite.ownerEmail;
+        switchTab('registerUser');
+      });
+    }
 
     function switchTab(tab) {
       document.getElementById('loginForm').style.display = tab === 'login' ? 'flex' : 'none';
@@ -576,8 +636,12 @@
             if (!pending.includes(email)) pending.push(email);
 
             db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
-              showToast('Solicitação enviada! Aguardando aprovação.');
-              handleLogout();
+              if (currentInviteToken) {
+                // Invalida o token para não ser reutilizado
+                db.collection("convites").doc(currentInviteToken).update({ used: true });
+              }
+              showToast('Conta criada! Bem-vindo à equipe.');
+              resolveUserSession(email);
             });
           })
           .catch((error) => { showToast('Erro ao criar usuário: ' + error.message); });
@@ -627,17 +691,25 @@
             if (foundCompany) {
               ownerEmail = foundCompany.ownerEmail;
               userRole = foundCompany.role;
-              if (userRole === 'owner') {
-                userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-              } else {
-                userPermissions = foundCompany.permissions || { canAdd: false, canEdit: false, canDelete: false };
-              }
+              userPermissions = userRole === 'owner' ? { canAdd: true, canEdit: true, canDelete: true } : (foundCompany.permissions || { canAdd: false, canEdit: false, canDelete: false });
               showMainApp(foundCompany.companyName + ` (${userRole.toUpperCase()})`, ownerEmail);
             } else {
               db.collection("empresas").where("pendingTeam", "array-contains", userEmail).get().then((pendingSnapshot) => {
                 if (!pendingSnapshot.empty) {
-                  alert('Sua conta ainda está aguardando aprovação do proprietário.');
-                  handleLogout();
+                  // Se foi convidado direto por e-mail, auto-aprova como técnico
+                  const companyDoc = pendingSnapshot.docs[0];
+                  ownerEmail = companyDoc.data().ownerEmail;
+                  userRole = 'user';
+                  userPermissions = { canAdd: false, canEdit: false, canDelete: false };
+
+                  let pending = (companyDoc.data().pendingTeam || []).filter(e => e !== userEmail);
+                  let members = companyDoc.data().teamMembers || {};
+                  members[userEmail] = { role: 'user', canAdd: false, canEdit: false, canDelete: false };
+
+                  db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending, teamMembers: members }).then(() => {
+                    showMainApp(companyDoc.data().companyName + " (TÉCNICO)", ownerEmail);
+                    showToast('Você entrou na equipe com sucesso!');
+                  });
                 } else {
                   ownerEmail = userEmail;
                   userRole = 'owner';
@@ -786,6 +858,56 @@
       if (condo) openModal(condo);
     }
 
+    // GESTÃO DE CONVITES E EQUIPE (v4.6.0)
+    function sendDirectInvite() {
+      const email = document.getElementById('inviteUserEmailInput').value.trim();
+      if (!email) {
+        alert('Digite o e-mail do colaborador.');
+        return;
+      }
+
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let pending = doc.data().pendingTeam || [];
+        if (!pending.includes(email)) {
+          pending.push(email);
+          db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
+            document.getElementById('inviteUserEmailInput').value = '';
+            renderTeamLists();
+            showToast('Convite enviado! O usuário já pode acessar.');
+          });
+        } else {
+          showToast('Este e-mail já está na lista de convites.');
+        }
+      });
+    }
+
+    function generateInviteLink() {
+      const token = 'invite_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // Validade de 24 horas
+
+      db.collection("convites").doc(token).set({
+        ownerEmail: ownerEmail,
+        createdAt: Date.now(),
+        expiresAt: expiresAt,
+        used: false
+      }).then(() => {
+        const baseUrl = window.location.href.split('?')[0];
+        const inviteUrl = `${baseUrl}?invite=${token}`;
+        
+        document.getElementById('generatedLinkInput').value = inviteUrl;
+        document.getElementById('generatedLinkContainer').style.display = 'block';
+        showToast('Link de convite gerado!');
+      });
+    }
+
+    function copyGeneratedLink() {
+      const input = document.getElementById('generatedLinkInput');
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Link de convite copiado!');
+      });
+    }
+
     // CHECK-IN / CHECK-OUT E RELATÓRIO
     function toggleCheckIn(id) {
       const condo = condos.find(c => c.id === id);
@@ -923,7 +1045,7 @@
 
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
 
-    // DOWNLOAD DE RELATÓRIO EM PDF COM IMAGENS INCORPORADAS (v4.5.0)
+    // DOWNLOAD DE RELATÓRIO EM PDF COM IMAGENS INCORPORADAS
     function downloadReportPDF(condoId, reportIndex) {
       const condo = condos.find(c => c.id === condoId);
       if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
@@ -967,7 +1089,6 @@
 
         let currentY = 84 + (splitText.length * 6) + 10;
 
-        // Adiciona Imagens anexadas no PDF
         if (report.media && report.media.length > 0) {
           const images = report.media.filter(m => m.type === 'image');
           if (images.length > 0) {
@@ -981,7 +1102,7 @@
             let imgWidth = 55;
             let imgHeight = 40;
 
-            images.forEach((img, idx) => {
+            images.forEach((img) => {
               if (imgX + imgWidth > 196) {
                 imgX = 14;
                 currentY += imgHeight + 6;
@@ -1011,7 +1132,7 @@
       }
     }
 
-    // "FAZER SUA ROTA" - OTIMIZAÇÃO E SELEÇÃO DE ROTA (NOVO v4.5.0)
+    // "FAZER SUA ROTA" - OTIMIZAÇÃO E SELEÇÃO DE ROTA
     function openRouteModal() {
       const container = document.getElementById('routeSelectionList');
       if (condos.length === 0) {
@@ -1056,7 +1177,6 @@
           let currentLat = pos.coords.latitude;
           let currentLng = pos.coords.longitude;
 
-          // Algoritmo do Vizinho Mais Próximo para ordenar os condomínios
           let orderedRoute = [];
           let unvisited = [...selectedCondos];
 
@@ -1078,7 +1198,6 @@
             currentLng = parseFloat(nextCondo.lng);
           }
 
-          // Monta a URL do Google Maps com Múltiplas Paradas (Waypoints)
           const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
           const destination = `${orderedRoute[orderedRoute.length - 1].lat},${orderedRoute[orderedRoute.length - 1].lng}`;
           
@@ -1098,7 +1217,7 @@
           closeRouteModal();
           showToast('Rota otimizada aberta no Google Maps!');
         },
-        (err) => {
+        () => {
           alert('Erro ao obter sua localização GPS. Verifique se o GPS do celular está ativado.');
         },
         { enableHighAccuracy: true }
