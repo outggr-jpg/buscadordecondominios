@@ -82,19 +82,18 @@
     .card-footer-row { display: flex; gap: 8px; }
     .card-footer-row .btn { flex: 1; justify-content: center; }
     
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 12px; }
     .modal-overlay.hidden { display: none; }
-    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 520px; width: 100%; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; font-size: 12px; color: var(--text-main); }
+    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 540px; width: 100%; padding: 20px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; font-size: 12px; color: var(--text-main); }
     
-    .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 10px; }
-    .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; border: 2px solid var(--border-color); background: var(--bg-main); box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: transform 0.2s, border-color 0.2s; }
-    .media-preview-item:hover { border-color: #0284c7; transform: translateY(-2px); }
+    /* LAYOUT DE GALERIA EXPANDIDO E VISÍVEL (v5.5.0) */
+    .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; max-height: 240px; overflow-y: auto; padding: 4px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; min-height: 110px; }
+    .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: #0f172a; }
     .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-    .media-preview-remove { position: absolute; top: 6px; right: 6px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.5); transition: background 0.2s; }
-    .media-preview-remove:hover { background: #be123c; transform: scale(1.1); }
-    .media-type-tag { position: absolute; bottom: 4px; left: 4px; background: rgba(15, 23, 42, 0.85); color: #38bdf8; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 6px; pointer-events: none; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .media-preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .media-type-tag { position: absolute; bottom: 2px; left: 2px; background: rgba(15, 23, 42, 0.85); color: #38bdf8; font-size: 8px; font-weight: bold; padding: 1px 4px; border-radius: 4px; pointer-events: none; }
 
     .report-card { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
     .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -113,7 +112,7 @@
     .version-date { font-size: 10px; color: var(--text-muted); font-family: monospace; }
     .version-list { list-style-type: disc; padding-left: 14px; color: var(--text-muted); margin-top: 4px; display: flex; flex-direction: column; gap: 3px; }
 
-    .form-group { margin-bottom: 12px; }
+    .form-group { margin-bottom: 10px; }
     .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
     .form-control { width: 100%; padding: 8px 12px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-size: 13px; outline: none; }
     .form-control:focus { border-color: #0284c7; }
@@ -157,7 +156,7 @@
     <img id="lightboxImg" class="lightbox-img" src="" alt="Imagem ampliada">
   </div>
 
-  <!-- TELA DE AUTENTICAÇÃO SIMPLIFICADA -->
+  <!-- TELA DE AUTENTICAÇÃO -->
   <div id="authScreen" class="modal-overlay" style="background-color: #0f172a; display: flex;">
     <div class="auth-container">
       <div style="text-align: center; margin-bottom: 12px;">
@@ -257,7 +256,7 @@
     </div>
   </div>
 
-  <!-- APLICAÇÃO PRINCIPAL (BOTÕES PADRONIZADOS EM SLATE / GRAFITE v5.4.0) -->
+  <!-- APLICAÇÃO PRINCIPAL -->
   <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     <header>
       <div class="header-container">
@@ -267,7 +266,7 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.4.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.5.0</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
             </div>
           </div>
@@ -303,7 +302,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE CONFIGURAÇÕES / PERFIL / TEMAS -->
+  <!-- MODAL DE CONFIGURAÇÕES -->
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 450px;">
       <div class="modal-header">
@@ -353,7 +352,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIOS GERAIS / MES -->
+  <!-- MODAL DE RELATÓRIOS GERAIS -->
   <div id="globalReportModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 650px;">
       <div class="modal-header">
@@ -497,7 +496,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO DE VISITA -->
+  <!-- MODAL DE RELATÓRIO DE VISITA COM GALERIA VISÍVEL (v5.5.0) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -505,23 +504,24 @@
         <button onclick="closeReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
 
-      <form id="reportForm" onsubmit="saveReportAndCheckOut(event)">
+      <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
         <input type="hidden" id="reportCondoId">
         
         <div class="form-group">
           <label>Relatório do Serviço Realizado *</label>
-          <textarea id="reportText" rows="4" required placeholder="Descreva detalhadamente o que foi feito..." class="form-control" style="resize:none;"></textarea>
+          <textarea id="reportText" rows="3" required placeholder="Descreva detalhadamente o que foi feito..." class="form-control" style="resize:none;"></textarea>
         </div>
 
         <div class="form-group">
           <label>Fotos e Vídeos (Marca d'Água Ativa):</label>
           <input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;">
-          <span style="font-size:10px; color:var(--text-muted); margin-top:3px; display:block;">Toque no 🔴 para remover itens enviados por engano.</span>
+          <span style="font-size:10px; color:var(--text-muted); margin-top:4px; display:block;">Toque no 🔴 para remover itens enviados por engano.</span>
           
+          <!-- CONTÊINER DA GALERIA EXPANDIDO -->
           <div id="mediaPreviewContainer" class="media-preview-container"></div>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" class="btn btn-rose">Finalizar e Check-out</button>
         </div>
@@ -601,21 +601,12 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 5.4.0</span>
+            <span>Versão 5.5.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Padronização estética total dos botões no tom neutro Slate/Grafite da Equipe.</li>
-            <li>Destaque visual exclusivo mantido para a ação principal de Check-in / Check-out.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 5.3.0</span>
-          </div>
-          <ul class="version-list">
-            <li>Novo layout de fotos/vídeos pós-check-out com miniaturas maiores em grid e remoção rápida.</li>
+            <li>Correção no carregamento das miniaturas do pós-check-out.</li>
+            <li>Aumento do espaço útil no modal para facilidade de digitação e rolagem no celular.</li>
           </ul>
         </div>
       </div>
@@ -1249,12 +1240,15 @@
 
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
+    // SELEÇÃO E RENDERIZAÇÃO CORRIGIDA DE MÍDIAS (v5.5.0)
     function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
       const condoId = document.getElementById('reportCondoId').value;
       const condo = condos.find(c => c.id === condoId);
       const condoName = condo ? condo.name : 'Condomínio';
       const techName = currentUser ? currentUser.email.split('@')[0] : 'Técnico';
+
+      showToast('Processando imagens...');
 
       files.forEach(file => {
         const reader = new FileReader();
@@ -1309,7 +1303,7 @@
       const container = document.getElementById('mediaPreviewContainer');
       
       if (selectedMediaFiles.length === 0) {
-        container.innerHTML = '';
+        container.innerHTML = '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia anexada ainda.</span>';
         return;
       }
 
@@ -1868,7 +1862,6 @@
       });
     }
 
-    // RENDERIZAÇÃO DOS BOTÕES DOS CARDS PADRONIZADOS EM SLATE (v5.4.0)
     function renderCondos() {
       const grid = document.getElementById('condoGrid');
       const empty = document.getElementById('emptyState');
