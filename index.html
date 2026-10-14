@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador de Condomínios - Protech</title>
+  <meta name="theme-color" content="#1e293b">
+  <link rel="manifest" href="manifest.json">
+  <!-- SDKs do Firebase Compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { background-color: #1e293b; border-bottom: 1px solid #334155; padding: 12px 16px; position: sticky; top: 0; z-index: 30; }
+    .header-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .title { font-size: 16px; font-weight: bold; color: white; }
+    
+    .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .subtitle { font-size: 11px; color: #94a3b8; }
+    .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
+    .badge:hover { background: rgba(2, 132, 199, 0.4); }
+    
+    .actions { display: flex; align-items: center; gap: 8px; }
+    .btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; text-decoration: none; }
+    .btn-emerald { background-color: #059669; color: white; }
+    .btn-emerald:hover { background-color: #10b981; }
+    .btn-sky { background-color: #0284c7; color: white; }
+    .btn-sky:hover { background-color: #0369a1; }
+    .btn-slate { background-color: #334155; color: #e2e8f0; }
+    .btn-slate:hover { background-color: #475569; }
+    .btn-rose { background-color: #e11d48; color: white; }
+    .btn-rose:hover { background-color: #be123c; }
+    .btn-amber { background-color: #d97706; color: white; }
+    .btn-amber:hover { background-color: #b45309; }
+    .btn-purple { background-color: #7c3aed; color: white; }
+    .btn-purple:hover { background-color: #6d28d9; }
+    
+    main { max-width: 1100px; width: 100%; margin: 0 auto; padding: 20px 16px; flex-grow: 1; }
+    
+    .search-box { position: relative; margin-bottom: 20px; }
+    .search-input { width: 100%; padding: 12px 16px; background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; color: white; font-size: 14px; outline: none; }
+    .search-input:focus { border-color: #0284c7; }
+    
+    .meta-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+    .meta-actions { display: flex; gap: 12px; }
+    .meta-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; }
+    .meta-btn:hover { color: #f1f5f9; }
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .card-title { font-size: 15px; font-weight: bold; color: #f8fafc; }
+    .card-actions { display: flex; gap: 4px; }
+    .icon-btn { background: none; border: none; color: #94a3b8; padding: 4px; cursor: pointer; border-radius: 4px; }
+    .icon-btn:hover { color: #38bdf8; }
+    .icon-btn.delete:hover { color: #f43f5e; }
+    
+    .card-body { font-size: 12px; color: #cbd5e1; display: flex; flex-direction: column; gap: 6px; }
+    .address-line { color: #38bdf8; font-weight: 500; }
+    .notes-box { background-color: #0f172a; padding: 8px; border-radius: 8px; border: 1px solid #334155; margin-top: 6px; color: #94a3b8; }
+    
+    .card-footer { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #334155; }
+    .card-footer-row { display: flex; gap: 8px; }
+    .card-footer-row .btn { flex: 1; justify-content: center; }
+    
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+    .modal-overlay.hidden { display: none; }
+    .modal { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; max-width: 520px; width: 100%; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; font-size: 12px; color: #cbd5e1; }
+    
+    .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 8px; }
+    .media-preview-item { position: relative; width: 100%; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #334155; background: #0f172a; }
+    .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; }
+    .media-preview-remove { position: absolute; top: 2px; right: 2px; background: rgba(225, 29, 72, 0.8); color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+
+    .report-card { background-color: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px; margin-top: 6px; }
+    .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .report-text { font-size: 12px; color: #e2e8f0; white-space: pre-wrap; margin-bottom: 6px; }
+
+    .version-item { border-left: 2px solid #0284c7; padding-left: 10px; }
+    .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
+    .version-date { font-size: 10px; color: #64748b; font-family: monospace; }
+    .version-list { list-style-type: disc; padding-left: 14px; color: #94a3b8; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; }
+    .form-control { width: 100%; padding: 8px 12px; background-color: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 13px; outline: none; }
+    .form-control:focus { border-color: #0284c7; }
+    .form-row { display: flex; gap: 8px; }
+    .form-row .form-group { flex: 1; }
+    
+    /* AUTH SCREEN */
+    .auth-container { max-width: 420px; width: 100%; margin: auto; background-color: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+    .auth-title { font-size: 18px; font-weight: bold; color: white; text-align: center; margin-bottom: 4px; }
+    .auth-subtitle { font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 16px; }
+    .tab-nav { display: flex; background: #0f172a; border-radius: 10px; padding: 3px; margin-bottom: 16px; gap: 2px; }
+    .tab-btn { flex: 1; text-align: center; padding: 6px 4px; font-size: 11px; font-weight: 600; color: #94a3b8; border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
+    .tab-btn.active { background: #1e293b; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+    .toast { position: fixed; bottom: 20px; right: 20px; background-color: #1e293b; border: 1px solid #334155; color: white; padding: 12px 16px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div id="toast" class="toast">Ação realizada com sucesso!</div>
+
+  <!-- TELA DE AUTENTICAÇÃO -->
+  <div id="authScreen" class="modal-overlay" style="background-color: #0f172a; display: flex;">
+    <div class="auth-container">
+      <div style="text-align: center; margin-bottom: 12px;">
+        <div style="background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">🏢</div>
+      </div>
+      <h2 class="auth-title">Protech Condomínios</h2>
+      <p class="auth-subtitle">Sistema de Gestão e Acesso Corporativo</p>
+
+      <div class="tab-nav">
+        <button id="tabLoginBtn" onclick="switchTab('login')" class="tab-btn active">Entrar</button>
+        <button id="tabRegisterCompanyBtn" onclick="switchTab('registerCompany')" class="tab-btn">Criar Empresa</button>
+        <button id="tabRegisterUserBtn" onclick="switchTab('registerUser')" class="tab-btn">Criar Usuário</button>
+      </div>
+
+      <!-- FORMULÁRIO DE LOGIN -->
+      <form id="loginForm" onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" id="loginEmail" required placeholder="seu.email@empresa.com" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-sky" style="justify-content: center; padding: 10px; margin-top: 4px;">Entrar na Conta</button>
+      </form>
+
+      <!-- FORMULÁRIO DE CRIAR EMPRESA (DONO) -->
+      <form id="registerCompanyForm" onsubmit="handleRegisterCompany(event)" style="display: none; flex-direction: column; gap: 10px;">
+        <div class="form-group">
+          <label>Nome da Empresa (Matriz)</label>
+          <input type="text" id="regCompanyName" required placeholder="Ex: Protech Segurança" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>E-mail do Administrador (Dono)</label>
+          <input type="email" id="regCompanyEmail" required placeholder="admin@empresa.com" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Senha (mínimo 6 dígitos)</label>
+          <input type="password" id="regCompanyPassword" required minlength="6" placeholder="••••••••" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-emerald" style="justify-content: center; padding: 10px; margin-top: 4px;">Cadastrar Empresa (Dono)</button>
+      </form>
+
+      <!-- FORMULÁRIO DE CRIAR USUÁRIO (TÉCNICO) -->
+      <form id="registerUserForm" onsubmit="handleRegisterUser(event)" style="display: none; flex-direction: column; gap: 10px;">
+        <div class="form-group">
+          <label>Seu Nome</label>
+          <input type="text" id="regUserName" required placeholder="Ex: João Técnico" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>E-mail do Colaborador</label>
+          <input type="email" id="regUserEmail" required placeholder="tecnico@empresa.com" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>E-mail da Empresa (Matriz) para aprovação</label>
+          <input type="email" id="regUserCompanyOwner" required placeholder="admin@empresa.com" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Senha (mínimo 6 dígitos)</label>
+          <input type="password" id="regUserPassword" required minlength="6" placeholder="••••••••" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-sky" style="justify-content: center; padding: 10px; margin-top: 4px;">Solicitar Acesso à Empresa</button>
+      </form>
+
+      <div style="margin-top: 14px; text-align: center; border-top: 1px solid #334155; padding-top: 12px;">
+        <button type="button" onclick="enterGuestMode()" style="background: none; border: none; color: #38bdf8; font-size: 11px; cursor: pointer; text-decoration: underline;">Testar Modo Visitante</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICAÇÃO PRINCIPAL -->
+  <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
+    <header>
+      <div class="header-container">
+        <div class="brand">
+          <div class="brand-icon">🏢</div>
+          <div>
+            <h1 class="title">Buscador de Condomínios</h1>
+            <div class="company-row">
+              <span id="companyNameDisplay" class="subtitle">Empresa</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.2.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar App</button>
+          <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe">👥 Equipe</button>
+          <button id="newCondoBtn" onclick="openModal()" class="btn btn-sky">+ Novo</button>
+          <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="search-box">
+        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, rua, número, bairro ou observação..." class="search-input">
+      </div>
+
+      <div class="meta-bar">
+        <span id="resultCount">Exibindo 0 condomínios</span>
+        <div class="meta-actions">
+          <button onclick="exportData()" class="meta-btn">📤 Exportar</button>
+          <button onclick="importDataTrigger()" class="meta-btn">📥 Importar</button>
+          <input type="file" id="importInput" style="display:none;" accept=".json" onchange="importData(event)">
+        </div>
+      </div>
+
+      <div id="condoGrid" class="grid"></div>
+      <div id="emptyState" style="display:none; text-align:center; padding: 40px; color: #64748b;">
+        Nenhum condomínio encontrado.
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL DE CADASTRO / EDIÇÃO DE CONDOMÍNIO COM GPS -->
+  <div id="condoModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="color:white; font-size: 16px;">Cadastrar Condomínio</h3>
+        <button onclick="closeModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <form id="condoForm" onsubmit="saveCondo(event)">
+        <input type="hidden" id="condoId">
+        
+        <div class="form-group">
+          <label>Nome do Condomínio *</label>
+          <input type="text" id="condoName" required placeholder="Ex: Residencial Parque das Flores" class="form-control">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Endereço (Rua / Av) *</label>
+            <input type="text" id="condoAddress" required placeholder="Ex: Av. Ipiranga" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Número *</label>
+            <input type="text" id="condoNumber" required placeholder="Ex: 1234" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Bairro</label>
+            <input type="text" id="condoNeighborhood" placeholder="Ex: Petrópolis" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Telefone / Contato</label>
+            <input type="text" id="condoPhone" placeholder="(51) 99999-9999" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Latitude *</label>
+            <input type="text" id="condoLat" required placeholder="Ex: -30.0346" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Longitude *</label>
+            <input type="text" id="condoLng" required placeholder="Ex: -51.2177" class="form-control">
+          </div>
+        </div>
+
+        <button type="button" onclick="captureCurrentGPS()" class="btn btn-amber" style="width: 100%; justify-content: center; margin-bottom: 12px;">📍 Capturar Coordenadas GPS Atuais</button>
+
+        <div class="form-group">
+          <label>Observações / Acesso</label>
+          <textarea id="condoNotes" rows="2" placeholder="Ex: Portaria 24h, tag nos portões..." class="form-control" style="resize:none;"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+          <button type="button" onclick="closeModal()" class="btn btn-slate">Cancelar</button>
+          <button type="submit" class="btn btn-sky">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE RELATÓRIO DE VISITA (ETAPA 2) -->
+  <div id="reportModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="reportModalTitle" style="color:white; font-size: 16px;">📝 Relatório de Visita Técnicos</h3>
+        <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <form id="reportForm" onsubmit="saveReportAndCheckOut(event)">
+        <input type="hidden" id="reportCondoId">
+        
+        <div class="form-group">
+          <label>Relatório do Serviço Realizado *</label>
+          <textarea id="reportText" rows="4" required placeholder="Descreva detalhadamente o que foi feito durante a visita (ex: Troca da fonte da fechadura, alinhamento de portão, testes de tags...)" class="form-control" style="resize:none;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Fotos e Vídeos da Visita (Opcional)</label>
+          <input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 4px;">
+          <div id="mediaPreviewContainer" class="media-preview-container"></div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+          <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
+          <button type="submit" class="btn btn-rose">Finalizar e Fazer Check-out</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE HISTÓRICO DE RELATÓRIOS -->
+  <div id="historyModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="historyModalTitle" style="color:white; font-size: 16px;">📋 Histórico de Visitas</h3>
+        <button onclick="closeHistoryModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <div class="modal-body" id="historyListContainer">
+        <!-- Carregado dinamicamente -->
+      </div>
+
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid #334155; padding-top: 12px;">
+        <button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE EQUIPE (APROVAÇÕES E MEMBROS) -->
+  <div id="teamModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="color:white; font-size: 16px;">👥 Aprovações e Equipe</h3>
+        <button onclick="closeTeamModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px;">Solicitações Pendentes de Aprovação:</h4>
+          <div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- Carregado dinamicamente -->
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; border-top: 1px solid #334155; padding-top: 12px;">
+          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Autorizados:</h4>
+          <div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- Carregado dinamicamente -->
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid #334155; padding-top: 12px;">
+        <button onclick="closeTeamModal()" class="btn btn-slate">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL HISTÓRICO DE VERSÕES -->
+  <div id="changelogModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="color:white; font-size: 16px;">Histórico de Atualizações</h3>
+        <button onclick="closeChangelogModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="version-item">
+          <div class="version-title">
+            <span>Versão 4.2.0</span>
+            <span class="version-date">Atual</span>
+          </div>
+          <ul class="version-list">
+            <li>Etapa 2 concluída: Adicionado Relatório de Visita com texto, anexos de fotos e vídeos, pré-visualização e histórico de visitas arquivadas por condomínio.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid #334155; padding-top: 12px;">
+        <button onclick="closeChangelogModal()" class="btn btn-slate">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // CONFIGURAÇÃO DO FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyARDZDxNAPu86dpcwj148-CRDXYvIKN-o0",
+      authDomain: "buscador-de-condominios.firebaseapp.com",
+      projectId: "buscador-de-condominios",
+      storageBucket: "buscador-de-condominios.firebasestorage.app",
+      messagingSenderId: "843028696668",
+      appId: "1:843028696668:web:b3ed59764b1891a291e099",
+      measurementId: "G-BQ1ECYGF8T"
+    };
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch(err) {}
+
+    const db = firebase.firestore();
+
+    let condos = [];
+    let currentUser = null;
+    let ownerEmail = null;
+    let isUserOwner = false;
+    let selectedMediaFiles = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            currentUser = user;
+            resolveUserSession(user.email);
+          }
+        });
+      } catch(e) {}
+    });
+
+    function switchTab(tab) {
+      const loginForm = document.getElementById('loginForm');
+      const registerCompanyForm = document.getElementById('registerCompanyForm');
+      const registerUserForm = document.getElementById('registerUserForm');
+      
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegisterCompanyBtn = document.getElementById('tabRegisterCompanyBtn');
+      const tabRegisterUserBtn = document.getElementById('tabRegisterUserBtn');
+
+      loginForm.style.display = 'none';
+      registerCompanyForm.style.display = 'none';
+      registerUserForm.style.display = 'none';
+      tabLoginBtn.classList.remove('active');
+      tabRegisterCompanyBtn.classList.remove('active');
+      tabRegisterUserBtn.classList.remove('active');
+
+      if (tab === 'login') {
+        loginForm.style.display = 'flex';
+        tabLoginBtn.classList.add('active');
+      } else if (tab === 'registerCompany') {
+        registerCompanyForm.style.display = 'flex';
+        tabRegisterCompanyBtn.classList.add('active');
+      } else if (tab === 'registerUser') {
+        registerUserForm.style.display = 'flex';
+        tabRegisterUserBtn.classList.add('active');
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          currentUser = userCredential.user;
+          resolveUserSession(email);
+          showToast('Login realizado com sucesso!');
+        })
+        .catch((error) => {
+          showToast('Erro: E-mail ou senha incorretos.');
+        });
+    }
+
+    function handleRegisterCompany(e) {
+      e.preventDefault();
+      const email = document.getElementById('regCompanyEmail').value.trim();
+      const password = document.getElementById('regCompanyPassword').value.trim();
+      const companyName = document.getElementById('regCompanyName').value.trim();
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          currentUser = userCredential.user;
+          ownerEmail = email;
+          isUserOwner = true;
+
+          db.collection("empresas").doc(email).set({
+            companyName: companyName,
+            ownerEmail: email,
+            team: [],
+            pendingTeam: []
+          }).then(() => {
+            showMainApp(companyName, ownerEmail, true);
+            showToast('Empresa criada com sucesso!');
+          });
+        })
+        .catch((error) => {
+          showToast('Erro ao criar empresa: ' + error.message);
+        });
+    }
+
+    function handleRegisterUser(e) {
+      e.preventDefault();
+      const email = document.getElementById('regUserEmail').value.trim();
+      const password = document.getElementById('regUserPassword').value.trim();
+      const companyOwnerEmail = document.getElementById('regUserCompanyOwner').value.trim();
+
+      db.collection("empresas").doc(companyOwnerEmail).get().then((doc) => {
+        if (!doc.exists) {
+          showToast('Erro: E-mail da empresa matriz não encontrado.');
+          return;
+        }
+
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            currentUser = userCredential.user;
+
+            let pending = doc.data().pendingTeam || [];
+            if (!pending.includes(email)) pending.push(email);
+
+            db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
+              showToast('Solicitação enviada! Aguardando aprovação do administrador.');
+              handleLogout();
+            });
+          })
+          .catch((error) => {
+            showToast('Erro ao criar usuário: ' + error.message);
+          });
+      });
+    }
+
+    function enterGuestMode() {
+      currentUser = { email: 'visitante@protech.com' };
+      ownerEmail = 'visitante@protech.com';
+      isUserOwner = true;
+      showMainApp('Modo Visitante / Teste', ownerEmail, true);
+      showToast('Entrou no modo de teste.');
+    }
+
+    function handleLogout() {
+      try { firebase.auth().signOut(); } catch(e) {}
+      currentUser = null;
+      ownerEmail = null;
+      isUserOwner = false;
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('mainApp').style.display = 'none';
+      showToast('Sessão encerrada.');
+    }
+
+    function resolveUserSession(userEmail) {
+      db.collection("empresas").doc(userEmail).get().then((doc) => {
+        if (doc.exists) {
+          ownerEmail = userEmail;
+          isUserOwner = true;
+          showMainApp(doc.data().companyName, ownerEmail, true);
+        } else {
+          db.collection("empresas").where("team", "array-contains", userEmail).get().then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+              const empresaDoc = querySnapshot.docs[0];
+              ownerEmail = empresaDoc.data().ownerEmail;
+              isUserOwner = false;
+              showMainApp(empresaDoc.data().companyName + " (Colaborador)", ownerEmail, false);
+            } else {
+              db.collection("empresas").where("pendingTeam", "array-contains", userEmail).get().then((pendingSnapshot) => {
+                if (!pendingSnapshot.empty) {
+                  alert('Sua conta ainda está aguardando aprovação do administrador da empresa matriz.');
+                  handleLogout();
+                } else {
+                  ownerEmail = userEmail;
+                  isUserOwner = true;
+                  db.collection("empresas").doc(userEmail).set({
+                    companyName: "Empresa de " + userEmail.split('@')[0],
+                    ownerEmail: userEmail,
+                    team: [],
+                    pendingTeam: []
+                  }).then(() => {
+                    showMainApp("Empresa de " + userEmail.split('@')[0], ownerEmail, true);
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+
+    function showMainApp(companyTitle, rootOwnerEmail, ownerStatus) {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      document.getElementById('companyNameDisplay').textContent = companyTitle;
+
+      const teamBtn = document.getElementById('teamBtn');
+      if (ownerStatus) {
+        teamBtn.style.display = 'inline-flex';
+      } else {
+        teamBtn.style.display = 'none';
+      }
+
+      loadCondosForOwner(rootOwnerEmail);
+    }
+
+    function loadCondosForOwner(rootOwnerEmail) {
+      db.collection("condominios")
+        .where("ownerEmail", "==", rootOwnerEmail)
+        .get()
+        .then((querySnapshot) => {
+          condos = [];
+          querySnapshot.forEach((doc) => {
+            condos.push({ id: doc.id, ...doc.data() });
+          });
+          
+          if (condos.length === 0 && isUserOwner) {
+            loadDefaultDataForNewCompany(rootOwnerEmail);
+          } else {
+            renderCondos();
+          }
+        });
+    }
+
+    function loadDefaultDataForNewCompany(rootOwnerEmail) {
+      const defaultData = [
+        {
+          name: 'Residencial Bela Vista',
+          address: 'Av. Protásio Alves',
+          number: '2450',
+          neighborhood: 'Petrópolis',
+          phone: '(51) 98888-1122',
+          notes: 'Portaria central. Acesso de prestadores pela lateral.',
+          lat: '-30.040000',
+          lng: '-51.170000',
+          ownerEmail: rootOwnerEmail,
+          reports: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }
+      ];
+
+      const batch = db.batch();
+      defaultData.forEach(item => {
+        const docRef = db.collection("condominios").doc();
+        batch.set(docRef, item);
+      });
+
+      batch.commit().then(() => {
+        loadCondosForOwner(rootOwnerEmail);
+      });
+    }
+
+    function saveCondo(e) {
+      e.preventDefault();
+      const id = document.getElementById('condoId').value;
+      const condoData = {
+        name: document.getElementById('condoName').value.trim(),
+        address: document.getElementById('condoAddress').value.trim(),
+        number: document.getElementById('condoNumber').value.trim(),
+        neighborhood: document.getElementById('condoNeighborhood').value.trim(),
+        phone: document.getElementById('condoPhone').value.trim(),
+        lat: document.getElementById('condoLat').value.trim(),
+        lng: document.getElementById('condoLng').value.trim(),
+        notes: document.getElementById('condoNotes').value.trim(),
+        ownerEmail: ownerEmail
+      };
+
+      if (!condoData.lat || !condoData.lng) {
+        alert('Por favor, informe ou capture a Latitude e a Longitude para garantir a validação de proximidade.');
+        return;
+      }
+
+      if (id) {
+        db.collection("condominios").doc(id).update(condoData)
+          .then(() => {
+            showToast('Condomínio atualizado!');
+            loadCondosForOwner(ownerEmail);
+            closeModal();
+          });
+      } else {
+        condoData.reports = [];
+        condoData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        db.collection("condominios").add(condoData)
+          .then(() => {
+            showToast('Condomínio cadastrado!');
+            loadCondosForOwner(ownerEmail);
+            closeModal();
+          });
+      }
+    }
+
+    function captureCurrentGPS() {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não suportada.');
+        return;
+      }
+      showToast('Capturando GPS atual...');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          document.getElementById('condoLat').value = position.coords.latitude.toFixed(6);
+          document.getElementById('condoLng').value = position.coords.longitude.toFixed(6);
+          showToast('Coordenadas capturadas com sucesso!');
+        },
+        (error) => {
+          alert('Erro ao obter GPS. Verifique as permissões.');
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+
+    function deleteCondo(id) {
+      if (confirm('Deseja excluir este condomínio?')) {
+        db.collection("condominios").doc(id).delete()
+          .then(() => {
+            showToast('Condomínio removido.');
+            loadCondosForOwner(ownerEmail);
+          });
+      }
+    }
+
+    function editCondo(id) {
+      const condo = condos.find(c => c.id === id);
+      if (condo) openModal(condo);
+    }
+
+    // --- CHECK-IN / CHECK-OUT E RELATÓRIO (ETAPA 2) ---
+    function toggleCheckIn(id) {
+      const condo = condos.find(c => c.id === id);
+      if (!condo) return;
+
+      if (!condo.lat || !condo.lng) {
+        alert('Check-in bloqueado: Este condomínio não possui Latitude e Longitude cadastradas. Edite o condomínio e informe as coordenadas GPS.');
+        return;
+      }
+
+      if (!condo.checkedIn) {
+        // REALIZAR CHECK-IN
+        if (!navigator.geolocation) {
+          alert('Geolocalização não é suportada.');
+          return;
+        }
+
+        showToast('Validando sua localização GPS...');
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            const targetLat = parseFloat(condo.lat);
+            const targetLng = parseFloat(condo.lng);
+            const distanceMeters = calculateHaversineDistance(userLat, userLng, targetLat, targetLng);
+
+            if (distanceMeters > 500) {
+              alert(`Check-in negado! Você está a ${Math.round(distanceMeters)} metros do condomínio. O limite máximo permitido é de 500 metros.`);
+              return;
+            }
+
+            performDirectCheckIn(id);
+          },
+          (error) => {
+            alert('Erro ao obter GPS do dispositivo. Certifique-se de que a localização está ativada.');
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+
+      } else {
+        // ABRIR FORMULÁRIO DE CHECK-OUT + RELATÓRIO DE VISITA
+        openReportModal(id);
+      }
+    }
+
+    function performDirectCheckIn(id) {
+      db.collection("condominios").doc(id).update({
+        checkedIn: true,
+        checkInTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        checkInDate: new Date().toLocaleDateString('pt-BR')
+      }).then(() => {
+        showToast('Check-in realizado com sucesso!');
+        loadCondosForOwner(ownerEmail);
+      });
+    }
+
+    function openReportModal(condoId) {
+      const condo = condos.find(c => c.id === condoId);
+      if (!condo) return;
+
+      document.getElementById('reportCondoId').value = condoId;
+      document.getElementById('reportText').value = '';
+      document.getElementById('reportMediaInput').value = '';
+      selectedMediaFiles = [];
+      renderMediaPreviews();
+
+      document.getElementById('reportModalTitle').textContent = `📝 Relatório: ${condo.name}`;
+      document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+      document.getElementById('reportModal').classList.add('hidden');
+    }
+
+    function handleMediaSelection(e) {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          selectedMediaFiles.push({
+            name: file.name,
+            type: file.type.startsWith('video') ? 'video' : 'image',
+            dataUrl: evt.target.result
+          });
+          renderMediaPreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderMediaPreviews() {
+      const container = document.getElementById('mediaPreviewContainer');
+      container.innerHTML = selectedMediaFiles.map((media, index) => `
+        <div class="media-preview-item">
+          <button type="button" class="media-preview-remove" onclick="removeMedia(${index})">✕</button>
+          ${media.type === 'video' ? `<video src="${media.dataUrl}" controls></video>` : `<img src="${media.dataUrl}">`}
+        </div>
+      `).join('');
+    }
+
+    function removeMedia(index) {
+      selectedMediaFiles.splice(index, 1);
+      renderMediaPreviews();
+    }
+
+    function saveReportAndCheckOut(e) {
+      e.preventDefault();
+      const condoId = document.getElementById('reportCondoId').value;
+      const condo = condos.find(c => c.id === condoId);
+      if (!condo) return;
+
+      const reportText = document.getElementById('reportText').value.trim();
+      const checkOutTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const currentDate = new Date().toLocaleDateString('pt-BR');
+
+      const newReport = {
+        date: currentDate,
+        checkInTime: condo.checkInTime || '--:--',
+        checkOutTime: checkOutTime,
+        userEmail: currentUser ? currentUser.email : 'técnico',
+        text: reportText,
+        mediaCount: selectedMediaFiles.length,
+        media: selectedMediaFiles // Salva mídias locais
+      };
+
+      let currentReports = condo.reports || [];
+      currentReports.unshift(newReport); // Adiciona ao topo
+
+      db.collection("condominios").doc(condoId).update({
+        checkedIn: false,
+        lastCheckOut: checkOutTime,
+        reports: currentReports
+      }).then(() => {
+        showToast('Relatório salvo e Check-out concluído!');
+        closeReportModal();
+        loadCondosForOwner(ownerEmail);
+      });
+    }
+
+    function openHistoryModal(condoId) {
+      const condo = condos.find(c => c.id === condoId);
+      if (!condo) return;
+
+      document.getElementById('historyModalTitle').textContent = `📋 Histórico de Visitas: ${condo.name}`;
+      const container = document.getElementById('historyListContainer');
+
+      const reports = condo.reports || [];
+      if (reports.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">Nenhum relatório de visita registrado.</div>';
+      } else {
+        container.innerHTML = reports.map(r => `
+          <div class="report-card">
+            <div class="report-header">
+              <span>📅 ${r.date} (${r.checkInTime} às ${r.checkOutTime})</span>
+              <span>👤 ${escapeHtml(r.userEmail ? r.userEmail.split('@')[0] : 'técnico')}</span>
+            </div>
+            <div class="report-text">${escapeHtml(r.text)}</div>
+            ${r.media && r.media.length > 0 ? `
+              <div class="media-preview-container">
+                ${r.media.map(m => `
+                  <div class="media-preview-item">
+                    ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video>` : `<img src="${m.dataUrl}">`}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('historyModal').classList.remove('hidden');
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.add('hidden');
+    }
+
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // GESTÃO DE EQUIPE
+    function openTeamModal() {
+      renderTeamLists();
+      document.getElementById('teamModal').classList.remove('hidden');
+    }
+    function closeTeamModal() {
+      document.getElementById('teamModal').classList.add('hidden');
+    }
+
+    function renderTeamLists() {
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data();
+        const pending = data.pendingTeam || [];
+        const approved = data.team || [];
+
+        const pendingList = document.getElementById('pendingTeamList');
+        if (pending.length === 0) {
+          pendingList.innerHTML = '<span style="color:#64748b; font-size:11px;">Nenhuma solicitação pendente.</span>';
+        } else {
+          pendingList.innerHTML = pending.map(email => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
+              <span style="color:white; font-size:12px;">${escapeHtml(email)}</span>
+              <div style="display:flex; gap:6px;">
+                <button onclick="approveMember('${email}')" class="btn btn-emerald" style="padding:4px 8px; font-size:11px;">Autorizar</button>
+                <button onclick="rejectMember('${email}')" class="btn btn-rose" style="padding:4px 8px; font-size:11px;">Recusar</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        const approvedList = document.getElementById('approvedTeamList');
+        if (approved.length === 0) {
+          approvedList.innerHTML = '<span style="color:#64748b; font-size:11px;">Nenhum colaborador autorizado.</span>';
+        } else {
+          approvedList.innerHTML = approved.map(email => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
+              <span style="color:white; font-size:12px;">${escapeHtml(email)}</span>
+              <button onclick="removeApprovedMember('${email}')" class="icon-btn delete" title="Remover Acesso">🗑️</button>
+            </div>
+          `).join('');
+        }
+      });
+    }
+
+    function approveMember(email) {
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let data = doc.data();
+        let pending = data.pendingTeam || [];
+        let approved = data.team || [];
+
+        pending = pending.filter(e => e !== email);
+        if (!approved.includes(email)) approved.push(email);
+
+        db.collection("empresas").doc(ownerEmail).update({
+          pendingTeam: pending,
+          team: approved
+        }).then(() => {
+          renderTeamLists();
+          showToast('Colaborador autorizado com sucesso!');
+        });
+      });
+    }
+
+    function rejectMember(email) {
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let data = doc.data();
+        let pending = data.pendingTeam || [];
+        pending = pending.filter(e => e !== email);
+
+        db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
+          renderTeamLists();
+          showToast('Solicitação recusada.');
+        });
+      });
+    }
+
+    function removeApprovedMember(email) {
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let data = doc.data();
+        let approved = data.team || [];
+        approved = approved.filter(e => e !== email);
+
+        db.collection("empresas").doc(ownerEmail).update({ team: approved }).then(() => {
+          renderTeamLists();
+          showToast('Acesso removido.');
+        });
+      });
+    }
+
+    function renderCondos() {
+      const grid = document.getElementById('condoGrid');
+      const empty = document.getElementById('emptyState');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const filtered = condos.filter(c => 
+        (c.name && c.name.toLowerCase().includes(searchVal)) ||
+        (c.address && c.address.toLowerCase().includes(searchVal)) ||
+        (c.number && c.number.toLowerCase().includes(searchVal)) ||
+        (c.neighborhood && c.neighborhood.toLowerCase().includes(searchVal)) ||
+        (c.notes && c.notes.toLowerCase().includes(searchVal))
+      );
+
+      document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length} condomínios`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.innerHTML = filtered.map(c => {
+        const reportsCount = (c.reports || []).length;
+        return `
+          <div class="card">
+            <div>
+              <div class="card-header">
+                <div class="card-title">${escapeHtml(c.name)}</div>
+                <div class="card-actions">
+                  <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>
+                  <button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)} ${c.neighborhood ? `- ${escapeHtml(c.neighborhood)}` : ''}</div>
+                ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 Coordenadas GPS cadastradas</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado (Check-in bloqueado)</div>`}
+                ${c.phone ? `<div>📞 ${escapeHtml(c.phone)}</div>` : ''}
+                ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
+                ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in ativo às ${c.checkInTime}</div>` : ''}
+                ${c.lastCheckOut && !c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#94a3b8;">⚪ Último Check-out: ${c.lastCheckOut}</div>` : ''}
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="card-footer-row">
+                <button onclick="copyAddress('${escapeHtml(c.address)}', '${escapeHtml(c.number)}', '${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">📋 Endereço</button>
+                <button onclick="openHistoryModal('${c.id}')" class="btn btn-purple">📋 Relatórios (${reportsCount})</button>
+              </div>
+              <div class="card-footer-row">
+                <a href="https://www.google.com/maps/search/?api=1&query=${c.lat && c.lng ? encodeURIComponent(c.lat + ',' + c.lng) : encodeURIComponent(c.address + ', ' + c.number + (c.neighborhood ? ' - ' + c.neighborhood : ''))}" target="_blank" class="btn btn-sky" style="text-decoration:none;">🗺️ GPS</a>
+                <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">
+                  ${c.checkedIn ? '🔴 Check-out / Relatório' : '🟢 Check-in (GPS)'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function copyAddress(address, number, neighborhood) {
+      const text = `${address}, ${number}${neighborhood ? ' - ' + neighborhood : ''}`;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Endereço copiado!');
+      }).catch(() => {
+        showToast('Erro ao copiar.');
+      });
+    }
+
+    function openModal(condo = null) {
+      document.getElementById('condoForm').reset();
+      document.getElementById('condoId').value = condo ? condo.id : '';
+      document.getElementById('modalTitle').textContent = condo ? 'Editar Condomínio' : 'Cadastrar Condomínio';
+      
+      if (condo) {
+        document.getElementById('condoName').value = condo.name;
+        document.getElementById('condoAddress').value = condo.address;
+        document.getElementById('condoNumber').value = condo.number || '';
+        document.getElementById('condoNeighborhood').value = condo.neighborhood || '';
+        document.getElementById('condoPhone').value = condo.phone || '';
+        document.getElementById('condoLat').value = condo.lat || '';
+        document.getElementById('condoLng').value = condo.lng || '';
+        document.getElementById('condoNotes').value = condo.notes || '';
+      }
+      
+      document.getElementById('condoModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('condoModal').classList.add('hidden');
+    }
+
+    function openChangelogModal() {
+      document.getElementById('changelogModal').classList.remove('hidden');
+    }
+
+    function closeChangelogModal() {
+      document.getElementById('changelogModal').classList.add('hidden');
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(condos, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "condominios_protech_backup.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDataTrigger() {
+      document.getElementById('importInput').click();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (Array.isArray(imported)) {
+            const batch = db.batch();
+            imported.forEach(item => {
+              delete item.id;
+              const docRef = db.collection("condominios").doc();
+              batch.set(docRef, { ...item, ownerEmail: ownerEmail, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            });
+            batch.commit().then(() => {
+              loadCondosForOwner(ownerEmail);
+              showToast('Dados importados com sucesso!');
+            });
+          }
+        } catch (err) {
+          showToast('Erro ao importar.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+
+    function escapeHtml(str) {
+      return str ? str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]) : '';
+    }
+  </script>
+</body>
+</html>
