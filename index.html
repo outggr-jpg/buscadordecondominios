@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buscador de Condomínios - Protech</title>
-  <meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   <!-- SDKs do Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -16,19 +16,20 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
     
-    header { background-color: #1e293b; border-bottom: 1px solid #334155; padding: 12px 16px; position: sticky; top: 0; z-index: 30; }
-    .header-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    header { background-color: #1e293b; border-bottom: 1px solid #334155; padding: 12px 16px; position: sticky; top: 0; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .header-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 10px; }
-    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .title { font-size: 16px; font-weight: bold; color: white; }
+    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
+    .title { font-size: 16px; font-weight: 700; color: white; letter-spacing: -0.3px; }
     
     .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-    .subtitle { font-size: 11px; color: #94a3b8; }
+    .subtitle { font-size: 11px; color: #94a3b8; font-weight: 500; }
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
     
     .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; text-decoration: none; }
+    .btn { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-decoration: none; }
+    .btn:active { transform: scale(0.97); }
     .btn-emerald { background-color: #059669; color: white; }
     .btn-emerald:hover { background-color: #10b981; }
     .btn-sky { background-color: #0284c7; color: white; }
@@ -44,27 +45,30 @@
     
     main { max-width: 1100px; width: 100%; margin: 0 auto; padding: 20px 16px; flex-grow: 1; }
     
-    .search-box { position: relative; margin-bottom: 20px; }
-    .search-input { width: 100%; padding: 12px 16px; background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; color: white; font-size: 14px; outline: none; }
-    .search-input:focus { border-color: #0284c7; }
+    .search-box { position: relative; margin-bottom: 16px; }
+    .search-input { width: 100%; padding: 12px 16px 12px 42px; background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; color: white; font-size: 14px; outline: none; transition: 0.2s; }
+    .search-input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2); }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 16px; pointer-events: none; }
     
-    .meta-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
-    .meta-actions { display: flex; gap: 12px; }
-    .meta-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; }
-    .meta-btn:hover { color: #f1f5f9; }
+    .meta-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 16px; font-weight: 500; }
     
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
-    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
+    
+    /* CARDS REFINADOS */
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, border-color 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+    .card:hover { border-color: #475569; }
+    .card.checked-in { border-color: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.25); }
+    
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .card-title { font-size: 15px; font-weight: bold; color: #f8fafc; }
+    .card-title { font-size: 15px; font-weight: 700; color: #f8fafc; line-height: 1.3; }
     .card-actions { display: flex; gap: 4px; }
-    .icon-btn { background: none; border: none; color: #94a3b8; padding: 4px; cursor: pointer; border-radius: 4px; }
-    .icon-btn:hover { color: #38bdf8; }
-    .icon-btn.delete:hover { color: #f43f5e; }
+    .icon-btn { background: none; border: none; color: #94a3b8; padding: 4px 6px; cursor: pointer; border-radius: 6px; transition: 0.2s; }
+    .icon-btn:hover { color: #38bdf8; background: rgba(255,255,255,0.05); }
+    .icon-btn.delete:hover { color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
     
     .card-body { font-size: 12px; color: #cbd5e1; display: flex; flex-direction: column; gap: 6px; }
-    .address-line { color: #38bdf8; font-weight: 500; }
-    .notes-box { background-color: #0f172a; padding: 8px; border-radius: 8px; border: 1px solid #334155; margin-top: 6px; color: #94a3b8; }
+    .address-line { color: #38bdf8; font-weight: 500; display: flex; align-items: flex-start; gap: 4px; }
+    .notes-box { background-color: #0f172a; padding: 8px 10px; border-radius: 8px; border: 1px solid #334155; margin-top: 6px; color: #94a3b8; font-size: 11px; }
     
     .card-footer { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #334155; }
     .card-footer-row { display: flex; gap: 8px; }
@@ -72,7 +76,7 @@
     
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
     .modal-overlay.hidden { display: none; }
-    .modal { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; max-width: 520px; width: 100%; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; }
+    .modal { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; max-width: 520px; width: 100%; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; font-size: 12px; color: #cbd5e1; }
     
@@ -115,7 +119,7 @@
     .tab-btn { flex: 1; text-align: center; padding: 6px 4px; font-size: 11px; font-weight: 600; color: #94a3b8; border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .tab-btn.active { background: #1e293b; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-    .toast { position: fixed; bottom: 20px; right: 20px; background-color: #1e293b; border: 1px solid #334155; color: white; padding: 12px 16px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background-color: #1e293b; border: 1px solid #0284c7; color: white; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
     .toast.show { transform: translateY(0); opacity: 1; }
   </style>
 </head>
@@ -133,7 +137,7 @@
   <div id="authScreen" class="modal-overlay" style="background-color: #0f172a; display: flex;">
     <div class="auth-container">
       <div style="text-align: center; margin-bottom: 12px;">
-        <div style="background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">🏢</div>
+        <div style="background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);">🏢</div>
       </div>
       <h2 class="auth-title">Protech Condomínios</h2>
       <p class="auth-subtitle">Sistema de Gestão e Acesso Corporativo</p>
@@ -215,14 +219,14 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.6.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.6.1</span>
             </div>
           </div>
         </div>
 
         <div class="actions">
-          <button onclick="openRouteModal()" class="btn btn-amber">🚗 Fazer sua Rota</button>
-          <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar App</button>
+          <button onclick="openRouteModal()" class="btn btn-amber">🚗 Fazer Rota</button>
+          <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar</button>
           <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe e Permissões">👥 Equipe</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-sky">+ Novo</button>
           <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
@@ -232,20 +236,17 @@
 
     <main>
       <div class="search-box">
+        <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, rua, número, bairro ou observação..." class="search-input">
       </div>
 
       <div class="meta-bar">
         <span id="resultCount">Exibindo 0 condomínios</span>
-        <div class="meta-actions">
-          <button onclick="exportData()" class="meta-btn">📤 Exportar Backup</button>
-          <button onclick="importDataTrigger()" class="meta-btn">📥 Importar Backup</button>
-          <input type="file" id="importInput" style="display:none;" accept=".json" onchange="importData(event)">
-        </div>
       </div>
 
       <div id="condoGrid" class="grid"></div>
-      <div id="emptyState" style="display:none; text-align:center; padding: 40px; color: #64748b;">
+      <div id="emptyState" style="display:none; text-align:center; padding: 50px 20px; color: #64748b;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
         Nenhum condomínio encontrado.
       </div>
     </main>
@@ -270,7 +271,7 @@
         <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
         <div style="display: flex; gap: 8px;">
           <button onclick="closeRouteModal()" class="btn btn-slate">Cancelar</button>
-          <button onclick="generateOptimizedRoute()" class="btn btn-amber">🗺️ Abrir Rota no Google Maps</button>
+          <button onclick="generateOptimizedRoute()" class="btn btn-amber">🗺️ Abrir no Maps</button>
         </div>
       </div>
     </div>
@@ -364,7 +365,7 @@
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
-          <button type="submit" class="btn btn-rose">Finalizar e Fazer Check-out</button>
+          <button type="submit" class="btn btn-rose">Finalizar e Check-out</button>
         </div>
       </form>
     </div>
@@ -386,7 +387,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE EQUIPE E CONVITES (v4.6.0) -->
+  <!-- MODAL DE EQUIPE E CONVITES -->
   <div id="teamModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
@@ -395,7 +396,6 @@
       </div>
 
       <div class="modal-body">
-        <!-- CONVITAR NOVO MEMBRO DIRETO OU GERAR LINK -->
         <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px;">
           <h4 style="font-size: 12px; color: #38bdf8; font-weight: bold;">📩 Convidar Novo Colaborador</h4>
           <div style="display: flex; gap: 8px;">
@@ -443,32 +443,21 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.6.0</span>
+            <span>Versão 4.6.1</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Sistema completo de convites por e-mail e criação de links temporários com expiração automática em 24h.</li>
-            <li>Entrada automática no sistema ao aceitar convite ou registrar-se via link seguro.</li>
+            <li>Refinamento do layout do painel principal (busca com ícone, cards com realce de Check-in ativo e visual limpo).</li>
+            <li>Remoção de botões de backup obsoletos para focar na sincronização nativa na nuvem.</li>
           </ul>
         </div>
 
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.5.0</span>
+            <span>Versão 4.6.0</span>
           </div>
           <ul class="version-list">
-            <li>Inclusão de imagens/fotos anexadas diretamente no PDF gerado do relatório de visita.</li>
-            <li>Funcionalidade "Fazer sua Rota": seleção múltipla de condomínios e cálculo automático da rota mais rápida no Google Maps.</li>
-          </ul>
-        </div>
-
-        <div class="version-item">
-          <div class="version-title">
-            <span>Versão 4.4.0</span>
-          </div>
-          <ul class="version-list">
-            <li>Download de relatórios de visita técnica formatados em arquivo PDF.</li>
-            <li>Visualizador de imagens em tela cheia (Lightbox modal).</li>
+            <li>Sistema de convites por e-mail e criação de links temporários com expiração automática em 24h.</li>
           </ul>
         </div>
       </div>
@@ -522,12 +511,9 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // VERIFICA SE ENTROU ATRAVÉS DE UM LINK DE CONVITE (?invite=TOKEN)
       const urlParams = new URLSearchParams(window.location.search);
       const inviteToken = urlParams.get('invite');
-      if (inviteToken) {
-        checkInviteToken(inviteToken);
-      }
+      if (inviteToken) { checkInviteToken(inviteToken); }
 
       try {
         firebase.auth().onAuthStateChanged((user) => {
@@ -541,28 +527,14 @@
 
     function checkInviteToken(token) {
       db.collection("convites").doc(token).get().then((doc) => {
-        if (!doc.exists) {
-          alert('Este link de convite é inválido ou já foi removido.');
-          return;
-        }
-
+        if (!doc.exists) { alert('Este link de convite é inválido ou já foi removido.'); return; }
         const invite = doc.data();
-        const now = Date.now();
+        if (invite.used) { alert('Este link de convite já foi utilizado.'); return; }
+        if (Date.now() > invite.expiresAt) { alert('Este link de convite expirou (validade de 24 horas).'); return; }
 
-        if (invite.used) {
-          alert('Este link de convite já foi utilizado.');
-          return;
-        }
-
-        if (now > invite.expiresAt) {
-          alert('Este link de convite expirou (validade de 24 horas). Peça um novo convite ao seu administrador.');
-          return;
-        }
-
-        // Token Válido!
         currentInviteToken = token;
         document.getElementById('inviteNotice').style.display = 'block';
-        document.getElementById('companyOwnerFieldGroup').style.display = 'none'; // Preenche automático
+        document.getElementById('companyOwnerFieldGroup').style.display = 'none';
         document.getElementById('regUserCompanyOwner').value = invite.ownerEmail;
         switchTab('registerUser');
       });
@@ -636,10 +608,7 @@
             if (!pending.includes(email)) pending.push(email);
 
             db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
-              if (currentInviteToken) {
-                // Invalida o token para não ser reutilizado
-                db.collection("convites").doc(currentInviteToken).update({ used: true });
-              }
+              if (currentInviteToken) { db.collection("convites").doc(currentInviteToken).update({ used: true }); }
               showToast('Conta criada! Bem-vindo à equipe.');
               resolveUserSession(email);
             });
@@ -696,7 +665,6 @@
             } else {
               db.collection("empresas").where("pendingTeam", "array-contains", userEmail).get().then((pendingSnapshot) => {
                 if (!pendingSnapshot.empty) {
-                  // Se foi convidado direto por e-mail, auto-aprova como técnico
                   const companyDoc = pendingSnapshot.docs[0];
                   ownerEmail = companyDoc.data().ownerEmail;
                   userRole = 'user';
@@ -858,13 +826,9 @@
       if (condo) openModal(condo);
     }
 
-    // GESTÃO DE CONVITES E EQUIPE (v4.6.0)
     function sendDirectInvite() {
       const email = document.getElementById('inviteUserEmailInput').value.trim();
-      if (!email) {
-        alert('Digite o e-mail do colaborador.');
-        return;
-      }
+      if (!email) { alert('Digite o e-mail do colaborador.'); return; }
 
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         let pending = doc.data().pendingTeam || [];
@@ -883,7 +847,7 @@
 
     function generateInviteLink() {
       const token = 'invite_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // Validade de 24 horas
+      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
 
       db.collection("convites").doc(token).set({
         ownerEmail: ownerEmail,
@@ -908,7 +872,6 @@
       });
     }
 
-    // CHECK-IN / CHECK-OUT E RELATÓRIO
     function toggleCheckIn(id) {
       const condo = condos.find(c => c.id === id);
       if (!condo) return;
@@ -1045,17 +1008,12 @@
 
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
 
-    // DOWNLOAD DE RELATÓRIO EM PDF COM IMAGENS INCORPORADAS
     function downloadReportPDF(condoId, reportIndex) {
       const condo = condos.find(c => c.id === condoId);
       if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
 
       const report = condo.reports[reportIndex];
-      
-      if (!window.jspdf) {
-        alert('A biblioteca de PDF ainda está a carregar. Verifique sua conexão.');
-        return;
-      }
+      if (!window.jspdf) { alert('A biblioteca de PDF ainda está a carregar.'); return; }
 
       try {
         const { jsPDF } = window.jspdf;
@@ -1103,21 +1061,11 @@
             let imgHeight = 40;
 
             images.forEach((img) => {
-              if (imgX + imgWidth > 196) {
-                imgX = 14;
-                currentY += imgHeight + 6;
-              }
-              if (currentY + imgHeight > 270) {
-                doc.addPage();
-                currentY = 20;
-                imgX = 14;
-              }
+              if (imgX + imgWidth > 196) { imgX = 14; currentY += imgHeight + 6; }
+              if (currentY + imgHeight > 270) { doc.addPage(); currentY = 20; imgX = 14; }
 
-              try {
-                doc.addImage(img.dataUrl, 'JPEG', imgX, currentY, imgWidth, imgHeight);
-              } catch(e) {
-                try { doc.addImage(img.dataUrl, 'PNG', imgX, currentY, imgWidth, imgHeight); } catch(err){}
-              }
+              try { doc.addImage(img.dataUrl, 'JPEG', imgX, currentY, imgWidth, imgHeight); } 
+              catch(e) { try { doc.addImage(img.dataUrl, 'PNG', imgX, currentY, imgWidth, imgHeight); } catch(err){} }
               imgX += imgWidth + 6;
             });
           }
@@ -1126,13 +1074,9 @@
         const fileName = `Relatorio_${condo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`;
         doc.save(fileName);
         showToast('Download do PDF concluído!');
-      } catch (err) {
-        console.error(err);
-        alert('Erro ao gerar o PDF. Tente novamente.');
-      }
+      } catch (err) { alert('Erro ao gerar o PDF.'); }
     }
 
-    // "FAZER SUA ROTA" - OTIMIZAÇÃO E SELEÇÃO DE ROTA
     function openRouteModal() {
       const container = document.getElementById('routeSelectionList');
       if (condos.length === 0) {
@@ -1162,10 +1106,7 @@
 
     function generateOptimizedRoute() {
       const selectedBoxes = Array.from(document.querySelectorAll('.route-checkbox:checked'));
-      if (selectedBoxes.length === 0) {
-        alert('Por favor, selecione pelo menos um condomínio para montar a rota.');
-        return;
-      }
+      if (selectedBoxes.length === 0) { alert('Selecione pelo menos um condomínio.'); return; }
 
       const selectedIds = selectedBoxes.map(cb => cb.value);
       let selectedCondos = condos.filter(c => selectedIds.includes(c.id));
@@ -1209,22 +1150,17 @@
           }
 
           let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
-          if (waypoints) {
-            mapsUrl += `&waypoints=${encodeURIComponent(waypoints)}`;
-          }
+          if (waypoints) { mapsUrl += `&waypoints=${encodeURIComponent(waypoints)}`; }
 
           window.open(mapsUrl, '_blank');
           closeRouteModal();
-          showToast('Rota otimizada aberta no Google Maps!');
+          showToast('Rota aberta no Google Maps!');
         },
-        () => {
-          alert('Erro ao obter sua localização GPS. Verifique se o GPS do celular está ativado.');
-        },
+        () => { alert('Erro ao obter sua localização GPS.'); },
         { enableHighAccuracy: true }
       );
     }
 
-    // LIGHTBOX TELA CHEIA
     function openLightbox(imageUrl) {
       document.getElementById('lightboxImg').src = imageUrl;
       document.getElementById('lightboxModal').classList.remove('hidden');
@@ -1235,12 +1171,8 @@
       document.getElementById('lightboxImg').src = '';
     }
 
-    // GESTÃO DE EQUIPE E PERMISSÕES GRANULARES
     function openTeamModal() {
-      if (userRole !== 'owner' && userRole !== 'admin') {
-        alert('Apenas Proprietários ou Administradores podem gerenciar a equipe.');
-        return;
-      }
+      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas Proprietários ou Administradores.'); return; }
       renderTeamLists();
       document.getElementById('teamModal').classList.remove('hidden');
     }
@@ -1389,7 +1321,7 @@
         const canDeleteThis = userRole === 'owner' || userPermissions.canDelete;
 
         return `
-          <div class="card">
+          <div class="card ${c.checkedIn ? 'checked-in' : ''}">
             <div>
               <div class="card-header">
                 <div class="card-title">${escapeHtml(c.name)}</div>
@@ -1401,23 +1333,23 @@
 
               <div class="card-body">
                 <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)} ${c.neighborhood ? `- ${escapeHtml(c.neighborhood)}` : ''}</div>
-                ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 Coordenadas GPS cadastradas</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado</div>`}
+                ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 GPS Ativo</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado</div>`}
                 ${c.phone ? `<div>📞 ${escapeHtml(c.phone)}</div>` : ''}
                 ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
-                ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in ativo às ${c.checkInTime}</div>` : ''}
+                ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold; display:flex; align-items:center; gap:4px;">🟢 Check-in ativo desde ${c.checkInTime}</div>` : ''}
                 ${c.lastCheckOut && !c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#94a3b8;">⚪ Último Check-out: ${c.lastCheckOut}</div>` : ''}
               </div>
             </div>
 
             <div class="card-footer">
               <div class="card-footer-row">
-                <button onclick="copyAddress('${escapeHtml(c.address)}', '${escapeHtml(c.number)}', '${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">📋 Endereço</button>
+                <button onclick="copyAddress('${escapeHtml(c.address)}', '${escapeHtml(c.number)}', '${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">📋 Copiar</button>
                 <button onclick="openHistoryModal('${c.id}')" class="btn btn-purple">📋 Relatórios (${reportsCount})</button>
               </div>
               <div class="card-footer-row">
                 <a href="https://www.google.com/maps/search/?api=1&query=${c.lat && c.lng ? encodeURIComponent(c.lat + ',' + c.lng) : encodeURIComponent(c.address + ', ' + c.number + (c.neighborhood ? ' - ' + c.neighborhood : ''))}" target="_blank" class="btn btn-sky" style="text-decoration:none;">🗺️ GPS</a>
                 <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">
-                  ${c.checkedIn ? '🔴 Check-out / Relatório' : '🟢 Check-in (GPS)'}
+                  ${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}
                 </button>
               </div>
             </div>
@@ -1455,38 +1387,6 @@
     function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
     function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
-
-    function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(condos, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "condominios_protech_backup.json");
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importDataTrigger() { document.getElementById('importInput').click(); }
-    function importData(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const imported = JSON.parse(evt.target.result);
-          if (Array.isArray(imported)) {
-            const batch = db.batch();
-            imported.forEach(item => {
-              delete item.id;
-              const docRef = db.collection("condominios").doc();
-              batch.set(docRef, { ...item, ownerEmail: ownerEmail, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            });
-            batch.commit().then(() => { loadCondosForOwner(ownerEmail); showToast('Importado com sucesso!'); });
-          }
-        } catch (err) { showToast('Erro ao importar.'); }
-      };
-      reader.readAsText(file);
-    }
 
     function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
