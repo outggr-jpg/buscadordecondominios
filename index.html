@@ -125,7 +125,7 @@
     .tab-btn.active { background: var(--bg-card); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
     .role-selector { display: flex; background: var(--bg-main); border-radius: 10px; padding: 3px; margin-bottom: 12px; gap: 2px; border: 1px solid var(--border-color); }
-    .role-btn { flex: 1; text-align: center; padding: 6px 2px; font-size: 10px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
+    .role-btn { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .role-btn.active { background: #0284c7; color: white; }
 
     .stat-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; text-align: center; }
@@ -134,7 +134,6 @@
 
     .paywall-container { max-width: 460px; width: 100%; margin: auto; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 28px; text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.6); }
 
-    /* ESTILOS DA FOTO DE PERFIL E TEMAS (v5.1.0) */
     .user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; }
     .theme-color-picker { display: flex; gap: 8px; margin-top: 6px; }
     .theme-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
@@ -155,7 +154,7 @@
     <img id="lightboxImg" class="lightbox-img" src="" alt="Imagem ampliada">
   </div>
 
-  <!-- TELA DE AUTENTICAÇÃO SIMPLIFICADA -->
+  <!-- TELA DE AUTENTICAÇÃO SIMPLIFICADA (v5.2.0) -->
   <div id="authScreen" class="modal-overlay" style="background-color: #0f172a; display: flex;">
     <div class="auth-container">
       <div style="text-align: center; margin-bottom: 12px;">
@@ -173,6 +172,7 @@
         <button id="tabRegisterBtn" onclick="switchAuthMode('register')" class="tab-btn">Criar Conta</button>
       </div>
 
+      <!-- FORMULÁRIO DE LOGIN -->
       <form id="loginForm" onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 10px;">
         <div class="form-group">
           <label>E-mail</label>
@@ -185,21 +185,23 @@
         <button type="submit" class="btn btn-sky" style="justify-content: center; padding: 10px; margin-top: 4px;">Entrar no Sistema</button>
       </form>
 
+      <!-- FORMULÁRIO COM SELEÇÃO APENAS DE PROPRIETÁRIO OU USUÁRIO (v5.2.0) -->
       <form id="registerForm" onsubmit="handleUnifiedRegister(event)" style="display: none; flex-direction: column; gap: 10px;">
         <div>
           <label style="font-size: 11px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; display: block;">Selecione seu Perfil:</label>
           <div class="role-selector">
             <button type="button" id="roleProprietario" onclick="selectRole('owner')" class="role-btn active">👑 Proprietário</button>
-            <button type="button" id="roleSupervisor" onclick="selectRole('supervisor')" class="role-btn">👔 Supervisor</button>
-            <button type="button" id="roleTecnico" onclick="selectRole('tecnico')" class="role-btn">🛠️ Técnico</button>
+            <button type="button" id="roleUsuario" onclick="selectRole('user')" class="role-btn">👤 Usuário / Técnico</button>
           </div>
         </div>
 
+        <!-- CAMPO EXCLUSIVO PARA PROPRIETÁRIO -->
         <div class="form-group" id="groupCompanyName">
           <label>Nome da Empresa (Matriz) *</label>
           <input type="text" id="regCompanyName" placeholder="Ex: Protech Segurança Eletrônica" class="form-control">
         </div>
 
+        <!-- CAMPO EXCLUSIVO PARA USUÁRIO / TÉCNICO -->
         <div class="form-group" id="groupUserName" style="display: none;">
           <label>Seu Nome *</label>
           <input type="text" id="regUserName" placeholder="Ex: Gabriel Gomes" class="form-control">
@@ -210,10 +212,11 @@
           <input type="email" id="regEmail" required placeholder="seu.email@empresa.com" class="form-control">
         </div>
 
+        <!-- CAMPO EXCLUSIVO PARA USUÁRIO / TÉCNICO -->
         <div class="form-group" id="groupCompanyOwnerEmail" style="display: none;">
           <label>E-mail da Empresa (Proprietário) *</label>
           <input type="email" id="regCompanyOwnerEmail" placeholder="dono@empresa.com" class="form-control">
-          <span style="font-size: 10px; color: #94a3b8; margin-top: 2px; display: block;">Sua solicitação entrará no período de testes ativo da empresa.</span>
+          <span style="font-size: 10px; color: #94a3b8; margin-top: 2px; display: block;">Acesso inicial somente leitura para consulta e relatórios.</span>
         </div>
 
         <div class="form-group">
@@ -266,7 +269,7 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.1.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.2.0</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
             </div>
           </div>
@@ -278,8 +281,6 @@
           <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar</button>
           <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe e Permissões">👥 Equipe</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-sky">+ Novo</button>
-          
-          <!-- BOTÃO DE CONFIGURAÇÕES DE PERFIL E TEMAS (ENGRENAGEM v5.1.0) -->
           <button onclick="openSettingsModal()" class="btn btn-slate" title="Configurações e Perfil" style="padding: 6px 10px; font-size: 16px;">⚙️</button>
           <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
         </div>
@@ -304,7 +305,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE CONFIGURAÇÕES / PERFIL / TEMAS (NOVO v5.1.0) -->
+  <!-- MODAL DE CONFIGURAÇÕES / PERFIL / TEMAS -->
   <div id="settingsModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 450px;">
       <div class="modal-header">
@@ -313,7 +314,6 @@
       </div>
 
       <div class="modal-body">
-        <!-- SEÇÃO PERFIL DO USUÁRIO -->
         <div style="display:flex; align-items:center; gap:14px; background:var(--bg-main); padding:14px; border-radius:12px; border:1px solid var(--border-color);">
           <div style="position:relative;">
             <img id="settingsAvatarImg" class="user-avatar" style="width:60px; height:60px; font-size:20px;" src="" alt="Avatar" onclick="document.getElementById('avatarFileInput').click()">
@@ -335,7 +335,6 @@
           </div>
         </div>
 
-        <!-- SEÇÃO DE CORES DE FUNDO DO APLICATIVO -->
         <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:6px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🎨 Personalizar Cor de Fundo do App:</label>
           <p style="font-size:10px; color:var(--text-muted); margin-bottom:8px;">Escolha o tema visual para a sua navegação:</p>
@@ -550,7 +549,7 @@
   <div id="teamModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Convites</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Permissões</h3>
         <button onclick="closeTeamModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
 
@@ -580,7 +579,7 @@
         </div>
 
         <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Ativos e Permissões Customizáveis:</h4>
+          <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Ativos e Permissões de Acesso:</h4>
           <div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
       </div>
@@ -602,22 +601,22 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 5.1.0</span>
+            <span>Versão 5.2.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Menu de engrenagem no canto superior direito para Configurações de Perfil e Temas.</li>
-            <li>Foto de perfil personalizável e alteração do nome de exibição.</li>
-            <li>Seletor de temas de fundo do app (Azul Noturno, OLED Escuro Puro, Verde Esmeralda, Azul Marinho e Modo Claro).</li>
+            <li>Simplificação da criação de contas: Divisão direta entre Proprietário e Usuário.</li>
+            <li>Segurança por padrão: Novos usuários entram como Leitura / Consulta sem permissão de edição.</li>
+            <li>Promoção para Supervisor com liberação de permissões no Gerenciamento de Equipe.</li>
           </ul>
         </div>
 
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 5.0.0</span>
+            <span>Versão 5.1.0</span>
           </div>
           <ul class="version-list">
-            <li>Vinculação unificada do Trial de 3 dias à Empresa e bloqueio global Paywall.</li>
+            <li>Menu de engrenagem para Perfil, Avatar e Seleção de Temas visuais.</li>
           </ul>
         </div>
       </div>
@@ -673,7 +672,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Carrega tema visual salvo no navegador (v5.1.0)
       const savedTheme = localStorage.getItem('protech_app_theme') || 'default';
       applyAppTheme(savedTheme);
 
@@ -695,7 +693,6 @@
       } catch(e) {}
     });
 
-    // SISTEMA DE TEMAS VISUAIS DO APP (v5.1.0)
     function applyAppTheme(themeName) {
       const root = document.documentElement;
       document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('selected'));
@@ -751,7 +748,7 @@
 
       let roleLabel = 'Proprietário (Admin)';
       if (userRole === 'admin' || userRole === 'supervisor') roleLabel = 'Supervisor / Administrador';
-      else if (userRole === 'user') roleLabel = 'Técnico de Campo';
+      else if (userRole === 'user') roleLabel = 'Usuário / Técnico';
       document.getElementById('settingsUserRole').textContent = `Cargo: ${roleLabel}`;
 
       const avatarImg = document.getElementById('settingsAvatarImg');
@@ -801,7 +798,7 @@
         document.getElementById('inviteNotice').style.display = 'block';
         document.getElementById('regCompanyOwnerEmail').value = invite.ownerEmail;
         switchAuthMode('register');
-        selectRole('tecnico');
+        selectRole('user');
       });
     }
 
@@ -813,12 +810,12 @@
       document.getElementById('tabRegisterBtn').classList.toggle('active', mode === 'register');
     }
 
+    // SELEÇÃO SIMPLIFICADA: APENAS PROPRIETÁRIO OU USUÁRIO (v5.2.0)
     function selectRole(role) {
       selectedRegRole = role;
 
       document.getElementById('roleProprietario').classList.toggle('active', role === 'owner');
-      document.getElementById('roleSupervisor').classList.toggle('active', role === 'supervisor');
-      document.getElementById('roleTecnico').classList.toggle('active', role === 'tecnico');
+      document.getElementById('roleUsuario').classList.toggle('active', role === 'user');
 
       const groupCompanyName = document.getElementById('groupCompanyName');
       const groupUserName = document.getElementById('groupUserName');
@@ -889,6 +886,7 @@
           .catch((error) => { showToast('Erro ao criar empresa: ' + error.message); });
 
       } else {
+        // CADASTRO COMO USUÁRIO / TÉCNICO (DEFAULT READ-ONLY)
         const userName = document.getElementById('regUserName').value.trim();
         const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
 
@@ -907,7 +905,7 @@
             .then(() => {
               let pending = doc.data().pendingTeam || [];
               if (!pending.some(p => (typeof p === 'string' ? p : p.email) === email)) {
-                pending.push({ email: email, name: userName, requestedRole: selectedRegRole });
+                pending.push({ email: email, name: userName, requestedRole: 'user' });
               }
 
               db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
@@ -972,6 +970,7 @@
             if (foundCompany) {
               ownerEmail = foundCompany.ownerEmail;
               userRole = foundCompany.role;
+              // Se for Usuário padrão, mantém permissões zeradas por padrão (v5.2.0)
               userPermissions = userRole === 'owner' ? { canAdd: true, canEdit: true, canDelete: true } : (foundCompany.permissions || { canAdd: false, canEdit: false, canDelete: false });
 
               if (validateSubscription(companyDocData)) {
@@ -1690,6 +1689,7 @@
     }
     function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
 
+    // GERENCIAMENTO DE EQUIPE, APROVAÇÃO E PROMOÇÃO A SUPERVISOR (v5.2.0)
     function renderTeamLists() {
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         if (!doc.exists) return;
@@ -1702,13 +1702,12 @@
           pending.map(item => {
             const email = typeof item === 'string' ? item : item.email;
             const name = typeof item === 'object' && item.name ? item.name : '';
-            const roleReq = typeof item === 'object' && item.requestedRole ? item.requestedRole.toUpperCase() : 'TÉCNICO';
 
             return `
               <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 10px; border-radius:8px; border:1px solid var(--border-color);">
                 <div>
                   <div style="color:var(--text-main); font-size:12px; font-weight:bold;">${escapeHtml(email)}</div>
-                  ${name ? `<div style="color:#38bdf8; font-size:10px;">${escapeHtml(name)} (${roleReq})</div>` : ''}
+                  ${name ? `<div style="color:#38bdf8; font-size:10px;">${escapeHtml(name)} (USUÁRIO)</div>` : ''}
                 </div>
                 <div style="display:flex; gap:6px;">
                   <button onclick="approveMember('${email}')" class="btn btn-emerald" style="padding:4px 8px; font-size:11px;">Aprovar</button>
@@ -1753,11 +1752,12 @@
         let members = data.teamMembers || {};
 
         pending = pending.filter(p => (typeof p === 'string' ? p : p.email) !== email);
+        // Aprovação padrão: Usuário sem permissões de alteração (canAdd, canEdit, canDelete em false)
         members[email] = { role: 'user', canAdd: false, canEdit: false, canDelete: false };
 
         db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending, teamMembers: members }).then(() => {
           renderTeamLists();
-          showToast('Membro aprovado!');
+          showToast('Membro aprovado como Usuário!');
         });
       });
     }
@@ -1793,10 +1793,14 @@
             members[email].canAdd = true;
             members[email].canEdit = true;
             members[email].canDelete = true;
+          } else {
+            members[email].canAdd = false;
+            members[email].canEdit = false;
+            members[email].canDelete = false;
           }
           db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
             renderTeamLists();
-            showToast('Nível atualizado!');
+            showToast(newRole === 'admin' ? 'Promovido a Supervisor!' : 'Rebaixado para Usuário Leitura.');
           });
         }
       });
@@ -1821,7 +1825,7 @@
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         let pending = doc.data().pendingTeam || [];
         if (!pending.some(p => (typeof p === 'string' ? p : p.email) === email)) {
-          pending.push({ email: email, name: '', requestedRole: 'tecnico' });
+          pending.push({ email: email, name: '', requestedRole: 'user' });
           db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
             document.getElementById('inviteUserEmailInput').value = '';
             renderTeamLists();
