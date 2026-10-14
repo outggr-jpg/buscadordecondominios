@@ -1,0 +1,15 @@
+{
+  "name": "Buscador de Condomínios - Protech",
+  "short_name": "Protech",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1040/1040993.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
