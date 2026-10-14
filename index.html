@@ -27,6 +27,7 @@
     header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 12px 16px; position: sticky; top: 0; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: background-color 0.3s; }
     .header-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo-img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; background: #334155; }
     .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
     .title { font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
     
@@ -260,12 +261,14 @@
     <header>
       <div class="header-container">
         <div class="brand">
-          <div class="brand-icon">🏢</div>
+          <div id="headerBrandLogoContainer">
+            <div class="brand-icon">🏢</div>
+          </div>
           <div>
-            <h1 class="title">Buscador de Condomínios</h1>
+            <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
             <div class="company-row">
-              <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.6.0</span>
+              <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.7.0</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
             </div>
           </div>
@@ -273,9 +276,6 @@
 
         <div class="actions">
           <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
-          <button id="globalReportBtn" onclick="openGlobalReportModal()" class="btn btn-slate">📊 Relatórios Geral</button>
-          <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-slate">📥 Instalar</button>
-          <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe e Permissões">👥 Equipe</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate">+ Novo</button>
           <button onclick="openSettingsModal()" class="btn btn-slate" title="Configurações e Perfil" style="padding: 6px 10px; font-size: 16px;">⚙️</button>
           <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
@@ -301,51 +301,84 @@
     </main>
   </div>
 
-  <!-- MODAL DE CONFIGURAÇÕES -->
+  <!-- MODAL DE CONFIGURAÇÕES (AGORA COM EQUIPE, RELATÓRIOS E INSTALAÇÃO) -->
   <div id="settingsModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 450px;">
+    <div class="modal" style="max-width: 480px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">⚙️ Configurações do Perfil</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">⚙️ Configurações e Gestão</h3>
         <button onclick="closeSettingsModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
 
       <div class="modal-body">
-        <div style="display:flex; align-items:center; gap:14px; background:var(--bg-main); padding:14px; border-radius:12px; border:1px solid var(--border-color);">
+        <!-- PERFIL DO USUÁRIO -->
+        <div style="display:flex; align-items:center; gap:14px; background:var(--bg-main); padding:12px; border-radius:12px; border:1px solid var(--border-color);">
           <div style="position:relative;">
-            <img id="settingsAvatarImg" class="user-avatar" style="width:60px; height:60px; font-size:20px;" src="" alt="Avatar" onclick="document.getElementById('avatarFileInput').click()">
-            <button onclick="document.getElementById('avatarFileInput').click()" style="position:absolute; bottom:-4px; right:-4px; background:#0284c7; color:white; border:none; width:22px; height:22px; border-radius:50%; font-size:11px; cursor:pointer;" title="Trocar Foto">📷</button>
+            <img id="settingsAvatarImg" class="user-avatar" style="width:50px; height:50px; font-size:18px;" src="" alt="Avatar" onclick="document.getElementById('avatarFileInput').click()">
+            <button onclick="document.getElementById('avatarFileInput').click()" style="position:absolute; bottom:-4px; right:-4px; background:#0284c7; color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:10px; cursor:pointer;" title="Trocar Foto">📷</button>
             <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" style="display:none;">
           </div>
           <div style="flex:1;">
-            <div id="settingsUserName" style="font-size:14px; font-weight:bold; color:var(--text-main);">Carregando...</div>
-            <div id="settingsUserRole" style="font-size:11px; color:#38bdf8; font-weight:600; margin-top:2px;">Cargo: Proprietário</div>
-            <div id="settingsUserEmail" style="font-size:10px; color:var(--text-muted); margin-top:2px;">email@empresa.com</div>
+            <div id="settingsUserName" style="font-size:13px; font-weight:bold; color:var(--text-main);">Carregando...</div>
+            <div id="settingsUserRole" style="font-size:10px; color:#38bdf8; font-weight:600; margin-top:2px;">Cargo: Proprietário</div>
+            <div id="settingsUserEmail" style="font-size:10px; color:var(--text-muted); margin-top:1px;">email@empresa.com</div>
           </div>
         </div>
 
-        <div class="form-group" style="margin-top:6px;">
-          <label>Editar Seu Nome de Exibição:</label>
+        <div class="form-group" style="margin-top:2px;">
+          <label>Seu Nome de Exibição:</label>
           <div style="display:flex; gap:6px;">
             <input type="text" id="settingsDisplayNameInput" class="form-control" placeholder="Seu nome completo">
             <button onclick="saveDisplayName()" class="btn btn-slate" style="padding:4px 10px;">Salvar</button>
           </div>
         </div>
 
-        <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:6px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🎨 Personalizar Cor de Fundo do App:</label>
-          <p style="font-size:10px; color:var(--text-muted); margin-bottom:8px;">Escolha o tema visual para a sua navegação:</p>
+        <!-- CONFIGURAÇÕES DA EMPRESA (LOGOTIPO E NOME) -->
+        <div id="companySettingsSection" style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px; display:none;">
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🏢 Dados da Empresa (Matriz):</label>
           
+          <div class="form-group" style="margin-top:6px;">
+            <label>Nome da Empresa:</label>
+            <div style="display:flex; gap:6px;">
+              <input type="text" id="settingsCompanyNameInput" class="form-control" placeholder="Nome da sua empresa">
+              <button onclick="saveCompanyName()" class="btn btn-slate" style="padding:4px 10px;">Salvar</button>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px; margin-top:8px; background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
+            <img id="settingsCompanyLogoImg" class="brand-logo-img" src="" alt="Logo" onclick="document.getElementById('companyLogoFileInput').click()">
+            <div style="flex:1;">
+              <div style="font-size:11px; font-weight:bold; color:var(--text-main);">Logotipo da Empresa</div>
+              <div style="font-size:10px; color:var(--text-muted);">Aparece no cabeçalho do app.</div>
+            </div>
+            <button onclick="document.getElementById('companyLogoFileInput').click()" class="btn btn-slate" style="padding:4px 8px; font-size:11px;">Enviar Logo</button>
+            <input type="file" id="companyLogoFileInput" accept="image/*" onchange="handleCompanyLogoUpload(event)" style="display:none;">
+          </div>
+        </div>
+
+        <!-- BOTÕES DO MENU GERAL (EQUIPE, RELATÓRIOS E INSTALAÇÃO) -->
+        <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">📋 Menu Operacional e Gestão:</label>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe e Permissões</button>
+            <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
+            <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
+          </div>
+        </div>
+
+        <!-- TEMA VISUAL -->
+        <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🎨 Personalizar Cor de Fundo do App:</label>
           <div class="theme-color-picker">
-            <div class="theme-dot selected" id="theme-default" style="background:#0f172a;" title="Azul Noturno (Original)" onclick="applyAppTheme('default')"></div>
-            <div class="theme-dot" id="theme-oled" style="background:#000000;" title="Escuro Puro (OLED / Economia)" onclick="applyAppTheme('oled')"></div>
-            <div class="theme-dot" id="theme-emerald" style="background:#064e3b;" title="Verde Esmeralda Protech" onclick="applyAppTheme('emerald')"></div>
-            <div class="theme-dot" id="theme-navy" style="background:#1e1b4b;" title="Azul Marinho Corporativo" onclick="applyAppTheme('navy')"></div>
-            <div class="theme-dot" id="theme-light" style="background:#f8fafc;" title="Modo Claro Clean" onclick="applyAppTheme('light')"></div>
+            <div class="theme-dot selected" id="theme-default" style="background:#0f172a;" title="Azul Noturno" onclick="applyAppTheme('default')"></div>
+            <div class="theme-dot" id="theme-oled" style="background:#000000;" title="Escuro Puro" onclick="applyAppTheme('oled')"></div>
+            <div class="theme-dot" id="theme-emerald" style="background:#064e3b;" title="Verde Protech" onclick="applyAppTheme('emerald')"></div>
+            <div class="theme-dot" id="theme-navy" style="background:#1e1b4b;" title="Azul Marinho" onclick="applyAppTheme('navy')"></div>
+            <div class="theme-dot" id="theme-light" style="background:#f8fafc;" title="Modo Claro" onclick="applyAppTheme('light')"></div>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
+      <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
         <button onclick="closeSettingsModal()" class="btn btn-slate">Concluído</button>
       </div>
     </div>
@@ -495,7 +528,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO DE VISITA OTIMIZADO (v5.6.0) -->
+  <!-- MODAL DE RELATÓRIO DE VISITA -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -516,7 +549,6 @@
           <input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;">
           <span style="font-size:10px; color:var(--text-muted); margin-top:4px; display:block;">Toque no 🔴 para remover itens enviados por engano.</span>
           
-          <!-- CONTÊINER DA GALERIA -->
           <div id="mediaPreviewContainer" class="media-preview-container"></div>
         </div>
 
@@ -600,12 +632,12 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 5.6.0</span>
+            <span>Versão 5.7.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Compressão otimizada de imagens para evitar o limite de 1MB do banco de dados e garantir salvamento rápido.</li>
-            <li>Tratamento de erros e feedback no botão de check-out.</li>
+            <li>Menus de Equipe, Relatórios e Instalação movidos para dentro das Configurações (Engrenagem).</li>
+            <li>Exibição do nome e logotipo personalizado da empresa no cabeçalho do aplicativo.</li>
           </ul>
         </div>
       </div>
@@ -640,12 +672,12 @@
     let currentInviteToken = null;
     let filteredGlobalVisits = [];
     let selectedRegRole = 'owner';
+    let currentCompanyName = '';
+    let currentCompanyLogo = '';
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      const btn = document.getElementById('installAppBtn');
-      if (btn) btn.style.display = 'inline-flex';
     });
 
     function triggerPWAInstall() {
@@ -741,10 +773,22 @@
       document.getElementById('settingsUserRole').textContent = `Cargo: ${roleLabel}`;
 
       const avatarImg = document.getElementById('settingsAvatarImg');
-      if (storedAvatar) {
-        avatarImg.src = storedAvatar;
+      avatarImg.src = storedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
+
+      // Configurações da Empresa (Apenas para Proprietários/Admins)
+      const companySec = document.getElementById('companySettingsSection');
+      const teamMenuBtn = document.getElementById('settingsTeamMenuBtn');
+
+      if (userRole === 'owner' || userRole === 'admin') {
+        companySec.style.display = 'block';
+        teamMenuBtn.style.display = 'flex';
+        document.getElementById('settingsCompanyNameInput').value = currentCompanyName;
+        
+        const logoImg = document.getElementById('settingsCompanyLogoImg');
+        logoImg.src = currentCompanyLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCompanyName)}&background=0284c7&color=fff`;
       } else {
-        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
+        companySec.style.display = 'none';
+        teamMenuBtn.style.display = 'none';
       }
 
       document.getElementById('settingsModal').classList.remove('hidden');
@@ -764,7 +808,6 @@
     function handleAvatarUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = (evt) => {
         const base64Img = evt.target.result;
@@ -774,6 +817,47 @@
         showToast('Foto de perfil atualizada!');
       };
       reader.readAsDataURL(file);
+    }
+
+    function saveCompanyName() {
+      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas administradores podem alterar o nome da empresa.'); return; }
+      const newName = document.getElementById('settingsCompanyNameInput').value.trim();
+      if (!newName) { alert('Informe um nome válido.'); return; }
+
+      db.collection("empresas").doc(ownerEmail).update({ companyName: newName }).then(() => {
+        currentCompanyName = newName;
+        updateHeaderBrandDisplay();
+        showToast('Nome da empresa atualizado!');
+      });
+    }
+
+    function handleCompanyLogoUpload(e) {
+      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas administradores podem alterar o logotipo.'); return; }
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const base64Logo = evt.target.result;
+        db.collection("empresas").doc(ownerEmail).update({ companyLogo: base64Logo }).then(() => {
+          currentCompanyLogo = base64Logo;
+          document.getElementById('settingsCompanyLogoImg').src = base64Logo;
+          updateHeaderBrandDisplay();
+          showToast('Logotipo da empresa atualizado!');
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateHeaderBrandDisplay() {
+      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Buscador de Condomínios';
+      const logoContainer = document.getElementById('headerBrandLogoContainer');
+      
+      if (currentCompanyLogo) {
+        logoContainer.innerHTML = `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">`;
+      } else {
+        logoContainer.innerHTML = `<div class="brand-icon">🏢</div>`;
+      }
     }
 
     function checkInviteToken(token) {
@@ -794,14 +878,12 @@
     function switchAuthMode(mode) {
       document.getElementById('loginForm').style.display = mode === 'login' ? 'flex' : 'none';
       document.getElementById('registerForm').style.display = mode === 'register' ? 'flex' : 'none';
-      
       document.getElementById('tabLoginBtn').classList.toggle('active', mode === 'login');
       document.getElementById('tabRegisterBtn').classList.toggle('active', mode === 'register');
     }
 
     function selectRole(role) {
       selectedRegRole = role;
-
       document.getElementById('roleProprietario').classList.toggle('active', role === 'owner');
       document.getElementById('roleUsuario').classList.toggle('active', role === 'user');
 
@@ -858,6 +940,7 @@
 
             db.collection("empresas").doc(email).set({
               companyName: companyName,
+              companyLogo: '',
               ownerEmail: email,
               subscriptionStatus: 'trial',
               trialStartDate: now,
@@ -865,7 +948,7 @@
               teamMembers: {},
               pendingTeam: []
             }).then(() => {
-              showMainApp(companyName, ownerEmail, { subscriptionStatus: 'trial', trialEndsAt: now + trialDuration });
+              showMainApp(companyName, '', ownerEmail, { subscriptionStatus: 'trial', trialEndsAt: now + trialDuration });
               showToast('Empresa criada com 3 dias de teste grátis!');
             });
           })
@@ -875,16 +958,10 @@
         const userName = document.getElementById('regUserName').value.trim();
         const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
 
-        if (!userName || !companyOwnerEmail) {
-          alert('Preencha seu nome e o e-mail da empresa.');
-          return;
-        }
+        if (!userName || !companyOwnerEmail) { alert('Preencha seu nome e o e-mail da empresa.'); return; }
 
         db.collection("empresas").doc(companyOwnerEmail).get().then((doc) => {
-          if (!doc.exists) {
-            alert('Erro: E-mail da empresa proprietária não foi encontrado.');
-            return;
-          }
+          if (!doc.exists) { alert('Erro: E-mail da empresa proprietária não encontrado.'); return; }
 
           firebase.auth().createUserWithEmailAndPassword(email, password)
             .then(() => {
@@ -909,7 +986,7 @@
       ownerEmail = 'visitante@protech.com';
       userRole = 'owner';
       userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-      showMainApp('Modo Visitante / Teste', ownerEmail, { subscriptionStatus: 'active' });
+      showMainApp('Protech Segurança (Visitante)', '', ownerEmail, { subscriptionStatus: 'active' });
       showToast('Entrou no modo de teste.');
     }
 
@@ -931,9 +1008,10 @@
           ownerEmail = userEmail;
           userRole = 'owner';
           userPermissions = { canAdd: true, canEdit: true, canDelete: true };
+          const data = doc.data();
           
-          if (validateSubscription(doc.data())) {
-            showMainApp(doc.data().companyName, ownerEmail, doc.data());
+          if (validateSubscription(data)) {
+            showMainApp(data.companyName, data.companyLogo || '', ownerEmail, data);
           }
         } else {
           db.collection("empresas").get().then((querySnapshot) => {
@@ -944,10 +1022,10 @@
               const data = d.data();
               const members = data.teamMembers || {};
               if (data.ownerEmail === userEmail) {
-                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, role: 'owner' };
+                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: 'owner' };
                 companyDocData = data;
               } else if (members[userEmail]) {
-                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, role: members[userEmail].role, permissions: members[userEmail] };
+                foundCompany = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: members[userEmail].role, permissions: members[userEmail] };
                 companyDocData = data;
               }
             });
@@ -958,7 +1036,7 @@
               userPermissions = userRole === 'owner' ? { canAdd: true, canEdit: true, canDelete: true } : (foundCompany.permissions || { canAdd: false, canEdit: false, canDelete: false });
 
               if (validateSubscription(companyDocData)) {
-                showMainApp(foundCompany.companyName + ` (${userRole.toUpperCase()})`, ownerEmail, companyDocData);
+                showMainApp(foundCompany.companyName, foundCompany.companyLogo, ownerEmail, companyDocData);
               }
             } else {
               db.collection("empresas").get().then((companySnapshots) => {
@@ -977,7 +1055,7 @@
                   userPermissions = { canAdd: false, canEdit: false, canDelete: false };
 
                   if (validateSubscription(cData)) {
-                    showMainApp(cData.companyName + " (AGUARDANDO APROVAÇÃO)", ownerEmail, cData);
+                    showMainApp(cData.companyName, cData.companyLogo || '', ownerEmail, cData);
                     showToast('Aguardando o proprietário aprovar sua conta.');
                   }
                 } else {
@@ -987,6 +1065,7 @@
                   const now = Date.now();
                   const defaultData = {
                     companyName: "Empresa de " + userEmail.split('@')[0],
+                    companyLogo: '',
                     ownerEmail: userEmail,
                     subscriptionStatus: 'trial',
                     trialStartDate: now,
@@ -995,7 +1074,7 @@
                     pendingTeam: []
                   };
                   db.collection("empresas").doc(userEmail).set(defaultData).then(() => {
-                    showMainApp(defaultData.companyName, ownerEmail, defaultData);
+                    showMainApp(defaultData.companyName, '', ownerEmail, defaultData);
                   });
                 }
               });
@@ -1035,10 +1114,10 @@
       const btn = document.getElementById('paywallSubscribeBtn');
 
       if (isOwner) {
-        msg.innerHTML = `O teste grátis de 3 dias da sua empresa chegou ao fim.<br><b>Seus dados e condomínios continuam salvos com segurança!</b> Assine para reativar o acesso da equipe.`;
+        msg.innerHTML = `O teste grátis de 3 dias da sua empresa chegou ao fim.<br><b>Seus dados e condomínios continuam salvos com segurança!</b> Assine para reativar o acesso.`;
         btn.style.display = 'inline-flex';
       } else {
-        msg.innerHTML = `O período de testes da sua empresa expirou.<br><b>Entre em contato com o gestor da sua empresa</b> para reativar o acesso do aplicativo.`;
+        msg.innerHTML = `O período de testes da sua empresa expirou.<br><b>Entre em contato com o gestor da sua empresa</b> para reativar o acesso.`;
         btn.style.display = 'none';
       }
     }
@@ -1047,27 +1126,28 @@
       alert('Integração de Pagamento:\n\nAqui será aberto o Link de Checkout do Asaas/Mercado Pago para pagamento via PIX ou Cartão.');
     }
 
-    function showMainApp(companyTitle, rootOwnerEmail, companyData = null) {
+    function showMainApp(companyName, companyLogo, rootOwnerEmail, companyData = null) {
+      currentCompanyName = companyName || 'Protech Condomínios';
+      currentCompanyLogo = companyLogo || '';
+
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('paywallScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'flex';
-      document.getElementById('companyNameDisplay').textContent = companyTitle;
+
+      updateHeaderBrandDisplay();
 
       const trialBadge = document.getElementById('trialBadgeDisplay');
       if (companyData && companyData.subscriptionStatus === 'trial' && companyData.trialEndsAt) {
         const diffMs = companyData.trialEndsAt - Date.now();
         const daysLeft = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-        trialBadge.textContent = `⏳ Teste: ${daysLeft}d restantes`;
+        trialBadge.textContent = `⏳ Teste: ${daysLeft}d`;
         trialBadge.style.display = 'inline-block';
       } else {
         trialBadge.style.display = 'none';
       }
 
       const newBtn = document.getElementById('newCondoBtn');
-      const teamBtn = document.getElementById('teamBtn');
-
       newBtn.style.display = (userRole === 'user' && !userPermissions.canAdd) ? 'none' : 'inline-flex';
-      teamBtn.style.display = (userRole === 'user') ? 'none' : 'inline-flex';
 
       loadCondosForOwner(rootOwnerEmail);
     }
@@ -1114,7 +1194,7 @@
     function saveCondo(e) {
       e.preventDefault();
       if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) {
-        alert('Você não tem permissão para adicionar ou editar condomínios.');
+        alert('Sem permissão para adicionar ou editar condomínios.');
         return;
       }
 
@@ -1131,10 +1211,7 @@
         ownerEmail: ownerEmail
       };
 
-      if (!condoData.lat || !condoData.lng) {
-        alert('Por favor, informe a Latitude e Longitude.');
-        return;
-      }
+      if (!condoData.lat || !condoData.lng) { alert('Informe a Latitude e Longitude.'); return; }
 
       if (id) {
         if (userRole === 'user' && !userPermissions.canEdit) { alert('Sem permissão para editar.'); return; }
@@ -1166,10 +1243,7 @@
     }
 
     function deleteCondo(id) {
-      if (userRole === 'user' && !userPermissions.canDelete) {
-        alert('Você não tem permissão para apagar condomínios.');
-        return;
-      }
+      if (userRole === 'user' && !userPermissions.canDelete) { alert('Sem permissão para apagar.'); return; }
       if (confirm('Deseja excluir este condomínio?')) {
         db.collection("condominios").doc(id).delete().then(() => {
           showToast('Condomínio removido.');
@@ -1179,10 +1253,7 @@
     }
 
     function editCondo(id) {
-      if (userRole === 'user' && !userPermissions.canEdit) {
-        alert('Você não tem permissão para editar condomínios.');
-        return;
-      }
+      if (userRole === 'user' && !userPermissions.canEdit) { alert('Sem permissão para editar.'); return; }
       const condo = condos.find(c => c.id === id);
       if (condo) openModal(condo);
     }
@@ -1190,21 +1261,14 @@
     function toggleCheckIn(id) {
       const condo = condos.find(c => c.id === id);
       if (!condo) return;
-
-      if (!condo.lat || !condo.lng) {
-        alert('Check-in bloqueado: Sem coordenadas GPS cadastradas.');
-        return;
-      }
+      if (!condo.lat || !condo.lng) { alert('Check-in bloqueado: Sem GPS cadastrado.'); return; }
 
       if (!condo.checkedIn) {
         if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
         showToast('Validando GPS...');
         navigator.geolocation.getCurrentPosition((pos) => {
           const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(condo.lat), parseFloat(condo.lng));
-          if (dist > 500) {
-            alert(`Check-in negado! Está a ${Math.round(dist)}m (limite de 500m).`);
-            return;
-          }
+          if (dist > 500) { alert(`Check-in negado! Está a ${Math.round(dist)}m (limite 500m).`); return; }
           performDirectCheckIn(id);
         }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true, timeout: 10000 });
       } else {
@@ -1239,7 +1303,6 @@
 
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
-    // PROCESSAMENTO E COMPRESSÃO OTIMIZADA (v5.6.0)
     async function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
@@ -1263,9 +1326,7 @@
             selectedMediaFiles.push({ name: file.name, type: 'video', dataUrl: dataUrl });
           }
           renderMediaPreviews();
-        } catch (err) {
-          console.error("Erro ao processar mídia:", err);
-        }
+        } catch (err) { console.error("Erro ao processar mídia:", err); }
       }
       showToast('Pronto para finalizar!');
     }
@@ -1286,8 +1347,6 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-
-          // Redimensionamento rigoroso para evitar limite de 1MB do Firestore
           const MAX_WIDTH = 900;
           if (width > MAX_WIDTH) {
             height = Math.round((height * MAX_WIDTH) / width);
@@ -1297,7 +1356,6 @@
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
-
           ctx.drawImage(img, 0, 0, width, height);
 
           const bannerHeight = Math.max(28, height * 0.08);
@@ -1310,14 +1368,13 @@
 
           const nowStr = new Date().toLocaleString('pt-BR');
           const textLine1 = `📍 ${condoName} | 👤 ${techName}`;
-          const textLine2 = `📅 ${nowStr} (Protech Segurança)`;
+          const textLine2 = `📅 ${nowStr} (${currentCompanyName})`;
 
           ctx.fillText(textLine1, 12, height - (bannerHeight * 0.52));
           ctx.font = `${Math.floor(fontSize * 0.85)}px sans-serif`;
           ctx.fillStyle = '#38bdf8';
           ctx.fillText(textLine2, 12, height - (bannerHeight * 0.18));
 
-          // Compressão JPEG a 75% para garantir leveza máxima no banco
           resolve(canvas.toDataURL('image/jpeg', 0.75));
         };
         img.src = dataUrl;
@@ -1326,7 +1383,6 @@
 
     function renderMediaPreviews() {
       const container = document.getElementById('mediaPreviewContainer');
-      
       if (selectedMediaFiles.length === 0) {
         container.innerHTML = '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia anexada ainda.</span>';
         return;
@@ -1335,9 +1391,7 @@
       container.innerHTML = selectedMediaFiles.map((m, idx) => `
         <div class="media-preview-item" title="Anexo ${idx + 1}">
           <button type="button" class="media-preview-remove" onclick="removeMedia(${idx})" title="Excluir Mídia">✕</button>
-          ${m.type === 'video' 
-            ? `<video src="${m.dataUrl}" controls></video><span class="media-type-tag">🎥 VÍDEO</span>` 
-            : `<img src="${m.dataUrl}" onclick="openLightbox('${m.dataUrl}')" alt="Foto Anexada"><span class="media-type-tag">📷 FOTO</span>`}
+          ${m.type === 'video' ? `<video src="${m.dataUrl}" controls></video><span class="media-type-tag">🎥 VÍDEO</span>` : `<img src="${m.dataUrl}" onclick="openLightbox('${m.dataUrl}')" alt="Foto Anexada"><span class="media-type-tag">📷 FOTO</span>`}
         </div>
       `).join('');
     }
@@ -1397,9 +1451,8 @@
         loadCondosForOwner(ownerEmail);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Finalizar e Check-out';
-      }).catch((err) => {
-        console.error("Erro ao salvar check-out:", err);
-        alert('Erro ao salvar no banco de dados. Tente anexar menos fotos ou reduzir o tamanho.');
+      }).catch(() => {
+        alert('Erro ao salvar no banco de dados. Tente anexar menos fotos.');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Finalizar e Check-out';
       });
@@ -1419,9 +1472,7 @@
         condos.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
 
       let techs = new Set();
-      condos.forEach(c => {
-        (c.reports || []).forEach(r => { if (r.userEmail) techs.add(r.userEmail); });
-      });
+      condos.forEach(c => { (c.reports || []).forEach(r => { if (r.userEmail) techs.add(r.userEmail); }); });
 
       techSelect.innerHTML = '<option value="">Todos os Técnicos</option>' +
         Array.from(techs).map(t => `<option value="${t}">${escapeHtml(t)}</option>`).join('');
@@ -1438,16 +1489,13 @@
 
       condos.forEach(c => {
         if (condoFilter && c.id !== condoFilter) return;
-
         (c.reports || []).forEach(r => {
           if (techFilter && r.userEmail !== techFilter) return;
-
           let isoDate = r.isoDate;
           if (!isoDate && r.date) {
             const parts = r.date.split('/');
             if (parts.length === 3) isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
           }
-
           if (monthFilter && isoDate && !isoDate.startsWith(monthFilter)) return;
 
           filteredGlobalVisits.push({ condoName: c.name, ...r });
@@ -1464,7 +1512,7 @@
 
       const container = document.getElementById('globalReportListContainer');
       if (filteredGlobalVisits.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum atendimento encontrado para os filtros selecionados.</div>';
+        container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum atendimento encontrado.</div>';
       } else {
         container.innerHTML = filteredGlobalVisits.map(r => `
           <div class="report-card">
@@ -1489,36 +1537,30 @@
       try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(15);
         doc.text("RELATORIO CONSOLIDADO DE ATENDIMENTOS", 14, 20);
-
         doc.setFontSize(10);
         doc.setFont("Helvetica", "normal");
-        doc.text(`Empresa: Protech Seguranca Eletronica`, 14, 27);
+        doc.text(`Empresa: ${currentCompanyName}`, 14, 27);
         doc.text(`Total de Visitas: ${filteredGlobalVisits.length}`, 14, 33);
-
         doc.line(14, 37, 196, 37);
 
         let y = 45;
         filteredGlobalVisits.forEach((r, idx) => {
           if (y > 260) { doc.addPage(); y = 20; }
-
           doc.setFont("Helvetica", "bold");
           doc.text(`${idx + 1}. ${r.condoName} - ${r.date}`, 14, y);
           doc.setFont("Helvetica", "normal");
           doc.text(`Horario: ${r.checkInTime} as ${r.checkOutTime} (${r.durationText || 'N/A'}) | Tecnico: ${r.userEmail}`, 14, y + 5);
-          
           const splitText = doc.splitTextToSize(`Servico: ${r.text}`, 180);
           doc.text(splitText, 14, y + 11);
-
           y += 13 + (splitText.length * 5);
           doc.setDrawColor(220, 220, 220);
           doc.line(14, y - 3, 196, y - 3);
         });
 
-        doc.save(`Relatorio_Geral_Protech_${Date.now()}.pdf`);
+        doc.save(`Relatorio_Geral_${currentCompanyName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
         showToast('PDF Consolidado Baixado!');
       } catch(err) { alert('Erro ao gerar PDF.'); }
     }
@@ -1539,7 +1581,7 @@
               <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
               <button onclick="downloadReportPDF('${condo.id}', ${idx})" class="btn btn-slate" style="padding:2px 8px; font-size:10px;">📄 Baixar PDF</button>
             </div>
-            <div style="font-size:11px; color:#10b981; font-weight:bold; margin-top:2px;">⏱️ Duração da visita: ${r.durationText || 'N/A'}</div>
+            <div style="font-size:11px; color:#10b981; font-weight:bold; margin-top:2px;">⏱️ Duração: ${r.durationText || 'N/A'}</div>
             <div style="font-size:10px; color:var(--text-muted);">👤 Técnico: ${escapeHtml(r.userEmail)}</div>
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
@@ -1564,66 +1606,53 @@
       if (!condo || !condo.reports || !condo.reports[reportIndex]) return;
 
       const report = condo.reports[reportIndex];
-      if (!window.jspdf) { alert('A biblioteca de PDF ainda está a carregar.'); return; }
+      if (!window.jspdf) { alert('A biblioteca de PDF ainda está carregando.'); return; }
 
       try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(16);
         doc.text("RELATORIO DE VISITA TECNICA", 14, 20);
-
         doc.setFontSize(10);
         doc.setFont("Helvetica", "normal");
-        doc.text(`Empresa / Sistema: Protech Seguranca Eletronica`, 14, 28);
+        doc.text(`Empresa: ${currentCompanyName}`, 14, 28);
         doc.text(`Condominio: ${condo.name}`, 14, 34);
         doc.text(`Endereco: ${condo.address}, ${condo.number} ${condo.neighborhood ? '- ' + condo.neighborhood : ''}`, 14, 40);
-
         doc.line(14, 44, 196, 44);
 
         doc.setFont("Helvetica", "bold");
         doc.text(`Data da Visita: ${report.date}`, 14, 52);
         doc.text(`Horario: Check-in ${report.checkInTime} as ${report.checkOutTime} (Duracao: ${report.durationText || 'N/A'})`, 14, 58);
         doc.text(`Tecnico Responsavel: ${report.userEmail}`, 14, 64);
-
         doc.line(14, 68, 196, 68);
 
         doc.setFont("Helvetica", "bold");
         doc.text("Descricao dos Servicos Realizados:", 14, 76);
         doc.setFont("Helvetica", "normal");
-
         const splitText = doc.splitTextToSize(report.text, 180);
         doc.text(splitText, 14, 84);
 
         let currentY = 84 + (splitText.length * 6) + 10;
-
         if (report.media && report.media.length > 0) {
           const images = report.media.filter(m => m.type === 'image');
           if (images.length > 0) {
             if (currentY > 230) { doc.addPage(); currentY = 20; }
-            
             doc.setFont("Helvetica", "bold");
             doc.text("Fotos Anexadas com Marca d'Agua Comprovatoria:", 14, currentY);
             currentY += 8;
 
-            let imgX = 14;
-            let imgWidth = 55;
-            let imgHeight = 40;
-
+            let imgX = 14, imgWidth = 55, imgHeight = 40;
             images.forEach((img) => {
               if (imgX + imgWidth > 196) { imgX = 14; currentY += imgHeight + 6; }
               if (currentY + imgHeight > 270) { doc.addPage(); currentY = 20; imgX = 14; }
-
-              try { doc.addImage(img.dataUrl, 'JPEG', imgX, currentY, imgWidth, imgHeight); } 
-              catch(e) { try { doc.addImage(img.dataUrl, 'PNG', imgX, currentY, imgWidth, imgHeight); } catch(err){} }
+              try { doc.addImage(img.dataUrl, 'JPEG', imgX, currentY, imgWidth, imgHeight); } catch(e){}
               imgX += imgWidth + 6;
             });
           }
         }
 
-        const fileName = `Relatorio_${condo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`;
-        doc.save(fileName);
+        doc.save(`Relatorio_${condo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
         showToast('Download do PDF concluído!');
       } catch (err) { alert('Erro ao gerar o PDF.'); }
     }
@@ -1631,14 +1660,14 @@
     function openRouteModal() {
       const container = document.getElementById('routeSelectionList');
       if (condos.length === 0) {
-        container.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">Nenhum condomínio cadastrado para rota.</span>';
+        container.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">Nenhum condomínio cadastrado.</span>';
       } else {
         container.innerHTML = condos.map(c => `
           <label class="route-item">
             <input type="checkbox" class="route-checkbox" value="${c.id}" ${c.lat && c.lng ? 'checked' : 'disabled'}>
             <div style="display:flex; flex-direction:column;">
               <span style="color:var(--text-main); font-size:13px; font-weight:bold;">${escapeHtml(c.name)}</span>
-              <span style="color:var(--text-muted); font-size:11px;">${escapeHtml(c.address)}, ${escapeHtml(c.number)} ${c.neighborhood ? '- ' + escapeHtml(c.neighborhood) : ''}</span>
+              <span style="color:var(--text-muted); font-size:11px;">${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
               ${!c.lat || !c.lng ? '<span style="color:#f43f5e; font-size:10px;">⚠️ Sem GPS cadastrado</span>' : ''}
             </div>
           </label>
@@ -1663,67 +1692,47 @@
       let selectedCondos = condos.filter(c => selectedIds.includes(c.id));
 
       showToast('Obtendo sua localização atual...');
+      navigator.geolocation.getCurrentPosition((pos) => {
+        let currentLat = pos.coords.latitude;
+        let currentLng = pos.coords.longitude;
+        let orderedRoute = [], unvisited = [...selectedCondos];
 
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          let currentLat = pos.coords.latitude;
-          let currentLng = pos.coords.longitude;
-
-          let orderedRoute = [];
-          let unvisited = [...selectedCondos];
-
-          while (unvisited.length > 0) {
-            let nearestIdx = 0;
-            let minDistance = Infinity;
-
-            for (let i = 0; i < unvisited.length; i++) {
-              let dist = calculateHaversineDistance(currentLat, currentLng, parseFloat(unvisited[i].lat), parseFloat(unvisited[i].lng));
-              if (dist < minDistance) {
-                minDistance = dist;
-                nearestIdx = i;
-              }
-            }
-
-            let nextCondo = unvisited.splice(nearestIdx, 1)[0];
-            orderedRoute.push(nextCondo);
-            currentLat = parseFloat(nextCondo.lat);
-            currentLng = parseFloat(nextCondo.lng);
+        while (unvisited.length > 0) {
+          let nearestIdx = 0, minDistance = Infinity;
+          for (let i = 0; i < unvisited.length; i++) {
+            let dist = calculateHaversineDistance(currentLat, currentLng, parseFloat(unvisited[i].lat), parseFloat(unvisited[i].lng));
+            if (dist < minDistance) { minDistance = dist; nearestIdx = i; }
           }
+          let nextCondo = unvisited.splice(nearestIdx, 1)[0];
+          orderedRoute.push(nextCondo);
+          currentLat = parseFloat(nextCondo.lat);
+          currentLng = parseFloat(nextCondo.lng);
+        }
 
-          const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
-          const destination = `${orderedRoute[orderedRoute.length - 1].lat},${orderedRoute[orderedRoute.length - 1].lng}`;
-          
-          let waypoints = '';
-          if (orderedRoute.length > 1) {
-            waypoints = orderedRoute.slice(0, orderedRoute.length - 1)
-              .map(c => `${c.lat},${c.lng}`)
-              .join('|');
-          }
+        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
+        const destination = `${orderedRoute[orderedRoute.length - 1].lat},${orderedRoute[orderedRoute.length - 1].lng}`;
+        let waypoints = orderedRoute.length > 1 ? orderedRoute.slice(0, orderedRoute.length - 1).map(c => `${c.lat},${c.lng}`).join('|') : '';
 
-          let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
-          if (waypoints) { mapsUrl += `&waypoints=${encodeURIComponent(waypoints)}`; }
+        let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
+        if (waypoints) { mapsUrl += `&waypoints=${encodeURIComponent(waypoints)}`; }
 
-          window.open(mapsUrl, '_blank');
-          closeRouteModal();
-          showToast('Rota aberta no Google Maps!');
-        },
-        () => { alert('Erro ao obter sua localização GPS.'); },
-        { enableHighAccuracy: true }
-      );
+        window.open(mapsUrl, '_blank');
+        closeRouteModal();
+        showToast('Rota aberta no Google Maps!');
+      }, () => { alert('Erro ao obter GPS.'); }, { enableHighAccuracy: true });
     }
 
     function openLightbox(imageUrl) {
       document.getElementById('lightboxImg').src = imageUrl;
       document.getElementById('lightboxModal').classList.remove('hidden');
     }
-
     function closeLightbox() {
       document.getElementById('lightboxModal').classList.add('hidden');
       document.getElementById('lightboxImg').src = '';
     }
 
     function openTeamModal() {
-      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas Proprietários ou Administradores.'); return; }
+      if (userRole !== 'owner' && userRole !== 'admin') { alert('Apenas administradores.'); return; }
       renderTeamLists();
       document.getElementById('teamModal').classList.remove('hidden');
     }
@@ -1741,12 +1750,11 @@
           pending.map(item => {
             const email = typeof item === 'string' ? item : item.email;
             const name = typeof item === 'object' && item.name ? item.name : '';
-
             return `
               <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 10px; border-radius:8px; border:1px solid var(--border-color);">
                 <div>
                   <div style="color:var(--text-main); font-size:12px; font-weight:bold;">${escapeHtml(email)}</div>
-                  ${name ? `<div style="color:#38bdf8; font-size:10px;">${escapeHtml(name)} (USUÁRIO)</div>` : ''}
+                  ${name ? `<div style="color:#38bdf8; font-size:10px;">${escapeHtml(name)}</div>` : ''}
                 </div>
                 <div style="display:flex; gap:6px;">
                   <button onclick="approveMember('${email}')" class="btn btn-slate" style="padding:4px 8px; font-size:11px; background:#059669; color:white;">Aprovar</button>
@@ -1758,20 +1766,20 @@
 
         const approvedList = document.getElementById('approvedTeamList');
         const memberEmails = Object.keys(members);
-        approvedList.innerHTML = memberEmails.length === 0 ? '<span style="color:var(--text-muted); font-size:11px;">Nenhum colaborador configurado.</span>' :
+        approvedList.innerHTML = memberEmails.length === 0 ? '<span style="color:var(--text-muted); font-size:11px;">Nenhum colaborador.</span>' :
           memberEmails.map(email => {
             const m = members[email];
             return `
               <div style="background:var(--bg-card); padding:10px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="color:var(--text-main); font-weight:bold; font-size:12px;">${escapeHtml(email)}</span>
-                  <button onclick="removeMember('${email}')" class="icon-btn delete" title="Remover Acesso">🗑️ Remover</button>
+                  <button onclick="removeMember('${email}')" class="icon-btn delete" title="Remover">🗑️</button>
                 </div>
                 <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:11px;">
                   <label>Nível:
                     <select onchange="updateMemberRole('${email}', this.value)" class="form-control" style="width:auto; display:inline-block; padding:2px 6px; font-size:11px;">
-                      <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Supervisor / Admin</option>
-                      <option value="user" ${m.role === 'user' ? 'selected' : ''}>Usuário / Técnico</option>
+                      <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Supervisor</option>
+                      <option value="user" ${m.role === 'user' ? 'selected' : ''}>Técnico</option>
                     </select>
                   </label>
                   <label><input type="checkbox" ${m.canAdd ? 'checked' : ''} onchange="updateMemberPermission('${email}', 'canAdd', this.checked)"> Adicionar</label>
@@ -1787,26 +1795,23 @@
     function approveMember(email) {
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         let data = doc.data();
-        let pending = data.pendingTeam || [];
+        let pending = (data.pendingTeam || []).filter(p => (typeof p === 'string' ? p : p.email) !== email);
         let members = data.teamMembers || {};
-
-        pending = pending.filter(p => (typeof p === 'string' ? p : p.email) !== email);
         members[email] = { role: 'user', canAdd: false, canEdit: false, canDelete: false };
 
         db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending, teamMembers: members }).then(() => {
           renderTeamLists();
-          showToast('Membro aprovado como Usuário!');
+          showToast('Membro aprovado!');
         });
       });
     }
 
     function rejectMember(email) {
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let data = doc.data();
-        let pending = (data.pendingTeam || []).filter(p => (typeof p === 'string' ? p : p.email) !== email);
+        let pending = (doc.data().pendingTeam || []).filter(p => (typeof p === 'string' ? p : p.email) !== email);
         db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
           renderTeamLists();
-          showToast('Solicitação recusada.');
+          showToast('Recusado.');
         });
       });
     }
@@ -1817,7 +1822,7 @@
         delete members[email];
         db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
           renderTeamLists();
-          showToast('Membro removido.');
+          showToast('Removido.');
         });
       });
     }
@@ -1828,17 +1833,13 @@
         if (members[email]) {
           members[email].role = newRole;
           if (newRole === 'admin') {
-            members[email].canAdd = true;
-            members[email].canEdit = true;
-            members[email].canDelete = true;
+            members[email].canAdd = true; members[email].canEdit = true; members[email].canDelete = true;
           } else {
-            members[email].canAdd = false;
-            members[email].canEdit = false;
-            members[email].canDelete = false;
+            members[email].canAdd = false; members[email].canEdit = false; members[email].canDelete = false;
           }
           db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
             renderTeamLists();
-            showToast(newRole === 'admin' ? 'Promovido a Supervisor!' : 'Rebaixado para Usuário Leitura.');
+            showToast('Cargo atualizado!');
           });
         }
       });
@@ -1849,16 +1850,14 @@
         let members = doc.data().teamMembers || {};
         if (members[email]) {
           members[email][permKey] = value;
-          db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => {
-            showToast('Permissão atualizada!');
-          });
+          db.collection("empresas").doc(ownerEmail).update({ teamMembers: members }).then(() => showToast('Permissão atualizada!'));
         }
       });
     }
 
     function sendDirectInvite() {
       const email = document.getElementById('inviteUserEmailInput').value.trim();
-      if (!email) { alert('Digite o e-mail do colaborador.'); return; }
+      if (!email) { alert('Digite o e-mail.'); return; }
 
       db.collection("empresas").doc(ownerEmail).get().then((doc) => {
         let pending = doc.data().pendingTeam || [];
@@ -1867,10 +1866,10 @@
           db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
             document.getElementById('inviteUserEmailInput').value = '';
             renderTeamLists();
-            showToast('Convite enviado! O usuário já pode acessar.');
+            showToast('Convite enviado!');
           });
         } else {
-          showToast('Este e-mail já está na lista de convites.');
+          showToast('Já está na lista.');
         }
       });
     }
@@ -1886,20 +1885,16 @@
         used: false
       }).then(() => {
         const baseUrl = window.location.href.split('?')[0];
-        const inviteUrl = `${baseUrl}?invite=${token}`;
-        
-        document.getElementById('generatedLinkInput').value = inviteUrl;
+        document.getElementById('generatedLinkInput').value = `${baseUrl}?invite=${token}`;
         document.getElementById('generatedLinkContainer').style.display = 'block';
-        showToast('Link de convite gerado!');
+        showToast('Link gerado!');
       });
     }
 
     function copyGeneratedLink() {
       const input = document.getElementById('generatedLinkInput');
       input.select();
-      navigator.clipboard.writeText(input.value).then(() => {
-        showToast('Link de convite copiado!');
-      });
+      navigator.clipboard.writeText(input.value).then(() => showToast('Link copiado!'));
     }
 
     function renderCondos() {
@@ -1945,7 +1940,7 @@
                 ${c.lat && c.lng ? `<div style="font-size:10px; color:#10b981; font-family:monospace;">🌐 GPS Ativo</div>` : `<div style="font-size:10px; color:#f43f5e; font-weight:bold;">⚠️ Sem GPS cadastrado</div>`}
                 ${c.phone ? `<div>📞 ${escapeHtml(c.phone)}</div>` : ''}
                 ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
-                ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold; display:flex; align-items:center; gap:4px;">🟢 Check-in ativo desde ${c.checkInTime}</div>` : ''}
+                ${c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in ativo desde ${c.checkInTime}</div>` : ''}
                 ${c.lastCheckOut && !c.checkedIn ? `<div style="margin-top:4px; font-size:11px; color:var(--text-muted);">⚪ Último Check-out: ${c.lastCheckOut}</div>` : ''}
               </div>
             </div>
@@ -1956,7 +1951,7 @@
                 <button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${reportsCount})</button>
               </div>
               <div class="card-footer-row">
-                <a href="https://www.google.com/maps/search/?api=1&query=${c.lat && c.lng ? encodeURIComponent(c.lat + ',' + c.lng) : encodeURIComponent(c.address + ', ' + c.number + (c.neighborhood ? ' - ' + c.neighborhood : ''))}" target="_blank" class="btn btn-slate" style="text-decoration:none;">🗺️ GPS</a>
+                <a href="https://www.google.com/maps/search/?api=1&query=${c.lat && c.lng ? encodeURIComponent(c.lat + ',' + c.lng) : encodeURIComponent(c.address + ', ' + c.number)}" target="_blank" class="btn btn-slate" style="text-decoration:none;">🗺️ GPS</a>
                 <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">
                   ${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}
                 </button>
@@ -1972,10 +1967,7 @@
     }
 
     function openModal(condo = null) {
-      if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) {
-        alert('Sem permissão para adicionar ou editar.');
-        return;
-      }
+      if (userRole === 'user' && !userPermissions.canAdd && !userPermissions.canEdit) { alert('Sem permissão.'); return; }
       document.getElementById('condoForm').reset();
       document.getElementById('condoId').value = condo ? condo.id : '';
       document.getElementById('modalTitle').textContent = condo ? 'Editar Condomínio' : 'Cadastrar Condomínio';
