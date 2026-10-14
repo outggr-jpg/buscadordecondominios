@@ -54,7 +54,6 @@
     
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
     
-    /* CARDS REFINADOS */
     .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, border-color 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
     .card:hover { border-color: #475569; }
     .card.checked-in { border-color: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.25); }
@@ -89,11 +88,9 @@
     .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     .report-text { font-size: 12px; color: #e2e8f0; white-space: pre-wrap; margin: 4px 0; }
 
-    /* SELEÇÃO DE ROTA */
     .route-item { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
     .route-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0284c7; cursor: pointer; }
 
-    /* LIGHTBOX TELA CHEIA */
     .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .lightbox-modal.hidden { display: none; }
     .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
@@ -111,13 +108,16 @@
     .form-row { display: flex; gap: 8px; }
     .form-row .form-group { flex: 1; }
     
-    /* AUTH SCREEN */
     .auth-container { max-width: 420px; width: 100%; margin: auto; background-color: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
     .auth-title { font-size: 18px; font-weight: bold; color: white; text-align: center; margin-bottom: 4px; }
     .auth-subtitle { font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 16px; }
     .tab-nav { display: flex; background: #0f172a; border-radius: 10px; padding: 3px; margin-bottom: 16px; gap: 2px; }
     .tab-btn { flex: 1; text-align: center; padding: 6px 4px; font-size: 11px; font-weight: 600; color: #94a3b8; border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .tab-btn.active { background: #1e293b; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+    .stat-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; text-align: center; }
+    .stat-num { font-size: 20px; font-weight: bold; color: #38bdf8; }
+    .stat-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-top: 2px; }
 
     .toast { position: fixed; bottom: 20px; right: 20px; background-color: #1e293b; border: 1px solid #0284c7; color: white; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -219,13 +219,14 @@
             <h1 class="title">Buscador de Condomínios</h1>
             <div class="company-row">
               <span id="companyNameDisplay" class="subtitle">Empresa</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.6.1</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v4.7.0</span>
             </div>
           </div>
         </div>
 
         <div class="actions">
           <button onclick="openRouteModal()" class="btn btn-amber">🚗 Fazer Rota</button>
+          <button id="globalReportBtn" onclick="openGlobalReportModal()" class="btn btn-purple">📊 Relatórios Geral</button>
           <button id="installAppBtn" onclick="triggerPWAInstall()" class="btn btn-emerald">📥 Instalar</button>
           <button id="teamBtn" onclick="openTeamModal()" class="btn btn-slate" title="Gerenciar Equipe e Permissões">👥 Equipe</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-sky">+ Novo</button>
@@ -250,6 +251,64 @@
         Nenhum condomínio encontrado.
       </div>
     </main>
+  </div>
+
+  <!-- MODAL DE RELATÓRIOS GERAIS / MES (NOVO v4.7.0) -->
+  <div id="globalReportModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 style="color:white; font-size: 16px;">📊 Relatório Geral de Atendimentos</h3>
+        <button onclick="closeGlobalReportModal()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:18px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- FILTROS -->
+        <div style="background:#0f172a; padding:12px; border-radius:10px; border:1px solid #334155; display:flex; flex-direction:column; gap:10px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Filtrar por Mês/Ano</label>
+              <input type="month" id="filterMonthInput" class="form-control" onchange="generateGlobalReport()">
+            </div>
+            <div class="form-group">
+              <label>Filtrar por Técnico</label>
+              <select id="filterTechSelect" class="form-control" onchange="generateGlobalReport()">
+                <option value="">Todos os Técnicos</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Filtrar por Condomínio</label>
+              <select id="filterCondoSelect" class="form-control" onchange="generateGlobalReport()">
+                <option value="">Todos os Condomínios</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD DE ESTATÍSTICAS -->
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px;">
+          <div class="stat-card">
+            <div id="statTotalVisits" class="stat-num">0</div>
+            <div class="stat-label">Total Atendimentos</div>
+          </div>
+          <div class="stat-card">
+            <div id="statTotalCondos" class="stat-num">0</div>
+            <div class="stat-label">Condomínios Atendidos</div>
+          </div>
+          <div class="stat-card">
+            <div id="statTotalHours" class="stat-num">0h</div>
+            <div class="stat-label">Tempo Total em Campo</div>
+          </div>
+        </div>
+
+        <!-- LISTA CONSOLIDADA DE VISITAS -->
+        <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid #334155; padding-top: 12px;">
+        <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
+        <button onclick="downloadGlobalReportPDF()" class="btn btn-sky">📄 Exportar Resumo em PDF</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL DE OTIMIZAÇÃO DE ROTA -->
@@ -358,7 +417,7 @@
         </div>
 
         <div class="form-group">
-          <label>Fotos e Vídeos da Visita (Opcional)</label>
+          <label>Fotos e Vídeos (Carimbo e Marca d'Água Ativos)</label>
           <input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 4px;">
           <div id="mediaPreviewContainer" class="media-preview-container"></div>
         </div>
@@ -432,7 +491,7 @@
     </div>
   </div>
 
-  <!-- MODAL HISTÓRICO DE VERSÕES COMPLETO -->
+  <!-- MODAL HISTÓRICO DE VERSÕES -->
   <div id="changelogModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -443,21 +502,22 @@
       <div class="modal-body">
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.6.1</span>
+            <span>Versão 4.7.0</span>
             <span class="version-date">Atual</span>
           </div>
           <ul class="version-list">
-            <li>Refinamento do layout do painel principal (busca com ícone, cards com realce de Check-in ativo e visual limpo).</li>
-            <li>Remoção de botões de backup obsoletos para focar na sincronização nativa na nuvem.</li>
+            <li>Cálculo e exibição automática do Tempo de Visita (duração em minutos/horas).</li>
+            <li>Marca d'água automática em fotos anexadas (Nome do Condomínio, Técnico, Data e Hora).</li>
+            <li>Novo painel de Relatórios Gerais filtrável por Mês/Ano, Técnico e Condomínio.</li>
           </ul>
         </div>
 
         <div class="version-item">
           <div class="version-title">
-            <span>Versão 4.6.0</span>
+            <span>Versão 4.6.1</span>
           </div>
           <ul class="version-list">
-            <li>Sistema de convites por e-mail e criação de links temporários com expiração automática em 24h.</li>
+            <li>Refinamento do layout do painel principal (busca com ícone e cards refinados).</li>
           </ul>
         </div>
       </div>
@@ -490,6 +550,7 @@
     let selectedMediaFiles = [];
     let deferredPrompt = null;
     let currentInviteToken = null;
+    let filteredGlobalVisits = [];
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -514,6 +575,11 @@
       const urlParams = new URLSearchParams(window.location.search);
       const inviteToken = urlParams.get('invite');
       if (inviteToken) { checkInviteToken(inviteToken); }
+
+      // Define mês atual por padrão no filtro
+      const now = new Date();
+      const monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      document.getElementById('filterMonthInput').value = monthStr;
 
       try {
         firebase.auth().onAuthStateChanged((user) => {
@@ -723,6 +789,7 @@
             loadDefaultDataForNewCompany(rootOwnerEmail);
           } else {
             renderCondos();
+            populateReportFilters();
           }
         });
     }
@@ -826,52 +893,7 @@
       if (condo) openModal(condo);
     }
 
-    function sendDirectInvite() {
-      const email = document.getElementById('inviteUserEmailInput').value.trim();
-      if (!email) { alert('Digite o e-mail do colaborador.'); return; }
-
-      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
-        let pending = doc.data().pendingTeam || [];
-        if (!pending.includes(email)) {
-          pending.push(email);
-          db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
-            document.getElementById('inviteUserEmailInput').value = '';
-            renderTeamLists();
-            showToast('Convite enviado! O usuário já pode acessar.');
-          });
-        } else {
-          showToast('Este e-mail já está na lista de convites.');
-        }
-      });
-    }
-
-    function generateInviteLink() {
-      const token = 'invite_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-
-      db.collection("convites").doc(token).set({
-        ownerEmail: ownerEmail,
-        createdAt: Date.now(),
-        expiresAt: expiresAt,
-        used: false
-      }).then(() => {
-        const baseUrl = window.location.href.split('?')[0];
-        const inviteUrl = `${baseUrl}?invite=${token}`;
-        
-        document.getElementById('generatedLinkInput').value = inviteUrl;
-        document.getElementById('generatedLinkContainer').style.display = 'block';
-        showToast('Link de convite gerado!');
-      });
-    }
-
-    function copyGeneratedLink() {
-      const input = document.getElementById('generatedLinkInput');
-      input.select();
-      navigator.clipboard.writeText(input.value).then(() => {
-        showToast('Link de convite copiado!');
-      });
-    }
-
+    // CHECK-IN / CHECK-OUT E CÁLCULO DE DURAÇÃO (v4.7.0)
     function toggleCheckIn(id) {
       const condo = condos.find(c => c.id === id);
       if (!condo) return;
@@ -898,10 +920,12 @@
     }
 
     function performDirectCheckIn(id) {
+      const now = new Date();
       db.collection("condominios").doc(id).update({
         checkedIn: true,
-        checkInTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        checkInDate: new Date().toLocaleDateString('pt-BR')
+        checkInTimestamp: now.getTime(),
+        checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        checkInDate: now.toLocaleDateString('pt-BR')
       }).then(() => {
         showToast('Check-in realizado!');
         loadCondosForOwner(ownerEmail);
@@ -922,16 +946,64 @@
 
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
+    // SELEÇÃO E MARCA D'ÁGUA EM FOTOS (v4.7.0)
     function handleMediaSelection(e) {
       const files = Array.from(e.target.files);
+      const condoId = document.getElementById('reportCondoId').value;
+      const condo = condos.find(c => c.id === condoId);
+      const condoName = condo ? condo.name : 'Condomínio';
+      const techName = currentUser ? currentUser.email.split('@')[0] : 'Técnico';
+
       files.forEach(file => {
         const reader = new FileReader();
         reader.onload = (evt) => {
-          selectedMediaFiles.push({ name: file.name, type: file.type.startsWith('video') ? 'video' : 'image', dataUrl: evt.target.result });
-          renderMediaPreviews();
+          if (file.type.startsWith('image')) {
+            // Aplica Marca D'água na Foto
+            applyWatermark(evt.target.result, condoName, techName, (watermarkedUrl) => {
+              selectedMediaFiles.push({ name: file.name, type: 'image', dataUrl: watermarkedUrl });
+              renderMediaPreviews();
+            });
+          } else {
+            selectedMediaFiles.push({ name: file.name, type: 'video', dataUrl: evt.target.result });
+            renderMediaPreviews();
+          }
         };
         reader.readAsDataURL(file);
       });
+    }
+
+    function applyWatermark(dataUrl, condoName, techName, callback) {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+
+        ctx.drawImage(img, 0, 0);
+
+        // Faixa de fundo preta translúcida no rodapé da foto
+        const bannerHeight = Math.max(30, img.height * 0.08);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, img.height - bannerHeight, img.width, bannerHeight);
+
+        // Texto do Carimbo
+        const fontSize = Math.max(12, Math.floor(bannerHeight * 0.35));
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.fillStyle = '#ffffff';
+
+        const nowStr = new Date().toLocaleString('pt-BR');
+        const textLine1 = `📍 ${condoName} | 👤 ${techName}`;
+        const textLine2 = `📅 ${nowStr} (Protech Segurança)`;
+
+        ctx.fillText(textLine1, 15, img.height - (bannerHeight * 0.52));
+        ctx.setFont(`${fontSize * 0.85}px sans-serif`);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText(textLine2, 15, img.height - (bannerHeight * 0.18));
+
+        callback(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = dataUrl;
     }
 
     function renderMediaPreviews() {
@@ -952,12 +1024,28 @@
       const condo = condos.find(c => c.id === condoId);
       if (!condo) return;
 
+      const now = new Date();
       const reportText = document.getElementById('reportText').value.trim();
-      const outTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const outTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Cálculo exato de duração em minutos
+      let durationMinutes = 0;
+      let durationText = 'N/A';
+      if (condo.checkInTimestamp) {
+        const diffMs = now.getTime() - condo.checkInTimestamp;
+        durationMinutes = Math.max(1, Math.round(diffMs / (1000 * 60)));
+        const hrs = Math.floor(durationMinutes / 60);
+        const mins = durationMinutes % 60;
+        durationText = hrs > 0 ? `${hrs}h ${mins}min` : `${mins} min`;
+      }
+
       const newReport = {
-        date: new Date().toLocaleDateString('pt-BR'),
+        date: now.toLocaleDateString('pt-BR'),
+        isoDate: now.toISOString().split('T')[0], // YYYY-MM-DD
         checkInTime: condo.checkInTime || '--:--',
         checkOutTime: outTime,
+        durationMinutes: durationMinutes,
+        durationText: durationText,
         userEmail: currentUser ? currentUser.email : 'técnico',
         text: reportText,
         media: selectedMediaFiles
@@ -971,6 +1059,130 @@
         closeReportModal();
         loadCondosForOwner(ownerEmail);
       });
+    }
+
+    // RELATÓRIOS GERAIS E FILTROS (v4.7.0)
+    function openGlobalReportModal() {
+      generateGlobalReport();
+      document.getElementById('globalReportModal').classList.remove('hidden');
+    }
+    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
+
+    function populateReportFilters() {
+      const techSelect = document.getElementById('filterTechSelect');
+      const condoSelect = document.getElementById('filterCondoSelect');
+
+      // Povoa condomínios
+      condoSelect.innerHTML = '<option value="">Todos os Condomínios</option>' +
+        condos.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+
+      // Povoa técnicos únicos dos relatórios
+      let techs = new Set();
+      condos.forEach(c => {
+        (c.reports || []).forEach(r => { if (r.userEmail) techs.add(r.userEmail); });
+      });
+
+      techSelect.innerHTML = '<option value="">Todos os Técnicos</option>' +
+        Array.from(techs).map(t => `<option value="${t}">${escapeHtml(t)}</option>`).join('');
+    }
+
+    function generateGlobalReport() {
+      const monthFilter = document.getElementById('filterMonthInput').value; // YYYY-MM
+      const techFilter = document.getElementById('filterTechSelect').value;
+      const condoFilter = document.getElementById('filterCondoSelect').value;
+
+      filteredGlobalVisits = [];
+      let totalMinutes = 0;
+      let visitedCondoIds = new Set();
+
+      condos.forEach(c => {
+        if (condoFilter && c.id !== condoFilter) return;
+
+        (c.reports || []).forEach(r => {
+          if (techFilter && r.userEmail !== techFilter) return;
+
+          // Converte data pt-BR (DD/MM/YYYY) para ISO (YYYY-MM-DD)
+          let isoDate = r.isoDate;
+          if (!isoDate && r.date) {
+            const parts = r.date.split('/');
+            if (parts.length === 3) isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+
+          if (monthFilter && isoDate && !isoDate.startsWith(monthFilter)) return;
+
+          filteredGlobalVisits.push({ condoName: c.name, ...r });
+          totalMinutes += (r.durationMinutes || 0);
+          visitedCondoIds.add(c.id);
+        });
+      });
+
+      // Atualiza Estatísticas
+      document.getElementById('statTotalVisits').textContent = filteredGlobalVisits.length;
+      document.getElementById('statTotalCondos').textContent = visitedCondoIds.size;
+      const totalHrs = Math.floor(totalMinutes / 60);
+      const totalMins = totalMinutes % 60;
+      document.getElementById('statTotalHours').textContent = `${totalHrs}h ${totalMins}m`;
+
+      // Renderiza Lista na Tela
+      const container = document.getElementById('globalReportListContainer');
+      if (filteredGlobalVisits.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">Nenhum atendimento encontrado para os filtros selecionados.</div>';
+      } else {
+        container.innerHTML = filteredGlobalVisits.map(r => `
+          <div class="report-card">
+            <div class="report-header">
+              <span>🏢 ${escapeHtml(r.condoName)}</span>
+              <span style="color:#10b981;">⏱️ ${r.durationText || 'N/A'}</span>
+            </div>
+            <div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; margin-top:2px;">
+              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
+              <span>👤 ${escapeHtml(r.userEmail)}</span>
+            </div>
+            <div class="report-text">${escapeHtml(r.text)}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function downloadGlobalReportPDF() {
+      if (filteredGlobalVisits.length === 0) { alert('Nenhum dado para exportar.'); return; }
+      if (!window.jspdf) { alert('Biblioteca de PDF carregando...'); return; }
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(15);
+        doc.text("RELATORIO CONSOLIDADO DE ATENDIMENTOS", 14, 20);
+
+        doc.setFontSize(10);
+        doc.setFont("Helvetica", "normal");
+        doc.text(`Empresa: Protech Seguranca Eletronica`, 14, 27);
+        doc.text(`Total de Visitas: ${filteredGlobalVisits.length}`, 14, 33);
+
+        doc.line(14, 37, 196, 37);
+
+        let y = 45;
+        filteredGlobalVisits.forEach((r, idx) => {
+          if (y > 260) { doc.addPage(); y = 20; }
+
+          doc.setFont("Helvetica", "bold");
+          doc.text(`${idx + 1}. ${r.condoName} - ${r.date}`, 14, y);
+          doc.setFont("Helvetica", "normal");
+          doc.text(`Horario: ${r.checkInTime} as ${r.checkOutTime} (${r.durationText || 'N/A'}) | Tecnico: ${r.userEmail}`, 14, y + 5);
+          
+          const splitText = doc.splitTextToSize(`Servico: ${r.text}`, 180);
+          doc.text(splitText, 14, y + 11);
+
+          y += 13 + (splitText.length * 5);
+          doc.setDrawColor(220, 220, 220);
+          doc.line(14, y - 3, 196, y - 3);
+        });
+
+        doc.save(`Relatorio_Geral_Protech_${Date.now()}.pdf`);
+        showToast('PDF Consolidado Baixado!');
+      } catch(err) { alert('Erro ao gerar PDF.'); }
     }
 
     function openHistoryModal(condoId) {
@@ -989,6 +1201,7 @@
               <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
               <button onclick="downloadReportPDF('${condo.id}', ${idx})" class="btn btn-sky" style="padding:2px 8px; font-size:10px;">📄 Baixar PDF</button>
             </div>
+            <div style="font-size:11px; color:#10b981; font-weight:bold; margin-top:2px;">⏱️ Duração da visita: ${r.durationText || 'N/A'}</div>
             <div style="font-size:10px; color:#94a3b8;">👤 Técnico: ${escapeHtml(r.userEmail)}</div>
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
@@ -1033,7 +1246,7 @@
 
         doc.setFont("Helvetica", "bold");
         doc.text(`Data da Visita: ${report.date}`, 14, 52);
-        doc.text(`Horario: Check-in ${report.checkInTime} as ${report.checkOutTime}`, 14, 58);
+        doc.text(`Horario: Check-in ${report.checkInTime} as ${report.checkOutTime} (Duracao: ${report.durationText || 'N/A'})`, 14, 58);
         doc.text(`Tecnico Responsavel: ${report.userEmail}`, 14, 64);
 
         doc.line(14, 68, 196, 68);
@@ -1053,7 +1266,7 @@
             if (currentY > 230) { doc.addPage(); currentY = 20; }
             
             doc.setFont("Helvetica", "bold");
-            doc.text("Fotos Anexadas da Visita:", 14, currentY);
+            doc.text("Fotos Anexadas com Marca d'Agua Comprovatoria:", 14, currentY);
             currentY += 8;
 
             let imgX = 14;
@@ -1290,6 +1503,52 @@
             showToast('Permissão atualizada!');
           });
         }
+      });
+    }
+
+    function sendDirectInvite() {
+      const email = document.getElementById('inviteUserEmailInput').value.trim();
+      if (!email) { alert('Digite o e-mail do colaborador.'); return; }
+
+      db.collection("empresas").doc(ownerEmail).get().then((doc) => {
+        let pending = doc.data().pendingTeam || [];
+        if (!pending.includes(email)) {
+          pending.push(email);
+          db.collection("empresas").doc(ownerEmail).update({ pendingTeam: pending }).then(() => {
+            document.getElementById('inviteUserEmailInput').value = '';
+            renderTeamLists();
+            showToast('Convite enviado! O usuário já pode acessar.');
+          });
+        } else {
+          showToast('Este e-mail já está na lista de convites.');
+        }
+      });
+    }
+
+    function generateInviteLink() {
+      const token = 'invite_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+
+      db.collection("convites").doc(token).set({
+        ownerEmail: ownerEmail,
+        createdAt: Date.now(),
+        expiresAt: expiresAt,
+        used: false
+      }).then(() => {
+        const baseUrl = window.location.href.split('?')[0];
+        const inviteUrl = `${baseUrl}?invite=${token}`;
+        
+        document.getElementById('generatedLinkInput').value = inviteUrl;
+        document.getElementById('generatedLinkContainer').style.display = 'block';
+        showToast('Link de convite gerado!');
+      });
+    }
+
+    function copyGeneratedLink() {
+      const input = document.getElementById('generatedLinkInput');
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Link de convite copiado!');
       });
     }
 
