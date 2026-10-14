@@ -1,15 +1,24 @@
 {
-  "name": "Buscador de Condomínios - Protech",
+  "name": "Protech Condomínios",
   "short_name": "Protech",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0f172a",
-  "theme_color": "#1e293b",
+  "theme_color": "#0f172a",
+  "description": "Aplicativo operacional de gestão e visitas a condomínios para equipes de segurança eletrônica.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1040/1040993.png",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
