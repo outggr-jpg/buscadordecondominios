@@ -260,7 +260,7 @@
             <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
             <div class="company-row">
               <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.1</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.2</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
               <span id="graceBadgeDisplay" class="badge badge-grace" style="display:none;">⚠️ Tolerância</span>
             </div>
@@ -272,10 +272,10 @@
           <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate">+ Novo</button>
           
-          <!-- Bloco do Usuário (Nome + Avatar) posicionado à direita e alinhado com o padrão da esquerda -->
+          <!-- Bloco do Usuário (Nome + Avatar) posicionado à direita e alinhado exatamente na mesma altura da esquerda -->
           <div onclick="openSettingsModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px 4px; border-radius: 10px; transition: 0.2s;" title="Configurações e Perfil">
             <div style="text-align: right; line-height: 1.2;">
-              <h1 id="headerUserNameDisplay" class="title" style="font-size: 16px;">Usuário</h1>
+              <h1 id="headerUserNameDisplay" class="title">Usuário</h1>
               <div class="company-row" style="justify-content: flex-end;">
                 <span class="subtitle">Perfil Operacional</span>
               </div>
@@ -284,8 +284,6 @@
               <img id="headerUserAvatarImg" class="user-avatar" src="" alt="Avatar">
             </div>
           </div>
-
-          <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
         </div>
       </div>
     </header>
@@ -403,6 +401,11 @@
             <div class="theme-dot" id="theme-navy" style="background:#1e1b4b;" title="Azul Marinho" onclick="applyAppTheme('navy')"></div>
             <div class="theme-dot" id="theme-light" style="background:#f8fafc;" title="Modo Claro" onclick="applyAppTheme('light')"></div>
           </div>
+        </div>
+
+        <!-- BOTÃO SAIR POSICIONADO COMO A ÚLTIMA OPÇÃO DENTRO DAS CONFIGURAÇÕES -->
+        <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:8px;">
+          <button onclick="closeSettingsModal(); handleLogout();" class="btn btn-rose" style="width: 100%; justify-content: center; padding: 10px;">🚪 Sair da Conta</button>
         </div>
       </div>
 
@@ -554,11 +557,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 5.9.1</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 5.9.2</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Otimização de compressão de fotos com marca d'água para armazenamento seguro no Firestore.</li>
-            <li>Adicionada exportação completa de relatórios em PDF.</li>
-            <li>Correção na geração e cópia de links de convite para equipe.</li>
+            <li>Otimização avançada de redimensionamento e compressão de imagens para salvamento estável no Firestore.</li>
+            <li>Inclusão definitiva do botão e rotina de exportação do relatório em PDF.</li>
+            <li>Botão "Sair" relocado para a última opção dentro do menu de configurações (perfil do usuário).</li>
+            <li>Alinhamento perfeito do nome do utilizador com o nome da empresa no cabeçalho.</li>
           </ul>
         </div>
       </div>
@@ -1016,24 +1020,24 @@
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
     }
 
-    // Função Otimizada para comprimir imagem e encaixar no limite do Firestore
+    // Função de compressão ultra-eficiente para garantir que as fotos fiquem bem abaixo de 1MB para o Firestore
     function applyWatermarkAsync(dataUrl, condoName, techName) {
       return new Promise((res) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height;
-          if (w > 700) { h = Math.round((h * 700) / w); w = 700; }
+          if (w > 600) { h = Math.round((h * 600) / w); w = 600; }
           canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          const bh = Math.max(26, h * 0.08);
-          ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, h - bh, w, bh);
+          const bh = Math.max(24, h * 0.08);
+          ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, h - bh, w, bh);
           ctx.font = `bold ${Math.max(10, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
           ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 10, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
           ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 10, h - (bh * 0.18));
-          res(canvas.toDataURL('image/jpeg', 0.6));
+          res(canvas.toDataURL('image/jpeg', 0.5));
         };
         img.src = dataUrl;
       });
