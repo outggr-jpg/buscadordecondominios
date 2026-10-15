@@ -129,7 +129,7 @@
 
     .paywall-container { max-width: 460px; width: 100%; margin: auto; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 28px; text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.6); }
 
-    .user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 16px; }
     .theme-color-picker { display: flex; gap: 8px; margin-top: 6px; }
     .theme-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
     .theme-dot:hover { transform: scale(1.15); }
@@ -260,27 +260,31 @@
             <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
             <div class="company-row">
               <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.0</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.1</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
               <span id="graceBadgeDisplay" class="badge badge-grace" style="display:none;">⚠️ Tolerância</span>
             </div>
           </div>
         </div>
 
-        <!-- LADO DIREITO: NOME E AVATAR DO USUÁRIO + BOTÕES -->
+        <!-- LADO DIREITO: BOTÕES DE AÇÃO + PERFIL DO USUÁRIO (CLICÁVEL PARA CONFIGURAÇÕES) -->
         <div class="actions">
           <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate">+ Novo</button>
           
-          <!-- Bloco do Usuário (Nome + Avatar) -->
-          <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border-color);">
+          <!-- Bloco do Usuário (Nome + Avatar) posicionado à direita e alinhado com o padrão da esquerda -->
+          <div onclick="openSettingsModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px 4px; border-radius: 10px; transition: 0.2s;" title="Configurações e Perfil">
             <div style="text-align: right; line-height: 1.2;">
-              <div id="headerUserNameDisplay" style="font-size: 11px; font-weight: bold; color: var(--text-main);">Usuário</div>
+              <h1 id="headerUserNameDisplay" class="title" style="font-size: 16px;">Usuário</h1>
+              <div class="company-row" style="justify-content: flex-end;">
+                <span class="subtitle">Perfil Operacional</span>
+              </div>
             </div>
-            <img id="headerUserAvatarImg" class="user-avatar" style="width: 30px; height: 30px; border-width: 1px;" src="" alt="Avatar" onclick="openSettingsModal()">
+            <div id="headerUserAvatarContainer">
+              <img id="headerUserAvatarImg" class="user-avatar" src="" alt="Avatar">
+            </div>
           </div>
 
-          <button onclick="openSettingsModal()" class="btn btn-slate" title="Configurações e Perfil" style="padding: 6px 10px; font-size: 16px;">⚙️</button>
           <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
         </div>
       </div>
@@ -550,10 +554,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 5.9.0</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 5.9.1</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Controle de assinatura independente via gateway externo e Firebase.</li>
-            <li>Tolerância de 7 dias pós-vencimento/cancelamento com retenção permanente de dados.</li>
+            <li>Otimização de compressão de fotos com marca d'água para armazenamento seguro no Firestore.</li>
+            <li>Adicionada exportação completa de relatórios em PDF.</li>
+            <li>Correção na geração e cópia de links de convite para equipe.</li>
           </ul>
         </div>
       </div>
@@ -634,9 +639,7 @@
       } catch(e) {}
     });
 
-    // SINCRONIZAÇÃO EM TEMPO REAL DO CABEÇALHO (EMPRESA + USUÁRIO)
     function setupRealtimeUserAndCompanySync(userId, userEmail) {
-      // 1. Escuta dados globais da Empresa (Sincronizado para toda a equipe)
       db.collection("empresas").onSnapshot((snapshot) => {
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
@@ -648,7 +651,6 @@
         });
       });
 
-      // 2. Escuta/Carrega dados individuais do Perfil do Usuário
       const storedName = localStorage.getItem('protech_user_name_' + userEmail) || userEmail.split('@')[0];
       const storedAvatar = localStorage.getItem('protech_user_avatar_' + userEmail) || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
       
@@ -1014,23 +1016,24 @@
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
     }
 
+    // Função Otimizada para comprimir imagem e encaixar no limite do Firestore
     function applyWatermarkAsync(dataUrl, condoName, techName) {
       return new Promise((res) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height;
-          if (w > 900) { h = Math.round((h * 900) / w); w = 900; }
+          if (w > 700) { h = Math.round((h * 700) / w); w = 700; }
           canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          const bh = Math.max(28, h * 0.08);
+          const bh = Math.max(26, h * 0.08);
           ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, h - bh, w, bh);
-          ctx.font = `bold ${Math.max(11, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
-          ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
+          ctx.font = `bold ${Math.max(10, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
+          ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 10, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
-          ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 12, h - (bh * 0.18));
-          res(canvas.toDataURL('image/jpeg', 0.75));
+          ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 10, h - (bh * 0.18));
+          res(canvas.toDataURL('image/jpeg', 0.6));
         };
         img.src = dataUrl;
       });
@@ -1060,10 +1063,96 @@
         showToast('Check-out concluído!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
-      }).catch(() => alert('Erro ao salvar no banco. Reduza o número de fotos.'));
+      }).catch((err) => alert('Erro ao salvar no banco. Reduza o número de fotos: ' + err.message));
     }
 
-    // NAVEGAÇÃO POR CARDS (MAPS AZUL E WAZE VERDE)
+    // Geração de Link de Convite
+    function generateInviteLink() {
+      if (!ownerEmail) return;
+      const token = 'inv_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+
+      db.collection("convites").doc(token).set({
+        ownerEmail: ownerEmail,
+        expiresAt: expiresAt,
+        used: false
+      }).then(() => {
+        const currentBaseUrl = window.location.origin + window.location.pathname;
+        const inviteUrl = `${currentBaseUrl}?invite=${token}`;
+        
+        document.getElementById('generatedLinkContainer').style.display = 'block';
+        document.getElementById('generatedLinkInput').value = inviteUrl;
+        showToast('Link de convite gerado com sucesso!');
+      }).catch(err => {
+        alert('Erro ao gerar link: ' + err.message);
+      });
+    }
+
+    function copyGeneratedLink() {
+      const input = document.getElementById('generatedLinkInput');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(input.value).then(() => {
+          showToast('Link copiado!');
+        }).catch(() => {
+          document.execCommand('copy');
+          showToast('Link copiado!');
+        });
+      } else {
+        document.execCommand('copy');
+        showToast('Link copiado!');
+      }
+    }
+
+    // Exportação em PDF do Relatório Geral
+    function downloadGlobalReportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Relatorio Geral de Atendimentos - Protech", 14, 20);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 28);
+
+      let y = 38;
+      doc.setFont("helvetica", "bold");
+      doc.text("Condominio", 14, y);
+      doc.text("Data", 90, y);
+      doc.text("Tecnico", 130, y);
+      
+      y += 6;
+      doc.line(14, y, 196, y);
+      y += 6;
+
+      doc.setFont("helvetica", "normal");
+      
+      let totalVisitsCount = 0;
+      condos.forEach(c => {
+        if (c.reports && c.reports.length > 0) {
+          c.reports.forEach(r => {
+            if (y > 270) { doc.addPage(); y = 20; }
+            doc.text((c.name || '').substring(0, 35), 14, y);
+            doc.text(r.date || '-', 90, y);
+            doc.text((r.userEmail || '').split('@')[0], 130, y);
+            y += 8;
+            totalVisitsCount++;
+          });
+        }
+      });
+
+      if (totalVisitsCount === 0) {
+        doc.text("Nenhum atendimento registrado no periodo.", 14, y);
+      }
+
+      doc.save("relatorio_atendimentos_protech.pdf");
+      showToast('PDF gerado com sucesso!');
+    }
+
     function abrirOpcoesGps(enderecoCompleto) {
       const enderecoEncoded = encodeURIComponent(enderecoCompleto);
       const urlWaze = `https://waze.com/ul?q=${enderecoEncoded}&navigate=yes`;
@@ -1071,7 +1160,6 @@
 
       document.getElementById('gpsLinkMaps').href = urlMaps;
       document.getElementById('gpsLinkWaze').href = urlWaze;
-
       document.getElementById('gpsModal').classList.remove('hidden');
     }
 
@@ -1131,6 +1219,8 @@
     function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
     function openTeamModal() { document.getElementById('teamModal').classList.remove('hidden'); }
     function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
+    function openGlobalReportModal() { document.getElementById('globalReportModal').classList.remove('hidden'); }
+    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
     function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
 
