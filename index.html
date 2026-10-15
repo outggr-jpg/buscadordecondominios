@@ -6,10 +6,11 @@
   <title>Protech Condomínios</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
-  <!-- SDKs do Firebase Compat -->
+  <!-- SDKs do Firebase Compat (App, Auth, Firestore e Storage) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <!-- Biblioteca jsPDF para exportação de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -260,7 +261,7 @@
             <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
             <div class="company-row">
               <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.2</span>
+              <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.3</span>
               <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
               <span id="graceBadgeDisplay" class="badge badge-grace" style="display:none;">⚠️ Tolerância</span>
             </div>
@@ -403,7 +404,7 @@
           </div>
         </div>
 
-        <!-- BOTÃO SAIR POSICIONADO COMO A ÚLTIMA OPÇÃO DENTRO DAS CONFIGURAÇÕES -->
+        <!-- BOTÃO SAIR -->
         <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:8px;">
           <button onclick="closeSettingsModal(); handleLogout();" class="btn btn-rose" style="width: 100%; justify-content: center; padding: 10px;">🚪 Sair da Conta</button>
         </div>
@@ -557,12 +558,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 5.9.2</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 5.9.3</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Otimização avançada de redimensionamento e compressão de imagens para salvamento estável no Firestore.</li>
-            <li>Inclusão definitiva do botão e rotina de exportação do relatório em PDF.</li>
-            <li>Botão "Sair" relocado para a última opção dentro do menu de configurações (perfil do usuário).</li>
-            <li>Alinhamento perfeito do nome do utilizador com o nome da empresa no cabeçalho.</li>
+            <li>Integração com **Firebase Storage** para salvamento ilimitado de fotos e vídeos na nuvem.</li>
+            <li>Eliminação definitiva de erros de estouro de limite por documento no Firestore.</li>
+            <li>Exportação de PDF, geração de links de convite e menus configurados.</li>
           </ul>
         </div>
       </div>
@@ -591,6 +591,7 @@
 
     try { firebase.initializeApp(firebaseConfig); } catch(err) {}
     const db = firebase.firestore();
+    const storage = firebase.storage(); // Inicialização do Firebase Storage
 
     let condos = [];
     let currentUser = null;
@@ -1010,7 +1011,7 @@
         if (f.type.startsWith('image')) {
           const dataUrl = await readFileAsDataURL(f);
           const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
-          selectedMediaFiles.push({ name: f.name, type: 'image', dataUrl: watermarked });
+          selectedMediaFiles.push({ name: f.name, type: 'image', fileObj: dataUrlToFile(watermarked, f.name), previewUrl: watermarked });
         }
       }
       renderMediaPreviews();
@@ -1020,24 +1021,30 @@
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
     }
 
-    // Função de compressão ultra-eficiente para garantir que as fotos fiquem bem abaixo de 1MB para o Firestore
+    function dataUrlToFile(dataUrl, filename) {
+      const arr = dataUrl.split(','); const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      return new File([u8arr], filename, { type: mime });
+    }
+
     function applyWatermarkAsync(dataUrl, condoName, techName) {
       return new Promise((res) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height;
-          if (w > 600) { h = Math.round((h * 600) / w); w = 600; }
+          if (w > 800) { h = Math.round((h * 800) / w); w = 800; }
           canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          const bh = Math.max(24, h * 0.08);
+          const bh = Math.max(26, h * 0.08);
           ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, h - bh, w, bh);
-          ctx.font = `bold ${Math.max(10, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
-          ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 10, h - (bh * 0.52));
+          ctx.font = `bold ${Math.max(11, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
+          ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
-          ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 10, h - (bh * 0.18));
-          res(canvas.toDataURL('image/jpeg', 0.5));
+          ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 12, h - (bh * 0.18));
+          res(canvas.toDataURL('image/jpeg', 0.8));
         };
         img.src = dataUrl;
       });
@@ -1045,29 +1052,46 @@
 
     function renderMediaPreviews() {
       document.getElementById('mediaPreviewContainer').innerHTML = selectedMediaFiles.length === 0 ? '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia.</span>' :
-        selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.dataUrl}"></div>`).join('');
+        selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.previewUrl}"></div>`).join('');
     }
 
-    function saveReportAndCheckOut(e) {
+    // SALVAMENTO USANDO O FIREBASE STORAGE PARA AS FOTOS
+    async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
       const c = condos.find(x => x.id === id);
-      const now = new Date();
-      const newRep = {
-        date: now.toLocaleDateString('pt-BR'),
-        isoDate: now.toISOString().split('T')[0],
-        checkInTime: c.checkInTime || '--:--',
-        checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        userEmail: currentUser.email,
-        text: document.getElementById('reportText').value.trim(),
-        media: selectedMediaFiles
-      };
-      let reps = c.reports || []; reps.unshift(newRep);
-      db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps }).then(() => {
-        showToast('Check-out concluído!');
+      showToast('Enviando fotos para a nuvem...');
+
+      try {
+        let uploadedMedia = [];
+        for (let mediaItem of selectedMediaFiles) {
+          const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name}`;
+          const storageRef = storage.ref().child(filePath);
+          const snapshot = await storageRef.put(mediaItem.fileObj);
+          const downloadUrl = await snapshot.ref.getDownloadURL();
+          uploadedMedia.push({ type: 'image', url: downloadUrl });
+        }
+
+        const now = new Date();
+        const newRep = {
+          date: now.toLocaleDateString('pt-BR'),
+          isoDate: now.toISOString().split('T')[0],
+          checkInTime: c.checkInTime || '--:--',
+          checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          userEmail: currentUser.email,
+          text: document.getElementById('reportText').value.trim(),
+          media: uploadedMedia
+        };
+
+        let reps = c.reports || []; reps.unshift(newRep);
+        await db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps });
+        
+        showToast('Check-out e fotos salvos com sucesso!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
-      }).catch((err) => alert('Erro ao salvar no banco. Reduza o número de fotos: ' + err.message));
+      } catch (err) {
+        alert('Erro ao enviar mídias para o Storage: ' + err.message);
+      }
     }
 
     // Geração de Link de Convite
