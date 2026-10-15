@@ -222,7 +222,7 @@
     </div>
   </div>
 
-  <!-- TELA DE BLOQUEIO / PAYWALL (DADOS PRESERVADOS) -->
+  <!-- TELA DE BLOQUEIO / PAYWALL -->
   <div id="paywallScreen" class="modal-overlay" style="background-color: #0f172a; display: none;">
     <div class="paywall-container">
       <div style="font-size: 44px; margin-bottom: 12px;">🔒</div>
@@ -242,6 +242,7 @@
   <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     <header>
       <div class="header-container">
+        <!-- LADO ESQUERDO: LOGO E NOME DA EMPRESA (DINÂMICO) -->
         <div class="brand">
           <div id="headerBrandLogoContainer">
             <div class="brand-icon">🏢</div>
@@ -257,9 +258,19 @@
           </div>
         </div>
 
+        <!-- LADO DIREITO: NOME E AVATAR DO USUÁRIO + BOTÕES -->
         <div class="actions">
           <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
           <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate">+ Novo</button>
+          
+          <!-- Bloco do Usuário (Nome + Avatar) -->
+          <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border-color);">
+            <div style="text-align: right; line-height: 1.2;">
+              <div id="headerUserNameDisplay" style="font-size: 11px; font-weight: bold; color: var(--text-main);">Usuário</div>
+            </div>
+            <img id="headerUserAvatarImg" class="user-avatar" style="width: 30px; height: 30px; border-width: 1px;" src="" alt="Avatar" onclick="openSettingsModal()">
+          </div>
+
           <button onclick="openSettingsModal()" class="btn btn-slate" title="Configurações e Perfil" style="padding: 6px 10px; font-size: 16px;">⚙️</button>
           <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
         </div>
@@ -582,10 +593,33 @@
           if (user) {
             currentUser = user;
             resolveUserSession(user.email);
+            setupRealtimeUserAndCompanySync(user.uid, user.email);
           }
         });
       } catch(e) {}
     });
+
+    // SINCRONIZAÇÃO EM TEMPO REAL DO CABEÇALHO (EMPRESA + USUÁRIO)
+    function setupRealtimeUserAndCompanySync(userId, userEmail) {
+      // 1. Escuta dados globais da Empresa (Sincronizado para toda a equipe)
+      db.collection("empresas").onSnapshot((snapshot) => {
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail || (data.teamMembers && data.teamMembers[userEmail])) {
+            currentCompanyName = data.companyName || 'Protech Condomínios';
+            currentCompanyLogo = data.companyLogo || '';
+            updateHeaderBrandDisplay();
+          }
+        });
+      });
+
+      // 2. Escuta/Carrega dados individuais do Perfil do Usuário
+      const storedName = localStorage.getItem('protech_user_name_' + userEmail) || userEmail.split('@')[0];
+      const storedAvatar = localStorage.getItem('protech_user_avatar_' + userEmail) || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
+      
+      document.getElementById('headerUserNameDisplay').textContent = storedName;
+      document.getElementById('headerUserAvatarImg').src = storedAvatar;
+    }
 
     function applyAppTheme(themeName) {
       const root = document.documentElement;
@@ -650,6 +684,7 @@
       const email = currentUser ? currentUser.email : 'usuario';
       localStorage.setItem('protech_user_name_' + email, newName);
       document.getElementById('settingsUserName').textContent = newName;
+      document.getElementById('headerUserNameDisplay').textContent = newName;
       showToast('Nome atualizado!');
     }
 
@@ -661,6 +696,7 @@
         const email = currentUser ? currentUser.email : 'usuario';
         localStorage.setItem('protech_user_avatar_' + email, evt.target.result);
         document.getElementById('settingsAvatarImg').src = evt.target.result;
+        document.getElementById('headerUserAvatarImg').src = evt.target.result;
         showToast('Foto atualizada!');
       };
       reader.readAsDataURL(file);
@@ -815,24 +851,20 @@
       });
     }
 
-    // VALIDAÇÃO DE ASSINATURA E TOLERÂNCIA DE 7 DIAS (COM DADOS PRESERVADOS)
     function validateSubscription(data) {
       if (!data) return true;
       if (data.subscriptionStatus === 'active') return true;
 
       const now = Date.now();
       const expiresAt = data.subscriptionExpiresAt || data.trialEndsAt || 0;
-      const gracePeriodMs = 7 * 86400000; // 7 dias de tolerância pós vencimento/cancelamento
+      const gracePeriodMs = 7 * 86400000;
 
       if (now <= expiresAt) {
-        // Dentro do prazo (Trial ou Assinatura ativa)
         return true;
       } else if (now <= (expiresAt + gracePeriodMs)) {
-        // Período de carência de 7 dias pós-vencimento/cancelamento
         document.getElementById('graceBadgeDisplay').style.display = 'inline-block';
         return true;
       } else {
-        // Expirou além da tolerância de 7 dias -> Exibe Paywall, mas dados continuam intactos no Firestore
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('paywallScreen').style.display = 'flex';
@@ -996,6 +1028,21 @@
       }).catch(() => alert('Erro ao salvar no banco. Reduza o número de fotos.'));
     }
 
+    // BOTÃO DE GPS INTELIGENTE (Waze x Google Maps)
+    function abrirOpcoesGps(enderecoCompleto) {
+      const enderecoEncoded = encodeURIComponent(enderecoCompleto);
+      const urlWaze = `https://waze.com/ul?q=${enderecoEncoded}&navigate=yes`;
+      const urlMaps = `https://www.google.com/maps/search/?api=1&query=${enderecoEncoded}`;
+
+      const escolherWaze = confirm("Deseja abrir a rota no Waze?\n\n• Clique em 'OK' para Waze\n• Clique em 'Cancelar' para Google Maps");
+
+      if (escolherWaze) {
+        window.open(urlWaze, '_blank');
+      } else {
+        window.open(urlMaps, '_blank');
+      }
+    }
+
     function renderCondos() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const filtered = condos.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
@@ -1015,7 +1062,7 @@
           <div class="card-footer">
             <div class="card-footer-row"><button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${(c.reports||[]).length})</button></div>
             <div class="card-footer-row">
-              <a href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}" target="_blank" class="btn btn-slate" style="text-decoration:none;">🗺️ GPS</a>
+              <button onclick="abrirOpcoesGps('${escapeHtml(c.address)}, ${escapeHtml(c.number)} - ${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">🗺️ GPS</button>
               <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}</button>
             </div>
           </div>
