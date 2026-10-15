@@ -137,6 +137,62 @@
 
     .toast { position: fixed; bottom: 20px; right: 20px; background-color: var(--bg-card); border: 1px solid #0284c7; color: var(--text-main); padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
     .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ESTILOS DOS CARDS DE GPS */
+    .gps-buttons-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
+    .gps-card {
+      flex: 1;
+      padding: 14px 16px;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: bold;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.2s, transform 0.1s;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .gps-card:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .gps-card.maps {
+      background-color: #1a73e8; /* Azul Google Maps */
+    }
+
+    .gps-card.waze {
+      background-color: #33cc66; /* Verde Waze */
+    }
+
+    .gps-cancel-btn {
+      width: 100%;
+      background-color: #f1f3f4;
+      color: #3c4043;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .gps-cancel-btn:hover {
+      background-color: #e4e6e7;
+    }
   </style>
 </head>
 <body>
@@ -293,6 +349,32 @@
         Nenhum condomínio encontrado.
       </div>
     </main>
+  </div>
+
+  <!-- MODAL DE SELEÇÃO DE GPS -->
+  <div id="gpsModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">🗺️ Selecione o Navegador</h3>
+        <button onclick="closeGpsModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" style="padding-top: 10px;">
+        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por qual aplicativo deseja iniciar a rota:</p>
+        
+        <div class="gps-buttons-container">
+          <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">
+            🗺️ Maps
+          </a>
+          <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">
+            🚗 Waze
+          </a>
+        </div>
+        
+        <button type="button" onclick="closeGpsModal()" class="gps-cancel-btn">
+          Cancelar
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL DE CONFIGURAÇÕES -->
@@ -1028,19 +1110,20 @@
       }).catch(() => alert('Erro ao salvar no banco. Reduza o número de fotos.'));
     }
 
-    // BOTÃO DE GPS INTELIGENTE (Waze x Google Maps)
+    // NAVEGAÇÃO POR CARDS (MAPS AZUL E WAZE VERDE)
     function abrirOpcoesGps(enderecoCompleto) {
       const enderecoEncoded = encodeURIComponent(enderecoCompleto);
       const urlWaze = `https://waze.com/ul?q=${enderecoEncoded}&navigate=yes`;
       const urlMaps = `https://www.google.com/maps/search/?api=1&query=${enderecoEncoded}`;
 
-      const escolherWaze = confirm("Deseja abrir a rota no Waze?\n\n• Clique em 'OK' para Waze\n• Clique em 'Cancelar' para Google Maps");
+      document.getElementById('gpsLinkMaps').href = urlMaps;
+      document.getElementById('gpsLinkWaze').href = urlWaze;
 
-      if (escolherWaze) {
-        window.open(urlWaze, '_blank');
-      } else {
-        window.open(urlMaps, '_blank');
-      }
+      document.getElementById('gpsModal').classList.remove('hidden');
+    }
+
+    function closeGpsModal() {
+      document.getElementById('gpsModal').classList.add('hidden');
     }
 
     function renderCondos() {
