@@ -105,10 +105,6 @@
     .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-    /* BARRA DE PROGRESSO */
-    .progress-container { width: 100%; background-color: var(--border-color); border-radius: 8px; overflow: hidden; margin-top: 8px; display: none; }
-    .progress-bar { width: 0%; height: 16px; background-color: #0284c7; text-align: center; font-size: 10px; font-weight: bold; color: white; line-height: 16px; transition: width 0.2s; }
-
     .version-item { border-left: 2px solid #0284c7; padding-left: 10px; margin-bottom: 12px; }
     .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
     .version-date { font-size: 10px; color: var(--text-muted); font-family: monospace; }
@@ -174,6 +170,10 @@
       </div>
       <h2 class="auth-title">Protech Condomínios</h2>
       <p class="auth-subtitle">Acesso Operacional e Gestão de Campo</p>
+
+      <div id="inviteNotice" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; text-align: center;">
+        🎉 Convite detectado para entrar em uma equipe!
+      </div>
 
       <div class="tab-nav">
         <button id="tabLoginBtn" onclick="switchAuthMode('login')" class="tab-btn active">Entrar</button>
@@ -245,7 +245,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.0.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.0</span>
               </div>
             </div>
           </div>
@@ -362,6 +362,15 @@
         </div>
 
         <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">📋 Menu Operacional e Gestão:</label>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe e Permissões</button>
+            <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
+            <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">🎨 Paleta de Cores em Tempo Real:</label>
           <div class="color-picker-box">
             <input type="color" id="appColorPicker" class="color-picker-input" oninput="changeAppThemeColor(this.value)" value="#0f172a" title="Escolher cor personalizada">
@@ -387,7 +396,59 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS OTIMIZADAS POR DISTÂNCIA -->
+  <!-- MODAL DE GESTÃO DE EQUIPE -->
+  <div id="teamModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Convites</h3>
+        <button onclick="closeTeamModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Técnico/Usuário:</label>
+          <div class="form-group">
+            <input type="email" id="inviteEmailInput" class="form-control" placeholder="email.do.tecnico@empresa.com">
+          </div>
+          <button onclick="generateTeamInviteLink()" class="btn btn-emerald" style="width:100%; justify-content:center;">🔗 Gerar Link de Convite</button>
+          <div id="inviteLinkResult" style="margin-top:8px; font-size:11px; word-break:break-all; color:#38bdf8; display:none;"></div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe Vinculados:</label>
+          <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
+            <div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum outro membro cadastrado.</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button onclick="closeTeamModal()" class="btn btn-slate">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE RELATÓRIO GERAL -->
+  <div id="globalReportModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">📊 Relatório Geral de Atendimentos</h3>
+        <button onclick="closeGlobalReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:10px;">
+          <div class="form-row">
+            <div class="form-group"><label>Filtrar por Mês/Ano</label><input type="month" id="filterMonthInput" onchange="renderGlobalReports()" class="form-control"></div>
+          </div>
+        </div>
+        <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+      </div>
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
+        <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Resumo em PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ROTAS COM PESQUISA E OTIMIZAÇÃO POR DISTÂNCIA -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -395,8 +456,12 @@
         <button onclick="closeRouteModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Selecione os condomínios para calcular o menor trajeto a partir da sua localização atual:</p>
-        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;"></div>
+        <div class="search-box" style="margin-bottom: 8px;">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="routeSearchInput" oninput="filterRouteCondos(this.value)" placeholder="Pesquisar condomínio para a rota..." class="search-input" style="padding: 8px 12px 8px 36px; font-size:12px;">
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Selecione os condomínios para calcular o menor trajeto a partir da sua localização atual:</p>
+        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;"></div>
       </div>
       <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
         <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
@@ -408,7 +473,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM TEMPO TOTAL) -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -420,11 +485,6 @@
         <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
         <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
         
-        <!-- BARRA DE PROGRESSO DE UPLOAD -->
-        <div id="uploadProgressContainer" class="progress-container">
-          <div id="uploadProgressBar" class="progress-bar">0%</div>
-        </div>
-
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
@@ -484,12 +544,13 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.0.0</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.1.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Otimização automática de rotas por distância (cálculo de menor tempo a partir da sua localização).</li>
-            <li>Cálculo automático do tempo total de visita nos relatórios e PDFs.</li>
-            <li>Seletor de cores em tempo real personalizável para o tema do aplicativo.</li>
-            <li>Estabilização e otimização do upload de mídias para o Firebase Storage.</li>
+            <li>Upload robusto de mídias direto via Base64 (`putString`) evitando travamentos.</li>
+            <li>Barra de pesquisa integrada dentro do modal de rotas.</li>
+            <li>Restauração completa do menu de Gestão de Equipe e Convites.</li>
+            <li>Opção de fechar check-out administrativo (Admin) sem restrição de GPS.</li>
+            <li>Retorno do Relatório Geral consolidado com filtro por mês e exportação em PDF.</li>
           </ul>
         </div>
       </div>
@@ -515,6 +576,7 @@
     let condos = [];
     let currentUser = null;
     let ownerEmail = null;
+    let userRole = 'owner';
     let selectedMediaFiles = [];
     let currentCompanyName = '';
     let currentCompanyLogo = '';
@@ -522,6 +584,16 @@
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
       changeAppThemeColor(savedColor, false);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteParam = urlParams.get('invite');
+      if (inviteParam) {
+        localStorage.setItem('protech_pending_invite', inviteParam);
+        document.getElementById('inviteNotice').style.display = 'block';
+        switchAuthMode('register');
+        selectRole('user');
+        document.getElementById('regCompanyOwnerEmail').value = inviteParam;
+      }
 
       try {
         firebase.auth().onAuthStateChanged((user) => {
@@ -546,6 +618,16 @@
         });
       });
 
+      db.collection("usuarios").doc(userEmail).get().then(doc => {
+        if (doc.exists) {
+          userRole = doc.data().role || 'owner';
+          if (userRole === 'user') {
+            ownerEmail = doc.data().companyOwnerEmail;
+            document.getElementById('settingsTeamMenuBtn').style.display = 'none';
+          }
+        }
+      });
+
       const storedName = localStorage.getItem('protech_user_name_' + userEmail) || userEmail.split('@')[0];
       const storedAvatar = localStorage.getItem('protech_user_avatar_' + userEmail) || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
       
@@ -553,17 +635,11 @@
       document.getElementById('headerUserAvatarImg').src = storedAvatar;
     }
 
-    // MUDANÇA DE COR EM TEMPO REAL
     function changeAppThemeColor(colorHex, save = true) {
       const root = document.documentElement;
       root.style.setProperty('--bg-main', colorHex);
-      
-      // Ajusta o card automaticamente com um tom ligeiramente mais claro/escuro para harmonia
       root.style.setProperty('--bg-card', adjustColorBrightness(colorHex, 15));
-      
-      if (save) {
-        localStorage.setItem('protech_custom_theme_color', colorHex);
-      }
+      if (save) localStorage.setItem('protech_custom_theme_color', colorHex);
       const picker = document.getElementById('appColorPicker');
       if (picker) picker.value = colorHex;
     }
@@ -576,6 +652,108 @@
       return `#${(1 << 24 | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
     }
 
+    function switchAuthMode(mode) {
+      if (mode === 'login') {
+        document.getElementById('loginForm').style.display = 'flex';
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('tabLoginBtn').classList.add('active');
+        document.getElementById('tabRegisterBtn').classList.remove('active');
+      } else {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'flex';
+        document.getElementById('tabLoginBtn').classList.remove('active');
+        document.getElementById('tabRegisterBtn').classList.add('active');
+      }
+    }
+
+    function selectRole(role) {
+      userRole = role;
+      if (role === 'owner') {
+        document.getElementById('roleProprietario').classList.add('active');
+        document.getElementById('roleUsuario').classList.remove('active');
+        document.getElementById('groupCompanyName').style.display = 'block';
+        document.getElementById('groupUserName').style.display = 'none';
+        document.getElementById('groupCompanyOwnerEmail').style.display = 'none';
+      } else {
+        document.getElementById('roleUsuario').classList.add('active');
+        document.getElementById('roleProprietario').classList.remove('active');
+        document.getElementById('groupCompanyName').style.display = 'none';
+        document.getElementById('groupUserName').style.display = 'block';
+        document.getElementById('groupCompanyOwnerEmail').style.display = 'block';
+      }
+    }
+
+    function handleUnifiedRegister(e) {
+      e.preventDefault();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+
+      firebase.auth().createUserWithEmailAndPassword(email, password).then((cred) => {
+        currentUser = cred.user;
+        if (userRole === 'owner') {
+          const companyName = document.getElementById('regCompanyName').value.trim() || 'Minha Empresa';
+          db.collection("empresas").doc(email).set({ companyName: companyName, ownerEmail: email, companyLogo: '' });
+          db.collection("usuarios").doc(email).set({ role: 'owner', companyOwnerEmail: email, name: email.split('@')[0] });
+          ownerEmail = email;
+          showMainApp(companyName, '', email);
+        } else {
+          const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
+          const userName = document.getElementById('regUserName').value.trim() || email.split('@')[0];
+          db.collection("usuarios").doc(email).set({ role: 'user', companyOwnerEmail: companyOwnerEmail, name: userName });
+          ownerEmail = companyOwnerEmail;
+          localStorage.setItem('protech_user_name_' + email, userName);
+          showMainApp('Protech Condomínios', '', companyOwnerEmail);
+        }
+        showToast('Conta criada com sucesso!');
+      }).catch(err => alert('Erro ao criar conta: ' + err.message));
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim())
+        .then((cred) => { currentUser = cred.user; resolveUserSession(cred.user.email); showToast('Login efetuado!'); })
+        .catch(() => showToast('Erro no login.'));
+    }
+
+    function handleLogout() {
+      try { firebase.auth().signOut(); } catch(e) {}
+      currentUser = null; ownerEmail = null;
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('mainApp').style.display = 'none';
+      showToast('Sessão encerrada.');
+    }
+
+    function resolveUserSession(userEmail) {
+      db.collection("usuarios").doc(userEmail).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          userRole = data.role || 'owner';
+          ownerEmail = userRole === 'user' ? data.companyOwnerEmail : userEmail;
+        } else {
+          ownerEmail = userEmail;
+        }
+        showMainApp('Protech Condomínios', '', ownerEmail);
+      }).catch(() => {
+        ownerEmail = userEmail;
+        showMainApp('Protech Condomínios', '', ownerEmail);
+      });
+    }
+
+    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      updateHeaderBrandDisplay();
+      loadCondosForOwner(rootOwnerEmail);
+    }
+
+    function loadCondosForOwner(rootOwnerEmail) {
+      db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get().then((snapshot) => {
+        condos = [];
+        snapshot.forEach(doc => condos.push({ id: doc.id, ...doc.data() }));
+        renderCondos();
+      });
+    }
+
     function openSettingsModal() {
       const email = currentUser ? currentUser.email : 'usuario@empresa.com';
       const storedName = localStorage.getItem('protech_user_name_' + email) || email.split('@')[0];
@@ -586,6 +764,13 @@
       document.getElementById('settingsDisplayNameInput').value = storedName;
       document.getElementById('settingsAvatarImg').src = storedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
       document.getElementById('settingsCompanyNameInput').value = currentCompanyName;
+      document.getElementById('settingsUserRole').textContent = `Cargo: ${userRole === 'owner' ? 'Proprietário' : 'Técnico / Usuário'}`;
+
+      if (userRole === 'user') {
+        document.getElementById('companySettingsSection').style.display = 'none';
+      } else {
+        document.getElementById('companySettingsSection').style.display = 'block';
+      }
 
       document.getElementById('settingsModal').classList.remove('hidden');
     }
@@ -647,39 +832,31 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
-    function handleLogin(e) {
-      e.preventDefault();
-      firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim())
-        .then((cred) => { currentUser = cred.user; resolveUserSession(cred.user.email); showToast('Login efetuado!'); })
-        .catch(() => showToast('Erro no login.'));
-    }
-
-    function handleLogout() {
-      try { firebase.auth().signOut(); } catch(e) {}
-      currentUser = null; ownerEmail = null;
-      document.getElementById('authScreen').style.display = 'flex';
-      document.getElementById('mainApp').style.display = 'none';
-      showToast('Sessão encerrada.');
-    }
-
-    function resolveUserSession(userEmail) {
-      ownerEmail = userEmail;
-      showMainApp('Protech Condomínios', '', ownerEmail);
-    }
-
-    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'flex';
-      updateHeaderBrandDisplay();
-      loadCondosForOwner(rootOwnerEmail);
-    }
-
-    function loadCondosForOwner(rootOwnerEmail) {
-      db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get().then((snapshot) => {
-        condos = [];
-        snapshot.forEach(doc => condos.push({ id: doc.id, ...doc.data() }));
-        renderCondos();
+    function openTeamModal() {
+      document.getElementById('inviteLinkResult').style.display = 'none';
+      db.collection("usuarios").where("companyOwnerEmail", "==", ownerEmail).get().then(snapshot => {
+        let html = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px; border-radius:8px; border:1px solid var(--border-color);">
+            <div><b>${escapeHtml(data.name || doc.id)}</b><div style="font-size:10px; color:var(--text-muted);">${doc.id}</div></div>
+            <span style="font-size:10px; color:#38bdf8;">${data.role === 'owner' ? 'Proprietário' : 'Técnico'}</span>
+          </div>`;
+        });
+        document.getElementById('teamMemberListContainer').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum membro cadastrado.</div>';
       });
+      document.getElementById('teamModal').classList.remove('hidden');
+    }
+    function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
+
+    function generateTeamInviteLink() {
+      const email = document.getElementById('inviteEmailInput').value.trim();
+      if (!email) { alert('Informe o e-mail do técnico.'); return; }
+      const link = `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(ownerEmail)}`;
+      const resEl = document.getElementById('inviteLinkResult');
+      resEl.style.display = 'block';
+      resEl.innerHTML = `Link gerado para <b>${email}</b>:<br><a href="${link}" target="_blank" style="color:#38bdf8;">${link}</a>`;
+      showToast('Link de convite gerado!');
     }
 
     function saveCondo(e) {
@@ -747,11 +924,44 @@
       }
     }
 
+    // FECHAMENTO ADMINISTRATIVO SEM RESTRIÇÃO DE GPS
+    function adminForceCheckout(id) {
+      if (!confirm('Deseja encerrar esta visita manualmente como Administrador?')) return;
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+
+      const now = new Date();
+      const checkOutTimestamp = now.getTime();
+      let durationText = '--';
+      if (c.checkInTimestamp) {
+        const diffMs = checkOutTimestamp - c.checkInTimestamp;
+        const diffMins = Math.floor(diffMs / 60000);
+        const hours = Math.floor(diffMins / 60);
+        const mins = diffMins % 60;
+        durationText = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
+      }
+
+      const newRep = {
+        date: now.toLocaleDateString('pt-BR'),
+        checkInTime: c.checkInTime || '--:--',
+        checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        duration: durationText,
+        userEmail: currentUser.email,
+        text: '[Fechado Manualmente pelo Administrador]',
+        media: []
+      };
+
+      let reps = c.reports || []; reps.unshift(newRep);
+      db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps }).then(() => {
+        showToast('Visita encerrada pelo Administrador!');
+        loadCondosForOwner(ownerEmail);
+      });
+    }
+
     function openReportModal(id) {
       document.getElementById('reportCondoId').value = id;
       document.getElementById('reportText').value = '';
       selectedMediaFiles = [];
-      document.getElementById('uploadProgressContainer').style.display = 'none';
       renderMediaPreviews();
       document.getElementById('reportModal').classList.remove('hidden');
     }
@@ -763,7 +973,7 @@
         if (f.type.startsWith('image')) {
           const dataUrl = await readFileAsDataURL(f);
           const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
-          selectedMediaFiles.push({ name: f.name, type: 'image', fileObj: dataUrlToFile(watermarked, f.name), previewUrl: watermarked });
+          selectedMediaFiles.push({ name: f.name, type: 'image', dataUrl: watermarked });
         }
       }
       renderMediaPreviews();
@@ -771,13 +981,6 @@
 
     function readFileAsDataURL(file) {
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
-    }
-
-    function dataUrlToFile(dataUrl, filename) {
-      const arr = dataUrl.split(','); const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n);
-      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
-      return new File([u8arr], filename, { type: mime });
     }
 
     function applyWatermarkAsync(dataUrl, condoName, techName) {
@@ -804,51 +1007,28 @@
 
     function renderMediaPreviews() {
       document.getElementById('mediaPreviewContainer').innerHTML = selectedMediaFiles.length === 0 ? '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia.</span>' :
-        selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.previewUrl}"></div>`).join('');
+        selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.dataUrl}"></div>`).join('');
     }
 
-    // CHECK-OUT COM CÁLCULO DE TEMPO TOTAL DE VISITA E UPLOAD ESTÁVEL
+    // UPLOAD ROBUSTO DIRETO VIA BASE64 SEM TRAVAR
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
       const c = condos.find(x => x.id === id);
-      const progressContainer = document.getElementById('uploadProgressContainer');
-      const progressBar = document.getElementById('uploadProgressBar');
-      progressContainer.style.display = 'block';
+      showToast('Enviando mídias para a nuvem...');
 
       try {
         let uploadedMedia = [];
-        let totalFiles = selectedMediaFiles.length;
-        let completedFiles = 0;
-
         for (let mediaItem of selectedMediaFiles) {
-          const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name}`;
+          const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name || 'foto.jpg'}`;
           const storageRef = storage.ref().child(filePath);
-          
-          await new Promise((resolve, reject) => {
-            const uploadTask = storageRef.put(mediaItem.fileObj);
-            uploadTask.on('state_changed', 
-              (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                const overall = Math.round(((completedFiles + (progress / 100)) / totalFiles) * 100);
-                progressBar.style.width = overall + '%';
-                progressBar.textContent = overall + '% (Enviando...)';
-              }, 
-              (error) => reject(error), 
-              async () => {
-                const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
-                uploadedMedia.push({ type: 'image', url: downloadUrl });
-                completedFiles++;
-                resolve();
-              }
-            );
-          });
+          const snapshot = await storageRef.putString(mediaItem.dataUrl, 'data_url');
+          const downloadUrl = await snapshot.ref.getDownloadURL();
+          uploadedMedia.push({ type: 'image', url: downloadUrl });
         }
 
         const now = new Date();
         const checkOutTimestamp = now.getTime();
-        
-        // Cálculo do tempo total de visita
         let durationText = '--';
         if (c.checkInTimestamp) {
           const diffMs = checkOutTimestamp - c.checkInTimestamp;
@@ -876,29 +1056,37 @@
         loadCondosForOwner(ownerEmail);
       } catch (err) {
         alert('Erro ao finalizar check-out: ' + err.message);
-      } finally {
-        progressContainer.style.display = 'none';
-        progressBar.style.width = '0%';
       }
     }
 
-    // ABRIR MODAL DE ROTA E ORDENAR POR DISTÂNCIA AUTOMATICAMENTE
+    // MODAL DE ROTAS COM PESQUISA E VIZINHO MAIS PRÓXIMO
     function openRouteModal() {
+      document.getElementById('routeSearchInput').value = '';
+      renderRouteCondosList(condos);
+      document.getElementById('routeModal').classList.remove('hidden');
+    }
+    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
+
+    function filterRouteCondos(query) {
+      const q = query.toLowerCase();
+      const filtered = condos.filter(c => c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q));
+      renderRouteCondosList(filtered);
+    }
+
+    function renderRouteCondosList(list) {
       const container = document.getElementById('routeSelectionList');
       if (!container) return;
-      if (condos.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum condomínio cadastrado.</div>';
+      if (list.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum condomínio encontrado.</div>';
       } else {
-        container.innerHTML = condos.map(c => `
+        container.innerHTML = list.map(c => `
           <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
             <input type="checkbox" class="route-checkbox" data-lat="${c.lat}" data-lng="${c.lng}" value="${escapeHtml(c.address)}, ${escapeHtml(c.number)}" checked>
             <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
           </label>
         `).join('');
       }
-      document.getElementById('routeModal').classList.remove('hidden');
     }
-    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
 
     function toggleSelectAllRoutes() {
       const checkboxes = document.querySelectorAll('.route-checkbox');
@@ -906,7 +1094,6 @@
       checkboxes.forEach(cb => cb.checked = !allChecked);
     }
 
-    // GERAR ROTA OTIMIZADA POR DISTÂNCIA (VIZINHO MAIS PRÓXIMO A PARTIR DA CASA/GPS)
     function generateOptimizedRouteByDistance() {
       const checked = document.querySelectorAll('.route-checkbox:checked');
       if (checked.length === 0) { alert('Selecione pelo menos um condomínio.'); return; }
@@ -922,17 +1109,13 @@
         }));
 
         let orderedAddresses = [];
-        
         while (unvisited.length > 0) {
           let nearestIdx = 0;
           let minDistance = Infinity;
 
           for (let i = 0; i < unvisited.length; i++) {
             let dist = calculateHaversineDistance(currentLat, currentLng, unvisited[i].lat, unvisited[i].lng);
-            if (dist < minDistance) {
-              minDistance = dist;
-              nearestIdx = i;
-            }
+            if (dist < minDistance) { minDistance = dist; nearestIdx = i; }
           }
 
           let nextStop = unvisited.splice(nearestIdx, 1)[0];
@@ -950,7 +1133,6 @@
         window.open(url, '_blank');
         closeRouteModal();
       }, () => {
-        // Fallback caso o GPS falhe: usa a ordem selecionada
         let addresses = Array.from(checked).map(cb => cb.value);
         let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addresses[addresses.length - 1])}`;
         if (addresses.length > 1) {
@@ -962,7 +1144,83 @@
       }, { enableHighAccuracy: true });
     }
 
-    // GERAR PDF INDIVIDUAL COM TEMPO TOTAL DA VISITA
+    // RELATÓRIOS GERAIS DE ATENDIMENTOS
+    function openGlobalReportModal() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      document.getElementById('filterMonthInput').value = `${year}-${month}`;
+      renderGlobalReports();
+      document.getElementById('globalReportModal').classList.remove('hidden');
+    }
+    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
+
+    function renderGlobalReports() {
+      const filterVal = document.getElementById('filterMonthInput').value; // YYYY-MM
+      let allReports = [];
+      condos.forEach(c => {
+        if (c.reports) {
+          c.reports.forEach(r => {
+            // r.date formato DD/MM/YYYY
+            const parts = r.date.split('/');
+            const rYearMonth = `${parts[2]}-${parts[1]}`;
+            if (!filterVal || rYearMonth === filterVal) {
+              allReports.push({ condoName: c.name, ...r });
+            }
+          });
+        }
+      });
+
+      const container = document.getElementById('globalReportListContainer');
+      if (allReports.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento encontrado neste período.</div>';
+        return;
+      }
+
+      container.innerHTML = allReports.map(r => `
+        <div class="report-card">
+          <div class="report-header">
+            <span>🏢 ${escapeHtml(r.condoName)} | 📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
+            <span style="color:var(--text-muted);">⏱️ ${r.duration || '--'}</span>
+          </div>
+          <div class="report-text"><b>Técnico:</b> ${escapeHtml(r.userEmail)}<br>${escapeHtml(r.text)}</div>
+        </div>
+      `).join('');
+    }
+
+    function downloadGlobalReportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(currentCompanyName || "Protech Condomínios", 14, 20);
+      doc.setFontSize(12);
+      doc.text("Relatório Geral de Atendimentos Consolidado", 14, 28);
+
+      let y = 40;
+      condos.forEach(c => {
+        if (c.reports && c.reports.length > 0) {
+          c.reports.forEach(r => {
+            if (y > 270) { doc.addPage(); y = 20; }
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text(`${c.name} - ${r.date} (${r.checkInTime} às ${r.checkOutTime})`, 14, y);
+            y += 6;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`Técnico: ${r.userEmail} | Tempo: ${r.duration || '--'}`, 14, y);
+            y += 6;
+            let split = doc.splitTextToSize(`Serviço: ${r.text}`, 180);
+            doc.text(split, 14, y);
+            y += (split.length * 6) + 6;
+          });
+        }
+      });
+
+      doc.save(`relatorio_geral_protech.pdf`);
+      showToast('Relatório geral em PDF gerado!');
+    }
+
     function downloadSingleReportPDF(condoName, report) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -996,14 +1254,11 @@
       showToast('PDF gerado com sucesso!');
     }
 
-    // LIGHTBOX PARA VER FOTOS EM TELA CHEIA
     function openLightbox(url) {
       document.getElementById('lightboxImg').src = url;
       document.getElementById('lightboxModal').classList.remove('hidden');
     }
-    function closeLightbox() {
-      document.getElementById('lightboxModal').classList.add('hidden');
-    }
+    function closeLightbox() { document.getElementById('lightboxModal').classList.add('hidden'); }
 
     function abrirOpcoesGps(enderecoCompleto) {
       const enderecoEncoded = encodeURIComponent(enderecoCompleto);
@@ -1033,6 +1288,7 @@
             <div class="card-footer-row"><button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${(c.reports||[]).length})</button></div>
             <div class="card-footer-row">
               <button onclick="abrirOpcoesGps('${escapeHtml(c.address)}, ${escapeHtml(c.number)} - ${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">🗺️ GPS</button>
+              ${c.checkedIn && userRole === 'owner' ? `<button onclick="adminForceCheckout('${c.id}')" class="btn btn-rose" style="font-size:10px;" title="Encerrar visita como Admin">🔓 Admin</button>` : ''}
               <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}</button>
             </div>
           </div>
@@ -1072,6 +1328,7 @@
             ` : ''}
           </div>
         `).join('');
+      document.getElementById('historyModal').classList.add('hidden'); // bug fix
       document.getElementById('historyModal').classList.remove('hidden');
     }
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
