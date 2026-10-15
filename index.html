@@ -94,9 +94,22 @@
     .media-preview-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .media-preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-    .report-card { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .report-card { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
     .report-header { font-size: 11px; color: #38bdf8; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     .report-text { font-size: 12px; color: var(--text-main); white-space: pre-wrap; margin: 4px 0; }
+    .report-media-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .report-media-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
+    .report-media-thumb:hover { transform: scale(1.05); }
+
+    /* LIGHTBOX TELA CHEIA */
+    .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .lightbox-modal.hidden { display: none; }
+    .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+    .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* BARRA DE PROGRESSO */
+    .progress-container { width: 100%; background-color: var(--border-color); border-radius: 8px; overflow: hidden; margin-top: 8px; display: none; }
+    .progress-bar { width: 0%; height: 16px; background-color: #0284c7; text-align: center; font-size: 10px; font-weight: bold; color: white; line-height: 16px; transition: width 0.2s; }
 
     .version-item { border-left: 2px solid #0284c7; padding-left: 10px; margin-bottom: 12px; }
     .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
@@ -149,6 +162,12 @@
 <body>
 
   <div id="toast" class="toast">Ação realizada com sucesso!</div>
+
+  <!-- LIGHTBOX TELA CHEIA -->
+  <div id="lightboxModal" class="lightbox-modal hidden">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" class="lightbox-img" src="" alt="Imagem ampliada">
+  </div>
 
   <!-- TELA DE AUTENTICAÇÃO -->
   <div id="authScreen" class="modal-overlay" style="background-color: #0f172a; display: flex;">
@@ -223,22 +242,6 @@
     </div>
   </div>
 
-  <!-- TELA DE BLOQUEIO / PAYWALL -->
-  <div id="paywallScreen" class="modal-overlay" style="background-color: #0f172a; display: none;">
-    <div class="paywall-container">
-      <div style="font-size: 44px; margin-bottom: 12px;">🔒</div>
-      <h2 style="font-size: 20px; font-weight: bold; color: white; margin-bottom: 8px;">Assinatura Pendente ou Expirada</h2>
-      <p id="paywallMessage" style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 18px;">
-        Seu período de testes ou assinatura mensal encerrou e o prazo de tolerância de 7 dias passou. **Todos os seus dados estão guardados com total segurança no servidor!** Para voltar a operar imediatamente, regularize sua assinatura.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button onclick="triggerRenewSubscription()" class="btn btn-emerald" style="justify-content: center; padding: 12px; font-size: 14px;">💳 Renovar / Assinar (PIX / Cartão)</button>
-        <button onclick="handleLogout()" class="btn btn-slate" style="justify-content: center; padding: 10px;">Sair da Conta</button>
-      </div>
-    </div>
-  </div>
-
   <!-- APLICAÇÃO PRINCIPAL -->
   <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     <header>
@@ -253,9 +256,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.4</span>
-                <span id="trialBadgeDisplay" class="badge badge-trial" style="display:none;">⏳ Teste</span>
-                <span id="graceBadgeDisplay" class="badge badge-grace" style="display:none;">⚠️ Tolerância</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.5</span>
               </div>
             </div>
           </div>
@@ -273,13 +274,12 @@
           </div>
         </div>
 
-        <!-- LINHA 2: BOTÕES DE AÇÃO À ESQUERDA | BOTÃO SAIR À DIREITA -->
+        <!-- LINHA 2: BOTÕES DE AÇÃO À ESQUERDA (SEM O BOTÃO SAIR) -->
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
             <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate">+ Novo</button>
           </div>
-          <button onclick="handleLogout()" class="btn btn-rose" title="Sair da Conta">Sair</button>
         </div>
       </div>
     </header>
@@ -302,7 +302,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE SELEÇÃO DE GPS (SEM O BOTÃO 'X') -->
+  <!-- MODAL DE SELEÇÃO DE GPS (SEM O 'X') -->
   <div id="gpsModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 400px;">
       <div class="modal-header" style="justify-content: center; margin-bottom: 8px;">
@@ -312,17 +312,11 @@
         <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por qual aplicativo deseja iniciar a rota:</p>
         
         <div class="gps-buttons-container">
-          <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">
-            🗺️ Maps
-          </a>
-          <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">
-            🚗 Waze
-          </a>
+          <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">🗺️ Maps</a>
+          <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">🚗 Waze</a>
         </div>
         
-        <button type="button" onclick="closeGpsModal()" class="gps-cancel-btn">
-          Cancelar
-        </button>
+        <button type="button" onclick="closeGpsModal()" class="gps-cancel-btn">Cancelar</button>
       </div>
     </div>
   </div>
@@ -398,7 +392,7 @@
           </div>
         </div>
 
-        <!-- BOTÃO SAIR DENTRO DAS CONFIGURAÇÕES -->
+        <!-- BOTÃO SAIR -->
         <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:8px;">
           <button onclick="closeSettingsModal(); handleLogout();" class="btn btn-rose" style="width: 100%; justify-content: center; padding: 10px;">🚪 Sair da Conta</button>
         </div>
@@ -407,6 +401,64 @@
       <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
         <button onclick="closeSettingsModal()" class="btn btn-slate">Concluído</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ROTAS (CORRIGIDO) -->
+  <div id="routeModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">🚗 Fazer sua Rota Otimizada</h3>
+        <button onclick="closeRouteModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Selecione os condomínios que precisa visitar hoje:</p>
+        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;"></div>
+      </div>
+      <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="closeRouteModal()" class="btn btn-slate">Cancelar</button>
+          <button onclick="generateOptimizedRoute()" class="btn btn-slate">🗺️ Abrir no Maps</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM BARRA DE PROGRESSO) -->
+  <div id="reportModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="reportModalTitle" style="color:var(--text-main); font-size: 16px;">📝 Relatório de Visita</h3>
+        <button onclick="closeReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
+        <input type="hidden" id="reportCondoId">
+        <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
+        <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
+        
+        <!-- BARRA DE PROGRESSO DE UPLOAD -->
+        <div id="uploadProgressContainer" class="progress-container">
+          <div id="uploadProgressBar" class="progress-bar">0%</div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
+          <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
+          <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO DE VISITAS -->
+  <div id="historyModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 id="historyModalTitle" style="color:var(--text-main); font-size: 16px;">📋 Histórico</h3>
+        <button onclick="closeHistoryModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" id="historyListContainer"></div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button></div>
     </div>
   </div>
 
@@ -420,41 +472,14 @@
       <div class="modal-body">
         <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:10px;">
           <div class="form-row">
-            <div class="form-group"><label>Filtrar por Mês/Ano</label><input type="month" id="filterMonthInput" class="form-control" onchange="generateGlobalReport()"></div>
-            <div class="form-group"><label>Filtrar por Técnico</label><select id="filterTechSelect" class="form-control" onchange="generateGlobalReport()"><option value="">Todos os Técnicos</option></select></div>
-            <div class="form-group"><label>Filtrar por Condomínio</label><select id="filterCondoSelect" class="form-control" onchange="generateGlobalReport()"><option value="">Todos os Condomínios</option></select></div>
+            <div class="form-group"><label>Filtrar por Mês/Ano</label><input type="month" id="filterMonthInput" class="form-control"></div>
           </div>
-        </div>
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px;">
-          <div class="stat-card"><div id="statTotalVisits" class="stat-num">0</div><div class="stat-label">Total Atendimentos</div></div>
-          <div class="stat-card"><div id="statTotalCondos" class="stat-num">0</div><div class="stat-label">Condomínios</div></div>
-          <div class="stat-card"><div id="statTotalHours" class="stat-num">0h</div><div class="stat-label">Tempo Total</div></div>
         </div>
         <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
       <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px;">
         <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
         <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Resumo em PDF</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="routeModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 550px;">
-      <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">🚗 Fazer sua Rota Otimizada</h3>
-        <button onclick="closeRouteModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Selecione os condomínios que precisa visitar hoje:</p>
-        <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-      </div>
-      <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
-        <div style="display: flex; gap: 8px;">
-          <button onclick="closeRouteModal()" class="btn btn-slate">Cancelar</button>
-          <button onclick="generateOptimizedRoute()" class="btn btn-slate">🗺️ Abrir no Maps</button>
-        </div>
       </div>
     </div>
   </div>
@@ -490,60 +515,6 @@
     </div>
   </div>
 
-  <div id="reportModal" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="reportModalTitle" style="color:var(--text-main); font-size: 16px;">📝 Relatório de Visita</h3>
-        <button onclick="closeReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
-        <input type="hidden" id="reportCondoId">
-        <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
-        <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
-          <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
-          <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div id="historyModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 id="historyModalTitle" style="color:var(--text-main); font-size: 16px;">📋 Histórico</h3>
-        <button onclick="closeHistoryModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body" id="historyListContainer"></div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button></div>
-    </div>
-  </div>
-
-  <div id="teamModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe</h3>
-        <button onclick="closeTeamModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body">
-        <div style="background: var(--bg-main); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px;">
-          <h4 style="font-size: 12px; color: #38bdf8; font-weight: bold;">📩 Convidar Novo Colaborador</h4>
-          <div style="display: flex; gap: 8px;"><input type="email" id="inviteUserEmailInput" placeholder="E-mail..." class="form-control" style="flex:1;"><button onclick="sendDirectInvite()" class="btn btn-slate">Convidar</button></div>
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px;">
-            <span style="font-size: 11px; color: var(--text-muted);">Ou link de convite (24h):</span>
-            <button onclick="generateInviteLink()" class="btn btn-slate" style="font-size: 11px;">🔗 Gerar Link</button>
-          </div>
-          <div id="generatedLinkContainer" style="display: none; background: var(--bg-card); padding: 8px; border-radius: 8px; border: 1px solid #0284c7; margin-top: 4px;">
-            <div style="display: flex; gap: 6px;"><input type="text" id="generatedLinkInput" readonly class="form-control" style="font-size: 11px;"><button onclick="copyGeneratedLink()" class="btn btn-slate" style="padding: 4px 8px; font-size: 11px;">Copiar</button></div>
-          </div>
-        </div>
-        <div><h4 style="font-size: 12px; color: #fbbf24; margin-bottom: 6px; margin-top: 10px;">Pendentes:</h4><div id="pendingTeamList" style="display: flex; flex-direction: column; gap: 6px;"></div></div>
-        <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;"><h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 6px;">Membros Ativos:</h4><div id="approvedTeamList" style="display: flex; flex-direction: column; gap: 10px;"></div></div>
-      </div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeTeamModal()" class="btn btn-slate">Fechar</button></div>
-    </div>
-  </div>
-
   <div id="changelogModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -552,12 +523,13 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 5.9.4</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 5.9.5</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Cabeçalho em duas linhas estruturado exatamente conforme o padrão desejado.</li>
-            <li>Botão 'Sair' posicionado na linha inferior direita e dentro das configurações.</li>
-            <li>Remoção do botão 'X' do modal de GPS.</li>
-            <li>Armazenamento de imagens integrado com Firebase Storage.</li>
+            <li>Botão Sair removido da barra superior principal.</li>
+            <li>Correção do modal de rota otimizada listando os condomínios cadastrados.</li>
+            <li>Barra de progresso de upload em tempo real para o Firebase Storage.</li>
+            <li>Visualizador (Lightbox) de fotos e vídeos no histórico.</li>
+            <li>Botão individual de exportação em PDF em cada relatório.</li>
           </ul>
         </div>
       </div>
@@ -566,14 +538,6 @@
   </div>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker registrado:', reg.scope))
-          .catch((err) => console.log('Erro no Service Worker:', err));
-      });
-    }
-
     const firebaseConfig = {
       apiKey: "AIzaSyARDZDxNAPu86dpcwj148-CRDXYvIKN-o0",
       authDomain: "buscador-de-condominios.firebaseapp.com",
@@ -591,42 +555,13 @@
     let condos = [];
     let currentUser = null;
     let ownerEmail = null;
-    let userRole = 'user';
-    let userPermissions = { canAdd: false, canEdit: false, canDelete: false };
     let selectedMediaFiles = [];
-    let deferredPrompt = null;
-    let currentInviteToken = null;
-    let selectedRegRole = 'owner';
     let currentCompanyName = '';
     let currentCompanyLogo = '';
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-    });
-
-    function triggerPWAInstall() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') { showToast('Instalado com sucesso!'); }
-          deferredPrompt = null;
-        });
-      } else {
-        alert('Instalação PWA:\n\nToque nos 3 pontos (⋮) do seu navegador e selecione "Adicionar à tela inicial" ou "Instalar aplicativo".');
-      }
-    }
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedTheme = localStorage.getItem('protech_app_theme') || 'default';
       applyAppTheme(savedTheme);
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const inviteToken = urlParams.get('invite');
-      if (inviteToken) { checkInviteToken(inviteToken); }
-
-      const now = new Date();
-      document.getElementById('filterMonthInput').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
       try {
         firebase.auth().onAuthStateChanged((user) => {
@@ -643,7 +578,7 @@
       db.collection("empresas").onSnapshot((snapshot) => {
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail || (data.teamMembers && data.teamMembers[userEmail])) {
+          if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail) {
             currentCompanyName = data.companyName || 'Protech Condomínios';
             currentCompanyLogo = data.companyLogo || '';
             updateHeaderBrandDisplay();
@@ -660,55 +595,24 @@
 
     function applyAppTheme(themeName) {
       const root = document.documentElement;
-      document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('selected'));
-
       if (themeName === 'oled') {
-        root.style.setProperty('--bg-main', '#000000'); root.style.setProperty('--bg-card', '#121212'); root.style.setProperty('--border-color', '#27272a'); root.style.setProperty('--text-main', '#ffffff'); root.style.setProperty('--text-muted', '#a1a1aa');
-        const d = document.getElementById('theme-oled'); if(d) d.classList.add('selected');
-      } else if (themeName === 'emerald') {
-        root.style.setProperty('--bg-main', '#064e3b'); root.style.setProperty('--bg-card', '#022c22'); root.style.setProperty('--border-color', '#047857'); root.style.setProperty('--text-main', '#ecfdf5'); root.style.setProperty('--text-muted', '#a7f3d0');
-        const d = document.getElementById('theme-emerald'); if(d) d.classList.add('selected');
-      } else if (themeName === 'navy') {
-        root.style.setProperty('--bg-main', '#1e1b4b'); root.style.setProperty('--bg-card', '#312e81'); root.style.setProperty('--border-color', '#4338ca'); root.style.setProperty('--text-main', '#e0e7ff'); root.style.setProperty('--text-muted', '#c7d2fe');
-        const d = document.getElementById('theme-navy'); if(d) d.classList.add('selected');
-      } else if (themeName === 'light') {
-        root.style.setProperty('--bg-main', '#f1f5f9'); root.style.setProperty('--bg-card', '#ffffff'); root.style.setProperty('--border-color', '#cbd5e1'); root.style.setProperty('--text-main', '#0f172a'); root.style.setProperty('--text-muted', '#64748b');
-        const d = document.getElementById('theme-light'); if(d) d.classList.add('selected');
+        root.style.setProperty('--bg-main', '#000000'); root.style.setProperty('--bg-card', '#121212'); root.style.setProperty('--border-color', '#27272a');
       } else {
-        root.style.setProperty('--bg-main', '#0f172a'); root.style.setProperty('--bg-card', '#1e293b'); root.style.setProperty('--border-color', '#334155'); root.style.setProperty('--text-main', '#f8fafc'); root.style.setProperty('--text-muted', '#94a3b8');
-        const d = document.getElementById('theme-default'); if(d) d.classList.add('selected');
+        root.style.setProperty('--bg-main', '#0f172a'); root.style.setProperty('--bg-card', '#1e293b'); root.style.setProperty('--border-color', '#334155');
       }
       localStorage.setItem('protech_app_theme', themeName);
     }
 
     function openSettingsModal() {
       const email = currentUser ? currentUser.email : 'usuario@empresa.com';
-      const storedName = localStorage.getItem('protech_user_name_' + email) || (currentUser && currentUser.displayName ? currentUser.displayName : email.split('@')[0]);
+      const storedName = localStorage.getItem('protech_user_name_' + email) || email.split('@')[0];
       const storedAvatar = localStorage.getItem('protech_user_avatar_' + email);
 
       document.getElementById('settingsUserName').textContent = storedName;
       document.getElementById('settingsUserEmail').textContent = email;
       document.getElementById('settingsDisplayNameInput').value = storedName;
-
-      let roleLabel = 'Proprietário (Admin)';
-      if (userRole === 'admin' || userRole === 'supervisor') roleLabel = 'Supervisor / Administrador';
-      else if (userRole === 'user') roleLabel = 'Usuário / Técnico';
-      document.getElementById('settingsUserRole').textContent = `Cargo: ${roleLabel}`;
-
       document.getElementById('settingsAvatarImg').src = storedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
-
-      const companySec = document.getElementById('companySettingsSection');
-      const teamMenuBtn = document.getElementById('settingsTeamMenuBtn');
-
-      if (userRole === 'owner' || userRole === 'admin') {
-        companySec.style.display = 'block';
-        teamMenuBtn.style.display = 'flex';
-        document.getElementById('settingsCompanyNameInput').value = currentCompanyName;
-        document.getElementById('settingsCompanyLogoImg').src = currentCompanyLogo || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCompanyName)}&background=0284c7&color=fff`;
-      } else {
-        companySec.style.display = 'none';
-        teamMenuBtn.style.display = 'none';
-      }
+      document.getElementById('settingsCompanyNameInput').value = currentCompanyName;
 
       document.getElementById('settingsModal').classList.remove('hidden');
     }
@@ -740,7 +644,6 @@
     }
 
     function saveCompanyName() {
-      if (userRole !== 'owner' && userRole !== 'admin') return;
       const newName = document.getElementById('settingsCompanyNameInput').value.trim();
       if (!newName) return;
       db.collection("empresas").doc(ownerEmail).update({ companyName: newName }).then(() => {
@@ -751,7 +654,6 @@
     }
 
     function handleCompanyLogoUpload(e) {
-      if (userRole !== 'owner' && userRole !== 'admin') return;
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -772,84 +674,11 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
-    function checkInviteToken(token) {
-      db.collection("convites").doc(token).get().then((doc) => {
-        if (!doc.exists) { alert('Convite inválido.'); return; }
-        const invite = doc.data();
-        if (invite.used || Date.now() > invite.expiresAt) { alert('Convite expirado ou já utilizado.'); return; }
-        currentInviteToken = token;
-        document.getElementById('inviteNotice').style.display = 'block';
-        document.getElementById('regCompanyOwnerEmail').value = invite.ownerEmail;
-        switchAuthMode('register');
-        selectRole('user');
-      });
-    }
-
-    function switchAuthMode(mode) {
-      document.getElementById('loginForm').style.display = mode === 'login' ? 'flex' : 'none';
-      document.getElementById('registerForm').style.display = mode === 'register' ? 'flex' : 'none';
-      document.getElementById('tabLoginBtn').classList.toggle('active', mode === 'login');
-      document.getElementById('tabRegisterBtn').classList.toggle('active', mode === 'register');
-    }
-
-    function selectRole(role) {
-      selectedRegRole = role;
-      document.getElementById('roleProprietario').classList.toggle('active', role === 'owner');
-      document.getElementById('roleUsuario').classList.toggle('active', role === 'user');
-      document.getElementById('groupCompanyName').style.display = role === 'owner' ? 'block' : 'none';
-      document.getElementById('groupUserName').style.display = role === 'owner' ? 'none' : 'block';
-      document.getElementById('groupCompanyOwnerEmail').style.display = role === 'owner' ? 'none' : 'block';
-      document.getElementById('regSubmitBtn').textContent = role === 'owner' ? 'Criar Conta (3 Dias Grátis)' : 'Solicitar Acesso';
-    }
-
     function handleLogin(e) {
       e.preventDefault();
       firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim())
-        .then((cred) => { currentUser = cred.user; resolveUserSession(cred.user.email); showToast('Login bem-sucedido!'); })
-        .catch(() => showToast('Erro: E-mail ou senha incorretos.'));
-    }
-
-    function handleUnifiedRegister(e) {
-      e.preventDefault();
-      const email = document.getElementById('regEmail').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
-
-      if (selectedRegRole === 'owner') {
-        const companyName = document.getElementById('regCompanyName').value.trim();
-        if (!companyName) { alert('Informe o nome da empresa.'); return; }
-        const now = Date.now();
-        firebase.auth().createUserWithEmailAndPassword(email, password).then((cred) => {
-          currentUser = cred.user; ownerEmail = email; userRole = 'owner';
-          db.collection("empresas").doc(email).set({ companyName, companyLogo: '', ownerEmail: email, subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000), subscriptionExpiresAt: now + (3*86400000), teamMembers: {}, pendingTeam: [] }).then(() => {
-            showMainApp(companyName, '', ownerEmail, { subscriptionStatus: 'trial' });
-            showToast('Empresa criada com 3 dias de teste!');
-          });
-        }).catch(err => showToast('Erro: ' + err.message));
-      } else {
-        const userName = document.getElementById('regUserName').value.trim();
-        const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
-        db.collection("empresas").doc(companyOwnerEmail).get().then((doc) => {
-          if (!doc.exists) { alert('E-mail da empresa proprietária não encontrado.'); return; }
-          firebase.auth().createUserWithEmailAndPassword(email, password).then(() => {
-            let pending = doc.data().pendingTeam || [];
-            if (!pending.some(p => (p.email || p) === email)) pending.push({ email, name: userName, requestedRole: 'user' });
-            db.collection("empresas").doc(companyOwnerEmail).update({ pendingTeam: pending }).then(() => {
-              if (currentInviteToken) db.collection("convites").doc(currentInviteToken).update({ used: true });
-              showToast('Solicitação enviada!');
-              resolveUserSession(email);
-            });
-          }).catch(err => showToast('Erro: ' + err.message));
-        });
-      }
-    }
-
-    function enterGuestMode() {
-      currentUser = { email: 'visitante@protech.com' };
-      ownerEmail = 'visitante@protech.com';
-      userRole = 'owner';
-      userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-      showMainApp('Protech Visitante', '', ownerEmail, { subscriptionStatus: 'active' });
-      showToast('Entrou no modo de teste.');
+        .then((cred) => { currentUser = cred.user; resolveUserSession(cred.user.email); showToast('Login efetuado!'); })
+        .catch(() => showToast('Erro no login.'));
     }
 
     function handleLogout() {
@@ -857,67 +686,16 @@
       currentUser = null; ownerEmail = null;
       document.getElementById('authScreen').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('paywallScreen').style.display = 'none';
       showToast('Sessão encerrada.');
     }
 
     function resolveUserSession(userEmail) {
-      db.collection("empresas").doc(userEmail).get().then((doc) => {
-        if (doc.exists) {
-          ownerEmail = userEmail; userRole = 'owner'; userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-          if (validateSubscription(doc.data())) showMainApp(doc.data().companyName, doc.data().companyLogo || '', ownerEmail, doc.data());
-        } else {
-          db.collection("empresas").get().then((snapshot) => {
-            let found = null, dataDoc = null;
-            snapshot.forEach(d => {
-              const data = d.data();
-              if (data.ownerEmail === userEmail) { found = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: 'owner' }; dataDoc = data; }
-              else if (data.teamMembers && data.teamMembers[userEmail]) { found = { ownerEmail: data.ownerEmail, companyName: data.companyName, companyLogo: data.companyLogo || '', role: data.teamMembers[userEmail].role, permissions: data.teamMembers[userEmail] }; dataDoc = data; }
-            });
-            if (found) {
-              ownerEmail = found.ownerEmail; userRole = found.role; userPermissions = userRole === 'owner' ? { canAdd: true, canEdit: true, canDelete: true } : (found.permissions || {});
-              if (validateSubscription(dataDoc)) showMainApp(found.companyName, found.companyLogo, ownerEmail, dataDoc);
-            } else {
-              ownerEmail = userEmail; userRole = 'owner'; userPermissions = { canAdd: true, canEdit: true, canDelete: true };
-              const now = Date.now();
-              const defData = { companyName: "Empresa de " + userEmail.split('@')[0], companyLogo: '', ownerEmail: userEmail, subscriptionStatus: 'trial', trialEndsAt: now + (3*86400000), subscriptionExpiresAt: now + (3*86400000), teamMembers: {}, pendingTeam: [] };
-              db.collection("empresas").doc(userEmail).set(defData).then(() => showMainApp(defData.companyName, '', ownerEmail, defData));
-            }
-          });
-        }
-      });
+      ownerEmail = userEmail;
+      showMainApp('Protech Condomínios', '', ownerEmail);
     }
 
-    function validateSubscription(data) {
-      if (!data) return true;
-      if (data.subscriptionStatus === 'active') return true;
-
-      const now = Date.now();
-      const expiresAt = data.subscriptionExpiresAt || data.trialEndsAt || 0;
-      const gracePeriodMs = 7 * 86400000;
-
-      if (now <= expiresAt) {
-        return true;
-      } else if (now <= (expiresAt + gracePeriodMs)) {
-        document.getElementById('graceBadgeDisplay').style.display = 'inline-block';
-        return true;
-      } else {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('paywallScreen').style.display = 'flex';
-        return false;
-      }
-    }
-
-    function triggerRenewSubscription() {
-      alert('Redirecionando para o portal de pagamento (PIX / Cartão). Após a confirmação, seu acesso será liberado instantaneamente e seus dados estarão intactos!');
-    }
-
-    function showMainApp(companyName, companyLogo, rootOwnerEmail, companyData) {
-      currentCompanyName = companyName || 'Protech Condomínios';
-      currentCompanyLogo = companyLogo || '';
+    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
       document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('paywallScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'flex';
       updateHeaderBrandDisplay();
       loadCondosForOwner(rootOwnerEmail);
@@ -995,6 +773,7 @@
       document.getElementById('reportCondoId').value = id;
       document.getElementById('reportText').value = '';
       selectedMediaFiles = [];
+      document.getElementById('uploadProgressContainer').style.display = 'none';
       renderMediaPreviews();
       document.getElementById('reportModal').classList.remove('hidden');
     }
@@ -1050,26 +829,47 @@
         selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.previewUrl}"></div>`).join('');
     }
 
+    // UPLOAD COM BARRA DE PROGRESSO EM TEMPO REAL
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
       const c = condos.find(x => x.id === id);
-      showToast('Enviando fotos para a nuvem...');
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      progressContainer.style.display = 'block';
 
       try {
         let uploadedMedia = [];
+        let totalFiles = selectedMediaFiles.length;
+        let completedFiles = 0;
+
         for (let mediaItem of selectedMediaFiles) {
           const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name}`;
           const storageRef = storage.ref().child(filePath);
-          const snapshot = await storageRef.put(mediaItem.fileObj);
-          const downloadUrl = await snapshot.ref.getDownloadURL();
-          uploadedMedia.push({ type: 'image', url: downloadUrl });
+          
+          await new Promise((resolve, reject) => {
+            const uploadTask = storageRef.put(mediaItem.fileObj);
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                const overall = Math.round(((completedFiles + (progress / 100)) / totalFiles) * 100);
+                progressBar.style.width = overall + '%';
+                progressBar.textContent = overall + '% (Enviando...)';
+              }, 
+              (error) => reject(error), 
+              async () => {
+                const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                uploadedMedia.push({ type: 'image', url: downloadUrl });
+                completedFiles++;
+                resolve();
+              }
+            );
+          });
         }
 
         const now = new Date();
         const newRep = {
           date: now.toLocaleDateString('pt-BR'),
-          isoDate: now.toISOString().split('T')[0],
           checkInTime: c.checkInTime || '--:--',
           checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           userEmail: currentUser.email,
@@ -1084,86 +884,91 @@
         closeReportModal();
         loadCondosForOwner(ownerEmail);
       } catch (err) {
-        alert('Erro ao enviar mídias para o Storage: ' + err.message);
+        alert('Erro ao enviar mídias: ' + err.message);
+      } finally {
+        progressContainer.style.display = 'none';
+        progressBar.style.width = '0%';
       }
     }
 
-    function generateInviteLink() {
-      if (!ownerEmail) return;
-      const token = 'inv_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-
-      db.collection("convites").doc(token).set({
-        ownerEmail: ownerEmail,
-        expiresAt: expiresAt,
-        used: false
-      }).then(() => {
-        const currentBaseUrl = window.location.origin + window.location.pathname;
-        const inviteUrl = `${currentBaseUrl}?invite=${token}`;
-        
-        document.getElementById('generatedLinkContainer').style.display = 'block';
-        document.getElementById('generatedLinkInput').value = inviteUrl;
-        showToast('Link de convite gerado com sucesso!');
-      }).catch(err => {
-        alert('Erro ao gerar link: ' + err.message);
-      });
-    }
-
-    function copyGeneratedLink() {
-      const input = document.getElementById('generatedLinkInput');
-      input.select();
-      input.setSelectionRange(0, 99999);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(input.value).then(() => { showToast('Link copiado!'); });
+    // ABRIR MODAL DE ROTA COM OS CONDOMÍNIOS CORRETAMENTE LISTADOS
+    function openRouteModal() {
+      const container = document.getElementById('routeSelectionList');
+      if (!container) return;
+      if (condos.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum condomínio cadastrado.</div>';
       } else {
-        document.execCommand('copy');
-        showToast('Link copiado!');
+        container.innerHTML = condos.map(c => `
+          <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
+            <input type="checkbox" class="route-checkbox" value="${escapeHtml(c.address)}, ${escapeHtml(c.number)}" checked>
+            <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
+          </label>
+        `).join('');
       }
+      document.getElementById('routeModal').classList.remove('hidden');
+    }
+    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
+
+    function toggleSelectAllRoutes() {
+      const checkboxes = document.querySelectorAll('.route-checkbox');
+      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+      checkboxes.forEach(cb => cb.checked = !allChecked);
     }
 
-    function downloadGlobalReportPDF() {
+    function generateOptimizedRoute() {
+      const checked = document.querySelectorAll('.route-checkbox:checked');
+      if (checked.length === 0) { alert('Selecione pelo menos um condomínio.'); return; }
+      let addresses = Array.from(checked).map(cb => cb.value);
+      let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addresses[addresses.length - 1])}`;
+      if (addresses.length > 1) {
+        let waypoints = addresses.slice(0, addresses.length - 1).map(a => encodeURIComponent(a)).join('|');
+        url += `&waypoints=${waypoints}`;
+      }
+      window.open(url, '_blank');
+      closeRouteModal();
+    }
+
+    // GERAR PDF INDIVIDUAL DE CADA RELATÓRIO
+    function downloadSingleReportPDF(condoName, report) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text("Relatorio Geral de Atendimentos - Protech", 14, 20);
+      doc.text(currentCompanyName || "Protech Condomínios", 14, 20);
+
+      doc.setFontSize(12);
+      doc.text(`Relatório de Atendimento: ${condoName}`, 14, 28);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 28);
+      doc.text(`Data: ${report.date} | Horário: ${report.checkInTime} até ${report.checkOutTime}`, 14, 36);
+      doc.text(`Técnico / Usuário: ${report.userEmail}`, 14, 42);
 
-      let y = 38;
       doc.setFont("helvetica", "bold");
-      doc.text("Condominio", 14, y);
-      doc.text("Data", 90, y);
-      doc.text("Tecnico", 130, y);
+      doc.text("Serviço Realizado / Observações:", 14, 52);
       
-      y += 6;
-      doc.line(14, y, 196, y);
-      y += 6;
-
       doc.setFont("helvetica", "normal");
-      let totalVisitsCount = 0;
-      condos.forEach(c => {
-        if (c.reports && c.reports.length > 0) {
-          c.reports.forEach(r => {
-            if (y > 270) { doc.addPage(); y = 20; }
-            doc.text((c.name || '').substring(0, 35), 14, y);
-            doc.text(r.date || '-', 90, y);
-            doc.text((r.userEmail || '').split('@')[0], 130, y);
-            y += 8;
-            totalVisitsCount++;
-          });
-        }
-      });
+      let splitText = doc.splitTextToSize(report.text || "Nenhuma descrição informada.", 180);
+      doc.text(splitText, 14, 60);
 
-      if (totalVisitsCount === 0) {
-        doc.text("Nenhum atendimento registrado no periodo.", 14, y);
+      let yPos = 65 + (splitText.length * 6);
+      if (report.media && report.media.length > 0) {
+        doc.setFont("helvetica", "bold");
+        doc.text(`Mídias anexadas: ${report.media.length} imagem(ns)`, 14, yPos);
       }
 
-      doc.save("relatorio_atendimentos_protech.pdf");
+      doc.save(`relatorio_${condoName.replace(/\s+/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
       showToast('PDF gerado com sucesso!');
+    }
+
+    // LIGHTBOX PARA VER FOTOS EM TELA CHEIA
+    function openLightbox(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightboxModal').classList.remove('hidden');
+    }
+    function closeLightbox() {
+      document.getElementById('lightboxModal').classList.add('hidden');
     }
 
     function abrirOpcoesGps(enderecoCompleto) {
@@ -1172,10 +977,7 @@
       document.getElementById('gpsLinkWaze').href = `https://waze.com/ul?q=${enderecoEncoded}&navigate=yes`;
       document.getElementById('gpsModal').classList.remove('hidden');
     }
-
-    function closeGpsModal() {
-      document.getElementById('gpsModal').classList.add('hidden');
-    }
+    function closeGpsModal() { document.getElementById('gpsModal').classList.add('hidden'); }
 
     function renderCondos() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -1217,18 +1019,29 @@
       document.getElementById('condoModal').classList.remove('hidden');
     }
     function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
+
     function openHistoryModal(id) {
       const c = condos.find(x => x.id === id);
       document.getElementById('historyModalTitle').textContent = `Histórico: ${c.name}`;
       document.getElementById('historyListContainer').innerHTML = (c.reports || []).length === 0 ? '<div style="text-align:center; color:#94a3b8; padding:20px;">Nenhum relatório.</div>' :
-        c.reports.map(r => `<div class="report-card"><div class="report-header"><span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span></div><div class="report-text">${escapeHtml(r.text)}</div></div>`).join('');
+        c.reports.map((r, idx) => `
+          <div class="report-card">
+            <div class="report-header">
+              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
+              <button onclick='downloadSingleReportPDF(${JSON.stringify(c.name)}, ${JSON.stringify(r)})' class="btn btn-slate" style="padding:2px 8px; font-size:10px;">📄 PDF</button>
+            </div>
+            <div class="report-text">${escapeHtml(r.text)}</div>
+            ${r.media && r.media.length > 0 ? `
+              <div class="report-media-grid">
+                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}')">`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
       document.getElementById('historyModal').classList.remove('hidden');
     }
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
-    function openRouteModal() { document.getElementById('routeModal').classList.remove('hidden'); }
-    function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
-    function openTeamModal() { document.getElementById('teamModal').classList.remove('hidden'); }
-    function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
+
     function openGlobalReportModal() { document.getElementById('globalReportModal').classList.remove('hidden'); }
     function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
