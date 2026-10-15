@@ -994,7 +994,7 @@
           ctx.font = `bold ${Math.max(11, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
           ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
-          ctx.fillText(`📅 ${new.toLocaleString ? new Date().toLocaleString('pt-BR') : ''}`, 12, h - (bh * 0.18));
+          ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 12, h - (bh * 0.18));
           res(canvas.toDataURL('image/jpeg', 0.75));
         };
         img.src = dataUrl;
