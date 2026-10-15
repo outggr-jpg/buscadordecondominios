@@ -39,8 +39,6 @@
     .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
-    .badge-trial { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-grace { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     
     .actions-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .btn { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-decoration: none; }
@@ -134,17 +132,16 @@
     .role-btn { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .role-btn.active { background: #0284c7; color: white; }
 
-    .stat-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; text-align: center; }
-    .stat-num { font-size: 20px; font-weight: bold; color: #38bdf8; }
-    .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
-
-    .paywall-container { max-width: 460px; width: 100%; margin: auto; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 28px; text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.6); }
-
     .user-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 16px; }
-    .theme-color-picker { display: flex; gap: 8px; margin-top: 6px; }
-    .theme-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-    .theme-dot:hover { transform: scale(1.15); }
-    .theme-dot.selected { border-color: #38bdf8; transform: scale(1.1); }
+    
+    /* PALETA DE CORES EM TEMPO REAL */
+    .color-picker-box { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+    .color-picker-input { -webkit-appearance: none; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; background: none; padding: 0; }
+    .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-picker-input::-webkit-color-swatch { border: 2px solid var(--border-color); border-radius: 50%; }
+    .color-presets { display: flex; gap: 6px; }
+    .color-preset-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+    .color-preset-dot:hover { transform: scale(1.15); }
 
     .toast { position: fixed; bottom: 20px; right: 20px; background-color: var(--bg-card); border: 1px solid #0284c7; color: var(--text-main); padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -177,10 +174,6 @@
       </div>
       <h2 class="auth-title">Protech Condomínios</h2>
       <p class="auth-subtitle">Acesso Operacional e Gestão de Campo</p>
-
-      <div id="inviteNotice" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; text-align: center;">
-        🎉 Você foi convidado para entrar em uma equipe!
-      </div>
 
       <div class="tab-nav">
         <button id="tabLoginBtn" onclick="switchAuthMode('login')" class="tab-btn active">Entrar</button>
@@ -233,12 +226,8 @@
           <input type="password" id="regPassword" required minlength="6" placeholder="••••••••" class="form-control">
         </div>
 
-        <button type="submit" id="regSubmitBtn" class="btn btn-slate" style="justify-content: center; padding: 10px; margin-top: 4px;">Criar Conta (3 Dias de Teste Grátis)</button>
+        <button type="submit" id="regSubmitBtn" class="btn btn-slate" style="justify-content: center; padding: 10px; margin-top: 4px;">Criar Conta</button>
       </form>
-
-      <div style="margin-top: 14px; text-align: center; border-top: 1px solid #334155; padding-top: 12px;">
-        <button type="button" onclick="enterGuestMode()" style="background: none; border: none; color: #38bdf8; font-size: 11px; cursor: pointer; text-decoration: underline;">Testar Modo Visitante</button>
-      </div>
     </div>
   </div>
 
@@ -256,7 +245,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v5.9.5</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.0.0</span>
               </div>
             </div>
           </div>
@@ -351,7 +340,7 @@
           </div>
         </div>
 
-        <div id="companySettingsSection" style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px; display:none;">
+        <div id="companySettingsSection" style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🏢 Dados da Empresa (Matriz):</label>
           <div class="form-group" style="margin-top:6px;">
             <label>Nome da Empresa:</label>
@@ -373,22 +362,16 @@
         </div>
 
         <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">📋 Menu Operacional e Gestão:</label>
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe e Permissões</button>
-            <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
-            <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
-          </div>
-        </div>
-
-        <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🎨 Personalizar Cor de Fundo do App:</label>
-          <div class="theme-color-picker">
-            <div class="theme-dot selected" id="theme-default" style="background:#0f172a;" title="Azul Noturno" onclick="applyAppTheme('default')"></div>
-            <div class="theme-dot" id="theme-oled" style="background:#000000;" title="Escuro Puro" onclick="applyAppTheme('oled')"></div>
-            <div class="theme-dot" id="theme-emerald" style="background:#064e3b;" title="Verde Protech" onclick="applyAppTheme('emerald')"></div>
-            <div class="theme-dot" id="theme-navy" style="background:#1e1b4b;" title="Azul Marinho" onclick="applyAppTheme('navy')"></div>
-            <div class="theme-dot" id="theme-light" style="background:#f8fafc;" title="Modo Claro" onclick="applyAppTheme('light')"></div>
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">🎨 Paleta de Cores em Tempo Real:</label>
+          <div class="color-picker-box">
+            <input type="color" id="appColorPicker" class="color-picker-input" oninput="changeAppThemeColor(this.value)" value="#0f172a" title="Escolher cor personalizada">
+            <span style="font-size: 11px; color: var(--text-muted);">Clique para escolher ou testar atalhos:</span>
+            <div class="color-presets">
+              <div class="color-preset-dot" style="background:#0f172a;" onclick="changeAppThemeColor('#0f172a')" title="Azul Noturno"></div>
+              <div class="color-preset-dot" style="background:#000000;" onclick="changeAppThemeColor('#000000')" title="Preto OLED"></div>
+              <div class="color-preset-dot" style="background:#064e3b;" onclick="changeAppThemeColor('#064e3b')" title="Verde Protech"></div>
+              <div class="color-preset-dot" style="background:#1e1b4b;" onclick="changeAppThemeColor('#1e1b4b')" title="Azul Marinho"></div>
+            </div>
           </div>
         </div>
 
@@ -404,28 +387,28 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS (CORRIGIDO) -->
+  <!-- MODAL DE ROTAS OTIMIZADAS POR DISTÂNCIA -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">🚗 Fazer sua Rota Otimizada</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">🚗 Rota Otimizada por Proximidade</h3>
         <button onclick="closeRouteModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Selecione os condomínios que precisa visitar hoje:</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Selecione os condomínios para calcular o menor trajeto a partir da sua localização atual:</p>
         <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;"></div>
       </div>
       <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
         <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
         <div style="display: flex; gap: 8px;">
           <button onclick="closeRouteModal()" class="btn btn-slate">Cancelar</button>
-          <button onclick="generateOptimizedRoute()" class="btn btn-slate">🗺️ Abrir no Maps</button>
+          <button onclick="generateOptimizedRouteByDistance()" class="btn btn-emerald">🗺️ Gerar Rota Mais Rápida</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM BARRA DE PROGRESSO) -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM TEMPO TOTAL) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -459,28 +442,6 @@
       </div>
       <div class="modal-body" id="historyListContainer"></div>
       <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button></div>
-    </div>
-  </div>
-
-  <!-- DEMAIS MODAIS -->
-  <div id="globalReportModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 650px;">
-      <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">📊 Relatório Geral de Atendimentos</h3>
-        <button onclick="closeGlobalReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body">
-        <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:10px;">
-          <div class="form-row">
-            <div class="form-group"><label>Filtrar por Mês/Ano</label><input type="month" id="filterMonthInput" class="form-control"></div>
-          </div>
-        </div>
-        <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
-      </div>
-      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
-        <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Resumo em PDF</button>
-      </div>
     </div>
   </div>
 
@@ -523,13 +484,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 5.9.5</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.0.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Botão Sair removido da barra superior principal.</li>
-            <li>Correção do modal de rota otimizada listando os condomínios cadastrados.</li>
-            <li>Barra de progresso de upload em tempo real para o Firebase Storage.</li>
-            <li>Visualizador (Lightbox) de fotos e vídeos no histórico.</li>
-            <li>Botão individual de exportação em PDF em cada relatório.</li>
+            <li>Otimização automática de rotas por distância (cálculo de menor tempo a partir da sua localização).</li>
+            <li>Cálculo automático do tempo total de visita nos relatórios e PDFs.</li>
+            <li>Seletor de cores em tempo real personalizável para o tema do aplicativo.</li>
+            <li>Estabilização e otimização do upload de mídias para o Firebase Storage.</li>
           </ul>
         </div>
       </div>
@@ -560,8 +520,8 @@
     let currentCompanyLogo = '';
 
     window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('protech_app_theme') || 'default';
-      applyAppTheme(savedTheme);
+      const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
+      changeAppThemeColor(savedColor, false);
 
       try {
         firebase.auth().onAuthStateChanged((user) => {
@@ -593,14 +553,27 @@
       document.getElementById('headerUserAvatarImg').src = storedAvatar;
     }
 
-    function applyAppTheme(themeName) {
+    // MUDANÇA DE COR EM TEMPO REAL
+    function changeAppThemeColor(colorHex, save = true) {
       const root = document.documentElement;
-      if (themeName === 'oled') {
-        root.style.setProperty('--bg-main', '#000000'); root.style.setProperty('--bg-card', '#121212'); root.style.setProperty('--border-color', '#27272a');
-      } else {
-        root.style.setProperty('--bg-main', '#0f172a'); root.style.setProperty('--bg-card', '#1e293b'); root.style.setProperty('--border-color', '#334155');
+      root.style.setProperty('--bg-main', colorHex);
+      
+      // Ajusta o card automaticamente com um tom ligeiramente mais claro/escuro para harmonia
+      root.style.setProperty('--bg-card', adjustColorBrightness(colorHex, 15));
+      
+      if (save) {
+        localStorage.setItem('protech_custom_theme_color', colorHex);
       }
-      localStorage.setItem('protech_app_theme', themeName);
+      const picker = document.getElementById('appColorPicker');
+      if (picker) picker.value = colorHex;
+    }
+
+    function adjustColorBrightness(hex, percent) {
+      let num = parseInt(hex.replace('#',''), 16);
+      let r = (num >> 16) + percent; if (r > 255) r = 255; else if (r < 0) r = 0;
+      let g = ((num >> 8) & 0x00FF) + percent; if (g > 255) g = 255; else if (g < 0) g = 0;
+      let b = (num & 0x0000FF) + percent; if (b > 255) b = 255; else if (b < 0) b = 0;
+      return `#${(1 << 24 | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
     }
 
     function openSettingsModal() {
@@ -762,7 +735,12 @@
           const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(c.lat), parseFloat(c.lng));
           if (dist > 500) { alert(`Fora do raio de 500m (${Math.round(dist)}m).`); return; }
           const now = new Date();
-          db.collection("condominios").doc(id).update({ checkedIn: true, checkInTimestamp: now.getTime(), checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), checkInDate: now.toLocaleDateString('pt-BR') }).then(() => { showToast('Check-in realizado!'); loadCondosForOwner(ownerEmail); });
+          db.collection("condominios").doc(id).update({ 
+            checkedIn: true, 
+            checkInTimestamp: now.getTime(), 
+            checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+            checkInDate: now.toLocaleDateString('pt-BR') 
+          }).then(() => { showToast('Check-in realizado!'); loadCondosForOwner(ownerEmail); });
         }, () => alert('Erro de GPS'), { enableHighAccuracy: true });
       } else {
         openReportModal(id);
@@ -829,7 +807,7 @@
         selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.previewUrl}"></div>`).join('');
     }
 
-    // UPLOAD COM BARRA DE PROGRESSO EM TEMPO REAL
+    // CHECK-OUT COM CÁLCULO DE TEMPO TOTAL DE VISITA E UPLOAD ESTÁVEL
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
@@ -868,10 +846,23 @@
         }
 
         const now = new Date();
+        const checkOutTimestamp = now.getTime();
+        
+        // Cálculo do tempo total de visita
+        let durationText = '--';
+        if (c.checkInTimestamp) {
+          const diffMs = checkOutTimestamp - c.checkInTimestamp;
+          const diffMins = Math.floor(diffMs / 60000);
+          const hours = Math.floor(diffMins / 60);
+          const mins = diffMins % 60;
+          durationText = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
+        }
+
         const newRep = {
           date: now.toLocaleDateString('pt-BR'),
           checkInTime: c.checkInTime || '--:--',
           checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          duration: durationText,
           userEmail: currentUser.email,
           text: document.getElementById('reportText').value.trim(),
           media: uploadedMedia
@@ -880,18 +871,18 @@
         let reps = c.reports || []; reps.unshift(newRep);
         await db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps });
         
-        showToast('Check-out e fotos salvos com sucesso!');
+        showToast('Check-out realizado com sucesso!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
       } catch (err) {
-        alert('Erro ao enviar mídias: ' + err.message);
+        alert('Erro ao finalizar check-out: ' + err.message);
       } finally {
         progressContainer.style.display = 'none';
         progressBar.style.width = '0%';
       }
     }
 
-    // ABRIR MODAL DE ROTA COM OS CONDOMÍNIOS CORRETAMENTE LISTADOS
+    // ABRIR MODAL DE ROTA E ORDENAR POR DISTÂNCIA AUTOMATICAMENTE
     function openRouteModal() {
       const container = document.getElementById('routeSelectionList');
       if (!container) return;
@@ -900,7 +891,7 @@
       } else {
         container.innerHTML = condos.map(c => `
           <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
-            <input type="checkbox" class="route-checkbox" value="${escapeHtml(c.address)}, ${escapeHtml(c.number)}" checked>
+            <input type="checkbox" class="route-checkbox" data-lat="${c.lat}" data-lng="${c.lng}" value="${escapeHtml(c.address)}, ${escapeHtml(c.number)}" checked>
             <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
           </label>
         `).join('');
@@ -915,20 +906,63 @@
       checkboxes.forEach(cb => cb.checked = !allChecked);
     }
 
-    function generateOptimizedRoute() {
+    // GERAR ROTA OTIMIZADA POR DISTÂNCIA (VIZINHO MAIS PRÓXIMO A PARTIR DA CASA/GPS)
+    function generateOptimizedRouteByDistance() {
       const checked = document.querySelectorAll('.route-checkbox:checked');
       if (checked.length === 0) { alert('Selecione pelo menos um condomínio.'); return; }
-      let addresses = Array.from(checked).map(cb => cb.value);
-      let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addresses[addresses.length - 1])}`;
-      if (addresses.length > 1) {
-        let waypoints = addresses.slice(0, addresses.length - 1).map(a => encodeURIComponent(a)).join('|');
-        url += `&waypoints=${waypoints}`;
-      }
-      window.open(url, '_blank');
-      closeRouteModal();
+
+      navigator.geolocation.getCurrentPosition((pos) => {
+        let currentLat = pos.coords.latitude;
+        let currentLng = pos.coords.longitude;
+        
+        let unvisited = Array.from(checked).map(cb => ({
+          address: cb.value,
+          lat: parseFloat(cb.dataset.lat),
+          lng: parseFloat(cb.dataset.lng)
+        }));
+
+        let orderedAddresses = [];
+        
+        while (unvisited.length > 0) {
+          let nearestIdx = 0;
+          let minDistance = Infinity;
+
+          for (let i = 0; i < unvisited.length; i++) {
+            let dist = calculateHaversineDistance(currentLat, currentLng, unvisited[i].lat, unvisited[i].lng);
+            if (dist < minDistance) {
+              minDistance = dist;
+              nearestIdx = i;
+            }
+          }
+
+          let nextStop = unvisited.splice(nearestIdx, 1)[0];
+          orderedAddresses.push(nextStop.address);
+          currentLat = nextStop.lat;
+          currentLng = nextStop.lng;
+        }
+
+        let destination = orderedAddresses[orderedAddresses.length - 1];
+        let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+        if (orderedAddresses.length > 1) {
+          let waypoints = orderedAddresses.slice(0, orderedAddresses.length - 1).map(a => encodeURIComponent(a)).join('|');
+          url += `&waypoints=${waypoints}`;
+        }
+        window.open(url, '_blank');
+        closeRouteModal();
+      }, () => {
+        // Fallback caso o GPS falhe: usa a ordem selecionada
+        let addresses = Array.from(checked).map(cb => cb.value);
+        let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addresses[addresses.length - 1])}`;
+        if (addresses.length > 1) {
+          let waypoints = addresses.slice(0, addresses.length - 1).map(a => encodeURIComponent(a)).join('|');
+          url += `&waypoints=${waypoints}`;
+        }
+        window.open(url, '_blank');
+        closeRouteModal();
+      }, { enableHighAccuracy: true });
     }
 
-    // GERAR PDF INDIVIDUAL DE CADA RELATÓRIO
+    // GERAR PDF INDIVIDUAL COM TEMPO TOTAL DA VISITA
     function downloadSingleReportPDF(condoName, report) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -942,8 +976,8 @@
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(`Data: ${report.date} | Horário: ${report.checkInTime} até ${report.checkOutTime}`, 14, 36);
-      doc.text(`Técnico / Usuário: ${report.userEmail}`, 14, 42);
+      doc.text(`Data: ${report.date} | Horário: ${report.checkInTime} às ${report.checkOutTime}`, 14, 36);
+      doc.text(`Tempo Total da Visita: ${report.duration || '--'} | Técnico: ${report.userEmail}`, 14, 42);
 
       doc.setFont("helvetica", "bold");
       doc.text("Serviço Realizado / Observações:", 14, 52);
@@ -1027,7 +1061,7 @@
         c.reports.map((r, idx) => `
           <div class="report-card">
             <div class="report-header">
-              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime})</span>
+              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime}) | ⏱️ ${r.duration || '--'}</span>
               <button onclick='downloadSingleReportPDF(${JSON.stringify(c.name)}, ${JSON.stringify(r)})' class="btn btn-slate" style="padding:2px 8px; font-size:10px;">📄 PDF</button>
             </div>
             <div class="report-text">${escapeHtml(r.text)}</div>
@@ -1042,8 +1076,6 @@
     }
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
 
-    function openGlobalReportModal() { document.getElementById('globalReportModal').classList.remove('hidden'); }
-    function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
     function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
 
