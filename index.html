@@ -139,60 +139,13 @@
     .toast.show { transform: translateY(0); opacity: 1; }
 
     /* ESTILOS DOS CARDS DE GPS */
-    .gps-buttons-container {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 15px;
-      width: 100%;
-    }
-
-    .gps-card {
-      flex: 1;
-      padding: 14px 16px;
-      border-radius: 8px;
-      text-align: center;
-      text-decoration: none;
-      font-weight: bold;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: opacity 0.2s, transform 0.1s;
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    .gps-card:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .gps-card.maps {
-      background-color: #1a73e8; /* Azul Google Maps */
-    }
-
-    .gps-card.waze {
-      background-color: #33cc66; /* Verde Waze */
-    }
-
-    .gps-cancel-btn {
-      width: 100%;
-      background-color: #f1f3f4;
-      color: #3c4043;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.2s;
-    }
-
-    .gps-cancel-btn:hover {
-      background-color: #e4e6e7;
-    }
+    .gps-buttons-container { display: flex; gap: 12px; margin-bottom: 15px; width: 100%; }
+    .gps-card { flex: 1; padding: 14px 16px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: opacity 0.2s, transform 0.1s; cursor: pointer; font-size: 15px; }
+    .gps-card:hover { opacity: 0.9; transform: translateY(-1px); }
+    .gps-card.maps { background-color: #1a73e8; }
+    .gps-card.waze { background-color: #33cc66; }
+    .gps-cancel-btn { width: 100%; background-color: #f1f3f4; color: #3c4043; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }
+    .gps-cancel-btn:hover { background-color: #e4e6e7; }
   </style>
 </head>
 <body>
