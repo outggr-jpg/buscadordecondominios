@@ -266,7 +266,7 @@
           </div>
         </div>
 
-        <!-- LINHA 2: BOTÕES DE AÇÃO À ESQUERDA (SEM O BOTÃO SAIR) -->
+        <!-- LINHA 2: BOTÕES DE AÇÃO À ESQUERDA -->
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
@@ -294,7 +294,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE SELEÇÃO DE GPS (SEM O 'X') -->
+  <!-- MODAL DE SELEÇÃO DE GPS -->
   <div id="gpsModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 400px;">
       <div class="modal-header" style="justify-content: center; margin-bottom: 8px;">
@@ -451,7 +451,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS (TODOS DESMARCADOS POR PADRÃO) -->
+  <!-- MODAL DE ROTAS -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -476,7 +476,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM CLOUDINARY PARA FOTOS E VÍDEOS) -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM O SEU CLOUD NAME) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -554,7 +554,7 @@
         <div class="version-item">
           <div class="version-title"><span>Versão 6.1.3</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Integração com Cloudinary para upload rápido e infalível de fotos e vídeos.</li>
+            <li>Integração com Cloudinary próprio para upload rápido e infalível de fotos e vídeos.</li>
             <li>Barra de progresso em tempo real durante o envio de mídias.</li>
             <li>Condomínios desmarcados por padrão na seleção de rotas.</li>
             <li>Gestão de equipe, relatórios gerais e PDFs totalmente operacionais.</li>
@@ -1030,7 +1030,7 @@
         `).join('');
     }
 
-    // UPLOAD ROBUSTO VIA CLOUDINARY
+    // UPLOAD ROBUSTO USANDO A SUA CONTA DO CLOUDINARY
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
@@ -1047,14 +1047,15 @@
         for (let mediaItem of selectedMediaFiles) {
           const formData = new FormData();
           formData.append('file', mediaItem.fileObj);
-          formData.append('upload_preset', 'protech_unsigned'); // Preset público padrão do Cloudinary
+          formData.append('upload_preset', 'ml_default'); // Preset padrão gratuito do Cloudinary
 
-          const response = await fetch('https://api.cloudinary.com/v1_1/demo/auto/upload', {
+          // ⚠️ AQUI ESTÁ O SEU CLOUD NAME CONFIGURADO:
+          const response = await fetch('https://api.cloudinary.com/v1_1/c-053cb1d42bc6820878345a713de73a/auto/upload', {
             method: 'POST',
             body: formData
           });
 
-          if (!response.ok) throw new Error('Falha no upload para o Cloudinary');
+          if (!response.ok) throw new Error('Falha no upload para o Cloudinary. Verifique o seu Cloud Name ou Preset.');
           const data = await response.json();
           
           uploadedMedia.push({ type: mediaItem.type, url: data.secure_url });
