@@ -89,7 +89,7 @@
     
     .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; max-height: 260px; overflow-y: auto; padding: 4px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; min-height: 120px; }
     .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: #0f172a; }
-    .media-preview-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .media-preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
     .report-card { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
@@ -102,8 +102,12 @@
     /* LIGHTBOX TELA CHEIA */
     .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .lightbox-modal.hidden { display: none; }
-    .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+    .lightbox-img, .lightbox-video { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* BARRA DE PROGRESSO DO UPLOAD */
+    .progress-container { width: 100%; background-color: var(--border-color); border-radius: 8px; overflow: hidden; margin-top: 8px; display: none; }
+    .progress-bar { width: 0%; height: 16px; background-color: #0284c7; text-align: center; font-size: 10px; font-weight: bold; color: white; line-height: 16px; transition: width 0.2s; }
 
     .version-item { border-left: 2px solid #0284c7; padding-left: 10px; margin-bottom: 12px; }
     .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
@@ -156,10 +160,10 @@
 
   <div id="toast" class="toast">Ação realizada com sucesso!</div>
 
-  <!-- LIGHTBOX TELA CHEIA -->
+  <!-- LIGHTBOX TELA CHEIA PARA FOTOS E VÍDEOS -->
   <div id="lightboxModal" class="lightbox-modal hidden">
     <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-    <img id="lightboxImg" class="lightbox-img" src="" alt="Imagem ampliada">
+    <div id="lightboxContentContainer" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;"></div>
   </div>
 
   <!-- TELA DE AUTENTICAÇÃO -->
@@ -245,7 +249,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.1</span>
               </div>
             </div>
           </div>
@@ -364,7 +368,7 @@
         <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">📋 Menu Operacional e Gestão:</label>
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <button onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe e Permissões</button>
+            <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe e Permissões</button>
             <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
             <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
           </div>
@@ -448,7 +452,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS COM PESQUISA E OTIMIZAÇÃO POR DISTÂNCIA -->
+  <!-- MODAL DE ROTAS (COM MEMÓRIA DE SELEÇÃO E PESQUISA) -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -473,7 +477,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM SUPORTE A FOTOS E VÍDEOS) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -485,6 +489,11 @@
         <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
         <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
         
+        <!-- BARRA DE PROGRESSO -->
+        <div id="uploadProgressContainer" class="progress-container">
+          <div id="uploadProgressBar" class="progress-bar">0%</div>
+        </div>
+
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
@@ -544,13 +553,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.1.0</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.1.1</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Upload robusto de mídias direto via Base64 (`putString`) evitando travamentos.</li>
-            <li>Barra de pesquisa integrada dentro do modal de rotas.</li>
-            <li>Restauração completa do menu de Gestão de Equipe e Convites.</li>
-            <li>Opção de fechar check-out administrativo (Admin) sem restrição de GPS.</li>
-            <li>Retorno do Relatório Geral consolidado com filtro por mês e exportação em PDF.</li>
+            <li>Upload binário estável com barra de progresso para Fotos e Vídeos.</li>
+            <li>Correção da seleção de checkboxes ao pesquisar no modal de rotas.</li>
+            <li>Fechamento administrativo de visitas sem restrição de GPS.</li>
+            <li>Relatório geral e PDFs individuais totalmente operacionais.</li>
           </ul>
         </div>
       </div>
@@ -924,7 +932,6 @@
       }
     }
 
-    // FECHAMENTO ADMINISTRATIVO SEM RESTRIÇÃO DE GPS
     function adminForceCheckout(id) {
       if (!confirm('Deseja encerrar esta visita manualmente como Administrador?')) return;
       const c = condos.find(x => x.id === id);
@@ -962,6 +969,7 @@
       document.getElementById('reportCondoId').value = id;
       document.getElementById('reportText').value = '';
       selectedMediaFiles = [];
+      document.getElementById('uploadProgressContainer').style.display = 'none';
       renderMediaPreviews();
       document.getElementById('reportModal').classList.remove('hidden');
     }
@@ -973,7 +981,9 @@
         if (f.type.startsWith('image')) {
           const dataUrl = await readFileAsDataURL(f);
           const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
-          selectedMediaFiles.push({ name: f.name, type: 'image', dataUrl: watermarked });
+          selectedMediaFiles.push({ name: f.name, type: 'image', fileObj: dataUrlToFile(watermarked, f.name), previewUrl: watermarked });
+        } else if (f.type.startsWith('video')) {
+          selectedMediaFiles.push({ name: f.name, type: 'video', fileObj: f, previewUrl: URL.createObjectURL(f) });
         }
       }
       renderMediaPreviews();
@@ -981,6 +991,13 @@
 
     function readFileAsDataURL(file) {
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
+    }
+
+    function dataUrlToFile(dataUrl, filename) {
+      const arr = dataUrl.split(','); const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      return new File([u8arr], filename, { type: mime });
     }
 
     function applyWatermarkAsync(dataUrl, condoName, techName) {
@@ -1007,24 +1024,50 @@
 
     function renderMediaPreviews() {
       document.getElementById('mediaPreviewContainer').innerHTML = selectedMediaFiles.length === 0 ? '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia.</span>' :
-        selectedMediaFiles.map((m, idx) => `<div class="media-preview-item"><button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button><img src="${m.dataUrl}"></div>`).join('');
+        selectedMediaFiles.map((m, idx) => `
+          <div class="media-preview-item">
+            <button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button>
+            ${m.type === 'video' ? `<video src="${m.previewUrl}"></video>` : `<img src="${m.previewUrl}">`}
+          </div>
+        `).join('');
     }
 
-    // UPLOAD ROBUSTO DIRETO VIA BASE64 SEM TRAVAR
+    // UPLOAD ROBUSTO DE FOTOS E VÍDEOS COM BARRA DE PROGRESSO EM TEMPO REAL
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
       const c = condos.find(x => x.id === id);
-      showToast('Enviando mídias para a nuvem...');
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      progressContainer.style.display = 'block';
 
       try {
         let uploadedMedia = [];
+        let totalFiles = selectedMediaFiles.length;
+        let completedFiles = 0;
+
         for (let mediaItem of selectedMediaFiles) {
-          const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name || 'foto.jpg'}`;
+          const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name}`;
           const storageRef = storage.ref().child(filePath);
-          const snapshot = await storageRef.putString(mediaItem.dataUrl, 'data_url');
-          const downloadUrl = await snapshot.ref.getDownloadURL();
-          uploadedMedia.push({ type: 'image', url: downloadUrl });
+          
+          await new Promise((resolve, reject) => {
+            const uploadTask = storageRef.put(mediaItem.fileObj);
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                const overall = Math.round(((completedFiles + (progress / 100)) / totalFiles) * 100);
+                progressBar.style.width = overall + '%';
+                progressBar.textContent = overall + '% (Enviando...)';
+              }, 
+              (error) => reject(error), 
+              async () => {
+                const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                uploadedMedia.push({ type: mediaItem.type, url: downloadUrl });
+                completedFiles++;
+                resolve();
+              }
+            );
+          });
         }
 
         const now = new Date();
@@ -1056,10 +1099,13 @@
         loadCondosForOwner(ownerEmail);
       } catch (err) {
         alert('Erro ao finalizar check-out: ' + err.message);
+      } finally {
+        progressContainer.style.display = 'none';
+        progressBar.style.width = '0%';
       }
     }
 
-    // MODAL DE ROTAS COM PESQUISA E VIZINHO MAIS PRÓXIMO
+    // ROTAS COM MEMÓRIA DE SELEÇÃO DOS CHECKBOXES
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -1067,24 +1113,35 @@
     }
     function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
 
-    function filterRouteCondos(query) {
-      const q = query.toLowerCase();
-      const filtered = condos.filter(c => c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q));
-      renderRouteCondosList(filtered);
+    function getSelectedAddressesSet() {
+      const checked = document.querySelectorAll('.route-checkbox:checked');
+      return new Set(Array.from(checked).map(cb => cb.value));
     }
 
-    function renderRouteCondosList(list) {
+    function filterRouteCondos(query) {
+      const previouslyChecked = getSelectedAddressesSet();
+      const q = query.toLowerCase();
+      const filtered = condos.filter(c => c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q));
+      renderRouteCondosList(filtered, previouslyChecked);
+    }
+
+    function renderRouteCondosList(list, preservedCheckedSet = null) {
       const container = document.getElementById('routeSelectionList');
       if (!container) return;
       if (list.length === 0) {
         container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum condomínio encontrado.</div>';
       } else {
-        container.innerHTML = list.map(c => `
-          <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
-            <input type="checkbox" class="route-checkbox" data-lat="${c.lat}" data-lng="${c.lng}" value="${escapeHtml(c.address)}, ${escapeHtml(c.number)}" checked>
-            <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
-          </label>
-        `).join('');
+        container.innerHTML = list.map(c => {
+          const addrVal = `${c.address}, ${c.number}`;
+          // Se houver conjunto preservado, mantém o estado anterior; senão, marca por padrão
+          const isChecked = preservedCheckedSet ? preservedCheckedSet.has(addrVal) : true;
+          return `
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
+              <input type="checkbox" class="route-checkbox" data-lat="${c.lat}" data-lng="${c.lng}" value="${escapeHtml(addrVal)}" ${isChecked ? 'checked' : ''}>
+              <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
+            </label>
+          `;
+        }).join('');
       }
     }
 
@@ -1144,7 +1201,7 @@
       }, { enableHighAccuracy: true });
     }
 
-    // RELATÓRIOS GERAIS DE ATENDIMENTOS
+    // RELATÓRIOS GERAIS
     function openGlobalReportModal() {
       const now = new Date();
       const year = now.getFullYear();
@@ -1156,12 +1213,11 @@
     function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
 
     function renderGlobalReports() {
-      const filterVal = document.getElementById('filterMonthInput').value; // YYYY-MM
+      const filterVal = document.getElementById('filterMonthInput').value;
       let allReports = [];
       condos.forEach(c => {
         if (c.reports) {
           c.reports.forEach(r => {
-            // r.date formato DD/MM/YYYY
             const parts = r.date.split('/');
             const rYearMonth = `${parts[2]}-${parts[1]}`;
             if (!filterVal || rYearMonth === filterVal) {
@@ -1247,18 +1303,27 @@
       let yPos = 65 + (splitText.length * 6);
       if (report.media && report.media.length > 0) {
         doc.setFont("helvetica", "bold");
-        doc.text(`Mídias anexadas: ${report.media.length} imagem(ns)`, 14, yPos);
+        doc.text(`Mídias anexadas: ${report.media.length} item(ns)`, 14, yPos);
       }
 
       doc.save(`relatorio_${condoName.replace(/\s+/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
       showToast('PDF gerado com sucesso!');
     }
 
-    function openLightbox(url) {
-      document.getElementById('lightboxImg').src = url;
+    // LIGHTBOX PARA FOTOS E VÍDEOS EM TELA CHEIA
+    function openLightbox(url, type) {
+      const container = document.getElementById('lightboxContentContainer');
+      if (type === 'video') {
+        container.innerHTML = `<video src="${url}" class="lightbox-video" controls autoplay></video>`;
+      } else {
+        container.innerHTML = `<img src="${url}" class="lightbox-img" alt="Mídia ampliada">`;
+      }
       document.getElementById('lightboxModal').classList.remove('hidden');
     }
-    function closeLightbox() { document.getElementById('lightboxModal').classList.add('hidden'); }
+    function closeLightbox() {
+      document.getElementById('lightboxContentContainer').innerHTML = '';
+      document.getElementById('lightboxModal').classList.add('hidden');
+    }
 
     function abrirOpcoesGps(enderecoCompleto) {
       const enderecoEncoded = encodeURIComponent(enderecoCompleto);
@@ -1323,12 +1388,14 @@
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
               <div class="report-media-grid">
-                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}')">`).join('')}
+                ${r.media.map(m => m.type === 'video' ? 
+                  `<div style="width:50px; height:50px; background:#000; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;" onclick="openLightbox('${m.url}', 'video')">▶️</div>` : 
+                  `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}', 'image')">`
+                ).join('')}
               </div>
             ` : ''}
           </div>
         `).join('');
-      document.getElementById('historyModal').classList.add('hidden'); // bug fix
       document.getElementById('historyModal').classList.remove('hidden');
     }
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
