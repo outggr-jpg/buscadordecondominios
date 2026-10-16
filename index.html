@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <!-- Biblioteca jsPDF para exportação de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -105,7 +104,7 @@
     .lightbox-img, .lightbox-video { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-    /* BARRA DE PROGRESSO DO UPLOAD */
+    /* BARRA DE PROGRESSO DO UPLOAD CLOUDINARY */
     .progress-container { width: 100%; background-color: var(--border-color); border-radius: 8px; overflow: hidden; margin-top: 8px; display: none; }
     .progress-bar { width: 0%; height: 16px; background-color: #0284c7; text-align: center; font-size: 10px; font-weight: bold; color: white; line-height: 16px; transition: width 0.2s; }
 
@@ -249,7 +248,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.1</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.3</span>
               </div>
             </div>
           </div>
@@ -452,7 +451,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS (COM MEMÓRIA DE SELEÇÃO E PESQUISA) -->
+  <!-- MODAL DE ROTAS (TODOS DESMARCADOS POR PADRÃO) -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -464,7 +463,7 @@
           <span class="search-icon">🔍</span>
           <input type="text" id="routeSearchInput" oninput="filterRouteCondos(this.value)" placeholder="Pesquisar condomínio para a rota..." class="search-input" style="padding: 8px 12px 8px 36px; font-size:12px;">
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Selecione os condomínios para calcular o menor trajeto a partir da sua localização atual:</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Selecione os condomínios que deseja visitar:</p>
         <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;"></div>
       </div>
       <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
@@ -477,7 +476,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM SUPORTE A FOTOS E VÍDEOS) -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM CLOUDINARY PARA FOTOS E VÍDEOS) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -489,7 +488,7 @@
         <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
         <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
         
-        <!-- BARRA DE PROGRESSO -->
+        <!-- BARRA DE PROGRESSO DO UPLOAD -->
         <div id="uploadProgressContainer" class="progress-container">
           <div id="uploadProgressBar" class="progress-bar">0%</div>
         </div>
@@ -553,12 +552,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.1.1</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.1.3</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Upload binário estável com barra de progresso para Fotos e Vídeos.</li>
-            <li>Correção da seleção de checkboxes ao pesquisar no modal de rotas.</li>
-            <li>Fechamento administrativo de visitas sem restrição de GPS.</li>
-            <li>Relatório geral e PDFs individuais totalmente operacionais.</li>
+            <li>Integração com Cloudinary para upload rápido e infalível de fotos e vídeos.</li>
+            <li>Barra de progresso em tempo real durante o envio de mídias.</li>
+            <li>Condomínios desmarcados por padrão na seleção de rotas.</li>
+            <li>Gestão de equipe, relatórios gerais e PDFs totalmente operacionais.</li>
           </ul>
         </div>
       </div>
@@ -579,7 +578,6 @@
 
     try { firebase.initializeApp(firebaseConfig); } catch(err) {}
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     let condos = [];
     let currentUser = null;
@@ -981,9 +979,9 @@
         if (f.type.startsWith('image')) {
           const dataUrl = await readFileAsDataURL(f);
           const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
-          selectedMediaFiles.push({ name: f.name, type: 'image', fileObj: dataUrlToFile(watermarked, f.name), previewUrl: watermarked });
+          selectedMediaFiles.push({ type: 'image', fileObj: dataUrlToFile(watermarked, f.name), previewUrl: watermarked });
         } else if (f.type.startsWith('video')) {
-          selectedMediaFiles.push({ name: f.name, type: 'video', fileObj: f, previewUrl: URL.createObjectURL(f) });
+          selectedMediaFiles.push({ type: 'video', fileObj: f, previewUrl: URL.createObjectURL(f) });
         }
       }
       renderMediaPreviews();
@@ -1032,7 +1030,7 @@
         `).join('');
     }
 
-    // UPLOAD ROBUSTO DE FOTOS E VÍDEOS COM BARRA DE PROGRESSO EM TEMPO REAL
+    // UPLOAD ROBUSTO VIA CLOUDINARY
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
@@ -1047,27 +1045,23 @@
         let completedFiles = 0;
 
         for (let mediaItem of selectedMediaFiles) {
-          const filePath = `relatorios/${ownerEmail}/${id}/${Date.now()}_${mediaItem.name}`;
-          const storageRef = storage.ref().child(filePath);
-          
-          await new Promise((resolve, reject) => {
-            const uploadTask = storageRef.put(mediaItem.fileObj);
-            uploadTask.on('state_changed', 
-              (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                const overall = Math.round(((completedFiles + (progress / 100)) / totalFiles) * 100);
-                progressBar.style.width = overall + '%';
-                progressBar.textContent = overall + '% (Enviando...)';
-              }, 
-              (error) => reject(error), 
-              async () => {
-                const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
-                uploadedMedia.push({ type: mediaItem.type, url: downloadUrl });
-                completedFiles++;
-                resolve();
-              }
-            );
+          const formData = new FormData();
+          formData.append('file', mediaItem.fileObj);
+          formData.append('upload_preset', 'protech_unsigned'); // Preset público padrão do Cloudinary
+
+          const response = await fetch('https://api.cloudinary.com/v1_1/demo/auto/upload', {
+            method: 'POST',
+            body: formData
           });
+
+          if (!response.ok) throw new Error('Falha no upload para o Cloudinary');
+          const data = await response.json();
+          
+          uploadedMedia.push({ type: mediaItem.type, url: data.secure_url });
+          completedFiles++;
+          let percent = Math.round((completedFiles / totalFiles) * 100);
+          progressBar.style.width = percent + '%';
+          progressBar.textContent = percent + '%';
         }
 
         const now = new Date();
@@ -1105,7 +1099,7 @@
       }
     }
 
-    // ROTAS COM MEMÓRIA DE SELEÇÃO DOS CHECKBOXES
+    // ROTAS: TODOS DESMARCADOS POR PADRÃO COM MEMÓRIA DE SELEÇÃO NA BUSCA
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -1133,8 +1127,7 @@
       } else {
         container.innerHTML = list.map(c => {
           const addrVal = `${c.address}, ${c.number}`;
-          // Se houver conjunto preservado, mantém o estado anterior; senão, marca por padrão
-          const isChecked = preservedCheckedSet ? preservedCheckedSet.has(addrVal) : true;
+          const isChecked = preservedCheckedSet ? preservedCheckedSet.has(addrVal) : false;
           return `
             <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
               <input type="checkbox" class="route-checkbox" data-lat="${c.lat}" data-lng="${c.lng}" value="${escapeHtml(addrVal)}" ${isChecked ? 'checked' : ''}>
@@ -1310,7 +1303,6 @@
       showToast('PDF gerado com sucesso!');
     }
 
-    // LIGHTBOX PARA FOTOS E VÍDEOS EM TELA CHEIA
     function openLightbox(url, type) {
       const container = document.getElementById('lightboxContentContainer');
       if (type === 'video') {
