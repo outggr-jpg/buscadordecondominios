@@ -556,7 +556,9 @@
         <div class="version-item">
           <div class="version-title"><span>Versão 6.1.7</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
+            <li>Autenticação e fluxo de login otimizados e corrigidos.</li>
             <li>Gestão de equipe aprimorada com controle de permissões por usuário e opção de remoção de membros.</li>
+            <li>Relatório Geral com filtros avançados e suporte completo a imagens no PDF.</li>
           </ul>
         </div>
       </div>
@@ -577,8 +579,16 @@
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
-    try { firebase.initializeApp(firebaseConfig); } catch(err) {}
+    try { 
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig); 
+      }
+    } catch(err) {
+      console.error("Erro ao iniciar Firebase:", err);
+    }
+    
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
     let condos = [];
     let currentUser = null;
@@ -597,21 +607,30 @@
       const inviteParam = urlParams.get('invite');
       if (inviteParam) {
         localStorage.setItem('protech_pending_invite', inviteParam);
-        document.getElementById('inviteNotice').style.display = 'block';
+        const inviteNotice = document.getElementById('inviteNotice');
+        if (inviteNotice) inviteNotice.style.display = 'block';
         switchAuthMode('register');
         selectRole('user');
-        document.getElementById('regCompanyOwnerEmail').value = inviteParam;
+        const ownerEmailInput = document.getElementById('regCompanyOwnerEmail');
+        if (ownerEmailInput) ownerEmailInput.value = inviteParam;
       }
 
       try {
-        firebase.auth().onAuthStateChanged((user) => {
+        auth.onAuthStateChanged((user) => {
           if (user) {
             currentUser = user;
             resolveUserSession(user.email);
             setupRealtimeUserAndCompanySync(user.uid, user.email);
+          } else {
+            const authScreen = document.getElementById('authScreen');
+            const mainApp = document.getElementById('mainApp');
+            if (authScreen) authScreen.style.display = 'flex';
+            if (mainApp) mainApp.style.display = 'none';
           }
         });
-      } catch(e) {}
+      } catch(e) {
+        console.error("Erro no AuthStateChanged:", e);
+      }
     });
 
     function setupRealtimeUserAndCompanySync(userId, userEmail) {
@@ -633,10 +652,11 @@
           userPermissions = data.permissions || { canManageCondos: true, canViewReports: true };
           if (userRole === 'user') {
             ownerEmail = data.companyOwnerEmail;
-            document.getElementById('settingsTeamMenuBtn').style.display = 'none';
-            // Aplicar permissões visuais para técnicos
+            const teamMenuBtn = document.getElementById('settingsTeamMenuBtn');
+            if (teamMenuBtn) teamMenuBtn.style.display = 'none';
             if (!userPermissions.canManageCondos) {
-              document.getElementById('newCondoBtn').style.display = 'none';
+              const newCondoBtn = document.getElementById('newCondoBtn');
+              if (newCondoBtn) newCondoBtn.style.display = 'none';
             }
           }
         }
@@ -645,8 +665,10 @@
       const storedName = localStorage.getItem('protech_user_name_' + userEmail) || userEmail.split('@')[0];
       const storedAvatar = localStorage.getItem('protech_user_avatar_' + userEmail) || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
       
-      document.getElementById('headerUserNameDisplay').textContent = storedName;
-      document.getElementById('headerUserAvatarImg').src = storedAvatar;
+      const userNameDisplay = document.getElementById('headerUserNameDisplay');
+      const userAvatarImg = document.getElementById('headerUserAvatarImg');
+      if (userNameDisplay) userNameDisplay.textContent = storedName;
+      if (userAvatarImg) userAvatarImg.src = storedAvatar;
     }
 
     function changeAppThemeColor(colorHex, save = true) {
@@ -702,7 +724,7 @@
       const email = document.getElementById('regEmail').value.trim();
       const password = document.getElementById('regPassword').value.trim();
 
-      firebase.auth().createUserWithEmailAndPassword(email, password).then((cred) => {
+      auth.createUserWithEmailAndPassword(email, password).then((cred) => {
         currentUser = cred.user;
         if (userRole === 'owner') {
           const companyName = document.getElementById('regCompanyName').value.trim() || 'Minha Empresa';
@@ -724,13 +746,27 @@
 
     function handleLogin(e) {
       e.preventDefault();
-      firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim())
-        .then((cred) => { currentUser = cred.user; resolveUserSession(cred.user.email); showToast('Login efetuado!'); })
-        .catch(() => showToast('Erro no login.'));
+      const emailEl = document.getElementById('loginEmail');
+      const passEl = document.getElementById('loginPassword');
+      if (!emailEl || !passEl) return;
+      
+      const email = emailEl.value.trim();
+      const password = passEl.value.trim();
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((cred) => {
+          currentUser = cred.user;
+          resolveUserSession(cred.user.email);
+          showToast('Login efetuado com sucesso!');
+        })
+        .catch((err) => {
+          console.error("Erro no login:", err);
+          alert('Erro ao entrar: ' + err.message);
+        });
     }
 
     function handleLogout() {
-      try { firebase.auth().signOut(); } catch(e) {}
+      try { auth.signOut(); } catch(e) {}
       currentUser = null; ownerEmail = null;
       document.getElementById('authScreen').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
@@ -846,7 +882,6 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
-    // GESTÃO DE EQUIPE COM PERMISSÕES E REMOÇÃO
     function openTeamModal() {
       document.getElementById('inviteLinkResult').style.display = 'none';
       db.collection("usuarios").where("companyOwnerEmail", "==", ownerEmail).get().then(snapshot => {
