@@ -256,7 +256,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.9.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.9.5</span>
               </div>
             </div>
           </div>
@@ -436,10 +436,17 @@
         </div>
 
         <div id="teamRankingSection" style="display:none; flex-direction:column; gap:10px;">
-          <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
-            <div style="font-size:12px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🏆 Ranking de Atendimentos Realizados</div>
-            <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Baseado na quantidade de check-outs e relatórios concluídos por cada técnico.</div>
-            <div id="teamRankingListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;">
+          <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; font-weight:bold; color:#38bdf8;">🏆 Filtro de Período do Ranking</div>
+            
+            <div style="display:flex; gap:4px; background:var(--bg-card); padding:3px; border-radius:8px; border:1px solid var(--border-color);">
+              <button id="rankBtn_weekly" onclick="filterRankingPeriod('weekly')" class="btn" style="flex:1; justify-content:center; font-size:10px; padding:6px 2px;">Semanal</button>
+              <button id="rankBtn_monthly" onclick="filterRankingPeriod('monthly')" class="btn" style="flex:1; justify-content:center; font-size:10px; padding:6px 2px;">Mensal</button>
+              <button id="rankBtn_yearly" onclick="filterRankingPeriod('yearly')" class="btn" style="flex:1; justify-content:center; font-size:10px; padding:6px 2px;">Anual</button>
+              <button id="rankBtn_all" onclick="filterRankingPeriod('all')" class="btn" style="flex:1; justify-content:center; font-size:10px; padding:6px 2px;">Geral</button>
+            </div>
+
+            <div id="teamRankingListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; margin-top:4px;">
               <div style="color:var(--text-muted); text-align:center; padding:10px;">Calculando ranking...</div>
             </div>
           </div>
@@ -730,11 +737,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.9.0 (Subcoleção de Relatórios & PDF Individual)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.9.5 (Rankings Múltiplos & Permissões Granulares)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Migração do histórico de visitas para subcoleção no Firestore para eliminar o limite de tamanho do documento do condomínio.</li>
-            <li>Adicionado botão para exportar o PDF de um atendimento individual direto no histórico.</li>
-            <li>Sanitização completa de ícones e caracteres especiais em todas as exportações PDF.</li>
+            <li>Adicionado suporte a múltiplos recortes no ranking (Semanal, Mensal, Anual e Geral)[cite: 1].</li>
+            <li>Permissões granulares avançadas para visualização de ranking, escopo, edição e downloads de PDF[cite: 1].</li>
+            <li>Inclusão automática de fotos com redimensionamento e paginação inteligente nos relatórios em PDF[cite: 1].</li>
           </ul>
         </div>
       </div>
@@ -1282,7 +1289,6 @@
       condos = [];
       for (let docSnap of snapshot.docs) {
         let condoData = { id: docSnap.id, ...docSnap.data() };
-        // Carregar relatórios da subcoleção para economizar espaço no documento principal
         const reportsSnap = await db.collection("condominios").doc(docSnap.id).collection("reports").orderBy("timestamp", "desc").get();
         condoData.reports = reportsSnap.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
         condos.push(condoData);
@@ -1374,7 +1380,24 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
-    function switchTeamTab(tab) {
+    async function checkUserPermission(permKey) {
+      if (userRole === 'owner') return true;
+      try {
+        const doc = await db.collection("usuarios").doc(currentUser.email).get();
+        if (!doc.exists) return false;
+        const data = doc.data();
+        if (data.role === 'owner') return true;
+        
+        const defaultPerms = { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true, viewRanking: true, viewScope: true, editScope: true, deleteScope: false, downloadPdf: true };
+        const perms = data.permissions ? { ...defaultPerms, ...data.permissions } : defaultPerms;
+        return !!perms[permKey];
+      } catch (e) {
+        console.error("Erro ao checar permissão:", e);
+        return false;
+      }
+    }
+
+    async function switchTeamTab(tab) {
       const membersBtn = document.getElementById('tabTeamMembersBtn');
       const rankingBtn = document.getElementById('tabTeamRankingBtn');
       const membersSec = document.getElementById('teamMembersSection');
@@ -1386,11 +1409,16 @@
         membersSec.style.display = 'flex';
         rankingSec.style.display = 'none';
       } else {
+        const allowed = await checkUserPermission('viewRanking');
+        if (!allowed) {
+          alert('Você não possui permissão para visualizar o ranking de técnicos.');
+          return;
+        }
         membersBtn.classList.remove('active');
         rankingBtn.classList.add('active');
         membersSec.style.display = 'none';
         rankingSec.style.display = 'flex';
-        renderTeamRanking();
+        filterRankingPeriod('monthly');
       }
     }
 
@@ -1404,7 +1432,8 @@
           const docEmail = doc.id;
           const isOwner = data.role === 'owner';
           const roleVal = data.role || 'user';
-          const perms = data.permissions || { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true };
+          const defaultPerms = { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true, viewRanking: true, viewScope: true, editScope: true, deleteScope: false, downloadPdf: true };
+          const perms = data.permissions ? { ...defaultPerms, ...data.permissions } : defaultPerms;
 
           html += `
             <div style="background:var(--bg-card); padding:10px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
@@ -1429,6 +1458,11 @@
                   <label><input type="checkbox" ${perms.editCondo ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'editCondo', this.checked)"> Editar Local</label>
                   <label><input type="checkbox" ${perms.deleteCondo ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'deleteCondo', this.checked)"> Excluir Local</label>
                   <label><input type="checkbox" ${perms.requireGps ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'requireGps', this.checked)"> Raio GPS 500m</label>
+                  <label><input type="checkbox" ${perms.viewRanking ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'viewRanking', this.checked)"> Ver Ranking</label>
+                  <label><input type="checkbox" ${perms.viewScope ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'viewScope', this.checked)"> Ver Escopo</label>
+                  <label><input type="checkbox" ${perms.editScope ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'editScope', this.checked)"> Editar Escopo</label>
+                  <label><input type="checkbox" ${perms.deleteScope ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'deleteScope', this.checked)"> Excluir Escopo</label>
+                  <label><input type="checkbox" ${perms.downloadPdf ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'downloadPdf', this.checked)"> Baixar PDF</label>
                 </div>
               ` : ''}
             </div>
@@ -1440,13 +1474,47 @@
     }
     function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
 
-    function renderTeamRanking() {
+    function filterRankingPeriod(period) {
+      ['weekly', 'monthly', 'yearly', 'all'].forEach(p => {
+        const btn = document.getElementById(`rankBtn_${p}`);
+        if (btn) {
+          if (p === period) {
+            btn.style.background = '#0284c7';
+            btn.style.color = '#ffffff';
+          } else {
+            btn.style.background = 'var(--bg-main)';
+            btn.style.color = 'var(--text-muted)';
+          }
+        }
+      });
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - dayOfWeek);
+      startOfWeek.setHours(0, 0, 0, 0);
+
       let stats = {};
       condos.forEach(c => {
         if (c.reports) {
           c.reports.forEach(r => {
             let tech = r.userEmail || 'Desconhecido';
-            stats[tech] = (stats[tech] || 0) + 1;
+            let parts = r.date ? r.date.split('/') : [];
+            if (parts.length === 3) {
+              let reportDate = new Date(parts[2], parts[1] - 1, parts[0]);
+
+              if (period === 'weekly') {
+                if (reportDate < startOfWeek || reportDate > now) return;
+              } else if (period === 'monthly') {
+                if (reportDate.getFullYear() !== currentYear || reportDate.getMonth() !== currentMonth) return;
+              } else if (period === 'yearly') {
+                if (reportDate.getFullYear() !== currentYear) return;
+              }
+
+              stats[tech] = (stats[tech] || 0) + 1;
+            }
           });
         }
       });
@@ -1455,7 +1523,7 @@
       const container = document.getElementById('teamRankingListContainer');
 
       if (sortedTechs.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento registrado no ranking ainda.</div>';
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento registrado neste período.</div>';
         return;
       }
 
@@ -1494,7 +1562,8 @@
 
     function updateMemberPerm(memberEmail, permKey, value) {
       db.collection("usuarios").doc(memberEmail).get().then(doc => {
-        let perms = doc.exists && doc.data().permissions ? doc.data().permissions : { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true };
+        const defaultPerms = { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true, viewRanking: true, viewScope: true, editScope: true, deleteScope: false, downloadPdf: true };
+        let perms = doc.exists && doc.data().permissions ? { ...defaultPerms, ...doc.data().permissions } : defaultPerms;
         perms[permKey] = value;
         db.collection("usuarios").doc(memberEmail).update({ permissions: perms }).then(() => {
           showToast('Permissão atualizada!');
@@ -1657,7 +1726,13 @@
       });
     }
 
-    function openContractScopeModal(id) {
+    async function openContractScopeModal(id) {
+      const allowed = await checkUserPermission('viewScope');
+      if (!allowed) {
+        alert('Você não possui permissão para visualizar o escopo contratual.');
+        return;
+      }
+
       const c = condos.find(x => x.id === id);
       if (!c) return;
       document.getElementById('contractCondoId').value = c.id;
@@ -1758,8 +1833,14 @@
       slotsContainer.appendChild(div);
     }
 
-    function saveContractScope(e) {
+    async function saveContractScope(e) {
       e.preventDefault();
+      const allowed = await checkUserPermission('editScope');
+      if (!allowed) {
+        alert('Você não possui permissão para editar ou salvar alterações no escopo contratual.');
+        return;
+      }
+
       const id = document.getElementById('contractCondoId').value;
       if (!id) return;
 
@@ -1784,7 +1865,13 @@
       });
     }
 
-    function downloadContractScopePDF() {
+    async function downloadContractScopePDF() {
+      const allowed = await checkUserPermission('downloadPdf');
+      if (!allowed) {
+        alert('Você não possui permissão para baixar documentos em PDF.');
+        return;
+      }
+
       const id = document.getElementById('contractCondoId').value;
       const c = condos.find(x => x.id === id);
       if (!c) return;
@@ -1793,7 +1880,7 @@
       const doc = new jsPDF();
       const cleanText = (str) => {
         if (!str) return '';
-        return String(str).replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return String(str).replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐🌐📍👤📅⏱️📊📥]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       };
 
       doc.setFont("helvetica", "bold");
@@ -2018,22 +2105,40 @@
     function toggleCheckIn(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
-      if (!c.lat || !c.lng) { alert('Sem GPS cadastrado.'); return; }
+      
       if (!c.checkedIn) {
+        if (!c.lat || !c.lng) { alert('Sem coordenadas GPS cadastradas para este condomínio.'); return; }
+        
+        if (userRole === 'owner' || userRole === 'admin') {
+          realizarCheckInNoBanco(id, c);
+          return;
+        }
+
         navigator.geolocation.getCurrentPosition((pos) => {
           const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(c.lat), parseFloat(c.lng));
-          if (dist > 500) { alert(`Fora do raio de 500m (${Math.round(dist)}m).`); return; }
-          const now = new Date();
-          db.collection("condominios").doc(id).update({ 
-            checkedIn: true, 
-            checkInTimestamp: now.getTime(), 
-            checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
-            checkInDate: now.toLocaleDateString('pt-BR') 
-          }).then(() => { showToast('Check-in realizado!'); loadCondosForOwner(ownerEmail); });
-        }, () => alert('Erro de GPS'), { enableHighAccuracy: true });
+          if (dist > 500) { 
+            alert(`Você está muito longe do condomínio (${Math.round(dist)}m). Aproxime-se a menos de 500 metros para fazer o check-in.`); 
+            return; 
+          }
+          realizarCheckInNoBanco(id, c);
+        }, () => alert('Não foi possível obter sua localização GPS. Verifique se o GPS está ativado no celular.'), { enableHighAccuracy: true });
+
       } else {
         openReportModal(id);
       }
+    }
+
+    function realizarCheckInNoBanco(id, c) {
+      const now = new Date();
+      db.collection("condominios").doc(id).update({ 
+        checkedIn: true, 
+        checkInTimestamp: now.getTime(), 
+        checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+        checkInDate: now.toLocaleDateString('pt-BR') 
+      }).then(() => { 
+        showToast('Check-in realizado com sucesso!'); 
+        loadCondosForOwner(ownerEmail); 
+      });
     }
 
     function openReportModal(id) {
@@ -2152,7 +2257,6 @@
           timestamp: checkOutTimestamp
         };
 
-        // Salvar na subcoleção 'reports' do condomínio para evitar estouro de 1MB do documento principal
         await db.collection("condominios").doc(id).collection("reports").add(newRep);
         await db.collection("condominios").doc(id).update({ checkedIn: false });
         
@@ -2328,12 +2432,40 @@
     }
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
 
-    function downloadSingleReportPDF(condoName, r) {
+    function loadImageAsBase64(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL("image/jpeg", 0.8));
+        };
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
+
+    async function downloadSingleReportPDF(condoName, r) {
+      const allowed = await checkUserPermission('downloadPdf');
+      if (!allowed) {
+        alert('Você não possui permissão para baixar relatórios em PDF.');
+        return;
+      }
+
+      showToast("Gerando PDF com fotos...");
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
+
       const cleanText = (str) => {
         if (!str) return '';
-        return String(str).replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return String(str)
+          .replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
       };
 
       doc.setFont("helvetica", "bold");
@@ -2357,8 +2489,33 @@
         y += 6;
       }
 
+      if (r.media && r.media.length > 0) {
+        y += 10;
+        if (y > 240) { doc.addPage(); y = 20; }
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("Fotos Anexadas do Atendimento:", 14, y);
+        y += 8;
+
+        for (let i = 0; i < r.media.length; i++) {
+          const mediaItem = r.media[i];
+          if (mediaItem.url) {
+            const base64Img = await loadImageAsBase64(mediaItem.url);
+            if (base64Img) {
+              if (y + 80 > 280) { 
+                doc.addPage(); 
+                y = 20; 
+              }
+              doc.addImage(base64Img, 'JPEG', 14, y, 100, 75);
+              y += 82;
+            }
+          }
+        }
+      }
+
       doc.save(`relatorio_${condoName.toLowerCase().replace(/\s+/g, '_')}_${r.date.replace(/\//g, '-')}.pdf`);
-      showToast('Relatório individual exportado em PDF!');
+      showToast("Relatório exportado em PDF!");
     }
 
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
@@ -2478,6 +2635,12 @@
     }
 
     async function downloadGlobalReportPDF() {
+      const allowed = await checkUserPermission('downloadPdf');
+      if (!allowed) {
+        alert('Você não possui permissão para baixar relatórios em PDF.');
+        return;
+      }
+
       const allReports = getFilteredGlobalReports();
       if (allReports.length === 0) { alert('Nenhum relatório para exportar com os filtros atuais.'); return; }
       const { jsPDF } = window.jspdf;
