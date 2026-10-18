@@ -254,7 +254,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.5.1</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.0.0</span>
               </div>
             </div>
           </div>
@@ -582,7 +582,7 @@
         
         <!-- FICHA TÉCNICA - ACORDEÕES -->
         <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px;">
-          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Fase 1 & 2):</label>
+          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Fase 1, 2 & 3):</label>
           
           <!-- ACORDEÃO MODEM / ROTEADOR -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModem')">🌐 Modem / Roteador <span>▼</span></button>
@@ -619,18 +619,46 @@
             </div>
           </div>
 
-          <!-- ACORDEÃO DVR / NVR (MÚLTIPLOS SLOTS COM PORTA RTSP E PORTA DE SERVIÇO) -->
+          <!-- ACORDEÃO DVR / NVR -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accDvr')">🎥 DVRs / NVRs <span>▼</span></button>
           <div id="accDvr" class="accordion-body">
             <div id="dvrContainer"></div>
             <button type="button" onclick="addDvrSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Gravador (DVR/NVR)</button>
           </div>
 
-          <!-- ACORDEÃO CÂMERAS IP (MÚLTIPLOS SLOTS COM PORTA HTTP) -->
+          <!-- ACORDEÃO CÂMERAS IP -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accCameras')">📷 Câmeras IP / Dispositivos <span>▼</span></button>
           <div id="accCameras" class="accordion-body">
             <div id="cameraContainer"></div>
             <button type="button" onclick="addCameraSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Câmera IP</button>
+          </div>
+
+          <!-- NOVA SEÇÃO (FASE 3): CONTROLADORAS DE ACESSO -->
+          <button type="button" class="accordion-btn" onclick="toggleAccordion('accControladoras')">🔐 Controladoras de Acesso <span>▼</span></button>
+          <div id="accControladoras" class="accordion-body">
+            <div id="controladoraContainer"></div>
+            <button type="button" onclick="addControladoraSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Controladora de Acesso</button>
+          </div>
+
+          <!-- NOVA SEÇÃO (FASE 3): MÓDULOS RF IP -->
+          <button type="button" class="accordion-btn" onclick="toggleAccordion('accModulosRf')">📡 Módulos RF IP <span>▼</span></button>
+          <div id="accModulosRf" class="accordion-body">
+            <div id="moduloRfContainer"></div>
+            <button type="button" onclick="addModuloRfSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Módulo RF IP</button>
+          </div>
+
+          <!-- NOVA SEÇÃO (FASE 3): MÓDULOS PORTA IP -->
+          <button type="button" class="accordion-btn" onclick="toggleAccordion('accModulosPorta')">🚪 Módulos Porta IP <span>▼</span></button>
+          <div id="accModulosPorta" class="accordion-body">
+            <div id="moduloPortaContainer"></div>
+            <button type="button" onclick="addModuloPortaSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Módulo Porta IP</button>
+          </div>
+
+          <!-- NOVA SEÇÃO (FASE 3): TERMINAIS FACIAIS E LEITORAS -->
+          <button type="button" class="accordion-btn" onclick="toggleAccordion('accFaciais')">👤 Terminais de Reconhecimento Facial <span>▼</span></button>
+          <div id="accFaciais" class="accordion-body">
+            <div id="facialContainer"></div>
+            <button type="button" onclick="addFacialSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Terminal Facial</button>
           </div>
         </div>
 
@@ -665,11 +693,13 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.5.1 (Ajustes Fase 2)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.0.0 (Fase 3)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Adicionada "Porta RTSP" e renomeada "Porta Data" para "Porta de Serviço" nos DVRs/NVRs.</li>
-            <li>Adicionado o campo "Porta HTTP" nas Câmeras IP.</li>
-            <li>Ficha técnica rápida atualizada para refletir os novos campos.</li>
+            <li>Adicionado suporte a Múltiplos Slots para Controladoras de Acesso (com IP, Porta Comunicação e Porta Automação).</li>
+            <li>Adicionado suporte a Múltiplos Slots para Módulos RF IP (Local, IP e Serial).</li>
+            <li>Adicionado suporte a Múltiplos Slots para Módulos Porta IP (Local, IP e Serial).</li>
+            <li>Adicionado suporte a Múltiplos Slots para Terminais de Reconhecimento Facial.</li>
+            <li>Ficha técnica rápida atualizada para exibir todos os novos módulos de acesso e automação.</li>
           </ul>
         </div>
       </div>
@@ -755,7 +785,7 @@
       }
     }
 
-    // Slots múltiplos de DVRs (com Porta RTSP e Porta de Serviço)
+    // Slots de DVRs
     function addDvrSlot(data = {}) {
       const container = document.getElementById('dvrContainer');
       const index = container.children.length;
@@ -783,7 +813,7 @@
       container.appendChild(div);
     }
 
-    // Slots múltiplos de Câmeras IP (com Porta HTTP)
+    // Slots de Câmeras IP
     function addCameraSlot(data = {}) {
       const container = document.getElementById('cameraContainer');
       const index = container.children.length;
@@ -806,6 +836,93 @@
           <div class="form-group"><label>Usuário</label><input type="text" class="form-control cam-user" value="${escapeHtml(data.user || '')}" placeholder="admin"></div>
           <div class="form-group"><label>Senha</label><input type="text" class="form-control cam-pass" value="${escapeHtml(data.pass || '')}" placeholder="senha"></div>
         </div>
+      `;
+      container.appendChild(div);
+    }
+
+    // Slots de Controladoras de Acesso (Fase 3)
+    function addControladoraSlot(data = {}) {
+      const container = document.getElementById('controladoraContainer');
+      const index = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'dynamic-item-box';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:11px; color:#38bdf8;">Controladora #${index + 1}</b>
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Nome / Identificação</label><input type="text" class="form-control ctrl-name" value="${escapeHtml(data.name || '')}" placeholder="Ex: Bravas, Nice"></div>
+          <div class="form-group"><label>IP da Controladora</label><input type="text" class="form-control ctrl-ip" value="${escapeHtml(data.ip || '')}" placeholder="Ex: 192.168.1.19"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Porta de Comunicação</label><input type="text" class="form-control ctrl-port" value="${escapeHtml(data.port || '')}" placeholder="Ex: 8887"></div>
+          <div class="form-group"><label>Porta de Automação</label><input type="text" class="form-control ctrl-autoport" value="${escapeHtml(data.autoPort || '')}" placeholder="Ex: 8090"></div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    // Slots de Módulos RF IP (Fase 3)
+    function addModuloRfSlot(data = {}) {
+      const container = document.getElementById('moduloRfContainer');
+      const index = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'dynamic-item-box';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:11px; color:#38bdf8;">Módulo RF IP #${index + 1}</b>
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
+        </div>
+        <div class="form-group"><label>Local</label><input type="text" class="form-control modrf-desc" value="${escapeHtml(data.desc || '')}" placeholder="Ex: Portão de Veículos 01"></div>
+        <div class="form-row">
+          <div class="form-group"><label>IP</label><input type="text" class="form-control modrf-ip" value="${escapeHtml(data.ip || '')}" placeholder="Ex: 192.168.1.45"></div>
+          <div class="form-group"><label>Serial</label><input type="text" class="form-control modrf-serial" value="${escapeHtml(data.serial || '')}" placeholder="Nº de Série"></div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    // Slots de Módulos Porta IP (Fase 3)
+    function addModuloPortaSlot(data = {}) {
+      const container = document.getElementById('moduloPortaContainer');
+      const index = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'dynamic-item-box';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:11px; color:#38bdf8;">Módulo Porta IP #${index + 1}</b>
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
+        </div>
+        <div class="form-group"><label>Local</label><input type="text" class="form-control modporta-desc" value="${escapeHtml(data.desc || '')}" placeholder="Ex: Porta externa, porta hall"></div>
+        <div class="form-row">
+          <div class="form-group"><label>IP</label><input type="text" class="form-control modporta-ip" value="${escapeHtml(data.ip || '')}" placeholder="Ex: 192.168.1.46"></div>
+          <div class="form-group"><label>Serial</label><input type="text" class="form-control modporta-serial" value="${escapeHtml(data.serial || '')}" placeholder="Nº de Série"></div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    // Slots de Reconhecimento Facial (Fase 3)
+    function addFacialSlot(data = {}) {
+      const container = document.getElementById('facialContainer');
+      const index = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'dynamic-item-box';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:11px; color:#38bdf8;">Terminal Facial #${index + 1}</b>
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Local / Descrição</label><input type="text" class="form-control facial-desc" value="${escapeHtml(data.desc || '')}" placeholder="Ex: Pedestres - Bloco A"></div>
+          <div class="form-group"><label>IP do Terminal</label><input type="text" class="form-control facial-ip" value="${escapeHtml(data.ip || '')}" placeholder="Ex: 192.168.1.50"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Porta HTTP / API</label><input type="text" class="form-control facial-http" value="${escapeHtml(data.http || '')}" placeholder="80 / 8080"></div>
+          <div class="form-group"><label>Usuário</label><input type="text" class="form-control facial-user" value="${escapeHtml(data.user || '')}" placeholder="admin"></div>
+        </div>
+        <div class="form-group"><label>Senha</label><input type="text" class="form-control facial-pass" value="${escapeHtml(data.pass || '')}" placeholder="senha"></div>
       `;
       container.appendChild(div);
     }
@@ -1166,7 +1283,7 @@
       });
     }
 
-    /* SALVAR CONDOMÍNIO */
+    /* SALVAR CONDOMÍNIO (FASE 1, 2 E 3) */
     function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
@@ -1217,6 +1334,49 @@
         });
       });
 
+      // Coletar Controladoras de Acesso (Fase 3)
+      let controladorasList = [];
+      document.querySelectorAll('#controladoraContainer .dynamic-item-box').forEach(box => {
+        controladorasList.push({
+          name: box.querySelector('.ctrl-name').value.trim(),
+          ip: box.querySelector('.ctrl-ip').value.trim(),
+          port: box.querySelector('.ctrl-port').value.trim(),
+          autoPort: box.querySelector('.ctrl-autoport').value.trim()
+        });
+      });
+
+      // Coletar Módulos RF IP (Fase 3)
+      let modulosRfList = [];
+      document.querySelectorAll('#moduloRfContainer .dynamic-item-box').forEach(box => {
+        modulosRfList.push({
+          desc: box.querySelector('.modrf-desc').value.trim(),
+          ip: box.querySelector('.modrf-ip').value.trim(),
+          serial: box.querySelector('.modrf-serial').value.trim()
+        });
+      });
+
+      // Coletar Módulos Porta IP (Fase 3)
+      let modulosPortaList = [];
+      document.querySelectorAll('#moduloPortaContainer .dynamic-item-box').forEach(box => {
+        modulosPortaList.push({
+          desc: box.querySelector('.modporta-desc').value.trim(),
+          ip: box.querySelector('.modporta-ip').value.trim(),
+          serial: box.querySelector('.modporta-serial').value.trim()
+        });
+      });
+
+      // Coletar Terminais Faciais (Fase 3)
+      let faciaisList = [];
+      document.querySelectorAll('#facialContainer .dynamic-item-box').forEach(box => {
+        faciaisList.push({
+          desc: box.querySelector('.facial-desc').value.trim(),
+          ip: box.querySelector('.facial-ip').value.trim(),
+          http: box.querySelector('.facial-http').value.trim(),
+          user: box.querySelector('.facial-user').value.trim(),
+          pass: box.querySelector('.facial-pass').value.trim()
+        });
+      });
+
       const data = {
         name: document.getElementById('condoName').value.trim(),
         address: document.getElementById('condoAddress').value.trim(),
@@ -1229,6 +1389,10 @@
         mikrotik: mikrotikData,
         dvrs: dvrsList,
         cameras: camerasList,
+        controladoras: controladorasList,
+        modulosRf: modulosRfList,
+        modulosPorta: modulosPortaList,
+        faciais: faciaisList,
         notes: document.getElementById('condoNotes').value.trim(),
         ownerEmail: ownerEmail
       };
@@ -1267,7 +1431,7 @@
       if (c) openModal(c);
     }
 
-    /* FICHA TÉCNICA LEITURA RÁPIDA */
+    /* FICHA TÉCNICA LEITURA RÁPIDA (FASE 1, 2 E 3) */
     function openTechSheetModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
@@ -1277,6 +1441,10 @@
       let mk = c.mikrotik || {};
       let dvrs = c.dvrs || [];
       let cams = c.cameras || [];
+      let ctrls = c.controladoras || [];
+      let rfs = c.modulosRf || [];
+      let portas = c.modulosPorta || [];
+      let faciais = c.faciais || [];
 
       let html = `
         <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);">
@@ -1306,6 +1474,38 @@
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP (${cams.length}):</b>`;
         cams.forEach((cm, i) => {
           html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Pass: ${escapeHtml(cm.pass || '--')}`;
+        });
+        html += `</div>`;
+      }
+
+      if (ctrls.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔐 Controladoras (${ctrls.length}):</b>`;
+        ctrls.forEach((ct, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(ct.name || 'Controladora')} | IP: ${escapeHtml(ct.ip || '--')} | Porta Com: ${escapeHtml(ct.port || '--')} | Porta Auto: ${escapeHtml(ct.autoPort || '--')}`;
+        });
+        html += `</div>`;
+      }
+
+      if (rfs.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Módulos RF IP (${rfs.length}):</b>`;
+        rfs.forEach((rf, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(rf.desc || 'Módulo RF')} | IP: ${escapeHtml(rf.ip || '--')} | Serial: ${escapeHtml(rf.serial || '--')}`;
+        });
+        html += `</div>`;
+      }
+
+      if (portas.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚪 Módulos Porta IP (${portas.length}):</b>`;
+        portas.forEach((p, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(p.desc || 'Módulo Porta')} | IP: ${escapeHtml(p.ip || '--')} | Serial: ${escapeHtml(p.serial || '--')}`;
+        });
+        html += `</div>`;
+      }
+
+      if (faciais.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Terminais Faciais (${faciais.length}):</b>`;
+        faciais.forEach((f, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | User: ${escapeHtml(f.user || '--')} | Pass: ${escapeHtml(f.pass || '--')}`;
         });
         html += `</div>`;
       }
@@ -1587,13 +1787,22 @@
       document.getElementById('condoForm').reset();
       document.getElementById('dvrContainer').innerHTML = '';
       document.getElementById('cameraContainer').innerHTML = '';
+      document.getElementById('controladoraContainer').innerHTML = '';
+      document.getElementById('moduloRfContainer').innerHTML = '';
+      document.getElementById('moduloPortaContainer').innerHTML = '';
+      document.getElementById('facialContainer').innerHTML = '';
       document.getElementById('condoId').value = c ? c.id : '';
       document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
       
+      // Recolher todos os acordeões
       document.getElementById('accModem').classList.remove('show');
       document.getElementById('accMikrotik').classList.remove('show');
       document.getElementById('accDvr').classList.remove('show');
       document.getElementById('accCameras').classList.remove('show');
+      document.getElementById('accControladoras').classList.remove('show');
+      document.getElementById('accModulosRf').classList.remove('show');
+      document.getElementById('accModulosPorta').classList.remove('show');
+      document.getElementById('accFaciais').classList.remove('show');
 
       if (c) {
         document.getElementById('condoName').value = c.name || '';
@@ -1624,13 +1833,12 @@
           document.getElementById('mikrotikPass').value = c.mikrotik.pass || '';
         }
 
-        if (c.dvrs && Array.isArray(c.dvrs)) {
-          c.dvrs.forEach(d => addDvrSlot(d));
-        }
-
-        if (c.cameras && Array.isArray(c.cameras)) {
-          c.cameras.forEach(cm => addCameraSlot(cm));
-        }
+        if (c.dvrs && Array.isArray(c.dvrs)) c.dvrs.forEach(d => addDvrSlot(d));
+        if (c.cameras && Array.isArray(c.cameras)) c.cameras.forEach(cm => addCameraSlot(cm));
+        if (c.controladoras && Array.isArray(c.controladoras)) c.controladoras.forEach(ct => addControladoraSlot(ct));
+        if (c.modulosRf && Array.isArray(c.modulosRf)) c.modulosRf.forEach(rf => addModuloRfSlot(rf));
+        if (c.modulosPorta && Array.isArray(c.modulosPorta)) c.modulosPorta.forEach(p => addModuloPortaSlot(p));
+        if (c.faciais && Array.isArray(c.faciais)) c.faciais.forEach(f => addFacialSlot(f));
       }
       document.getElementById('condoModal').classList.remove('hidden');
     }
