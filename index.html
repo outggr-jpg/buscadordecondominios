@@ -285,7 +285,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.1</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
@@ -316,7 +316,7 @@
     <main>
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, IP do modem, IP da câmera, DVR ou operadora..." class="search-input">
+        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço ou bairro..." class="search-input">
       </div>
 
       <div class="meta-bar">
@@ -327,7 +327,7 @@
       <div id="condoGrid" class="grid"></div>
       <div id="emptyState" style="display:none; text-align:center; padding: 50px 20px; color: #64748b;">
         <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-        Nenhum condomínio ou equipamento encontrado.
+        Nenhum condomínio encontrado.
       </div>
     </main>
   </div>
@@ -405,6 +405,8 @@
           <div style="display:flex; flex-direction:column; gap:6px;">
             <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe, Permissões e Ranking</button>
             <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
+            <!-- Auditoria reposicionada acima de Instalar Aplicativo conforme solicitado -->
+            <button onclick="closeSettingsModal(); openGlobalAuditModal();" class="btn btn-slate" style="justify-content: flex-start;">📜 Auditoria Detalhada de Alterações</button>
             <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
           </div>
         </div>
@@ -430,6 +432,22 @@
 
       <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
         <button onclick="closeSettingsModal()" class="btn btn-slate">Concluído</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE AUDITORIA GERAL EM CONFIGURAÇÕES -->
+  <div id="globalAuditModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">📜 Auditoria Detalhada de Alterações</h3>
+        <button onclick="closeGlobalAuditModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" id="globalAuditListContainer" style="gap:8px;">
+        <!-- Preenchido dinamicamente -->
+      </div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
+        <button onclick="closeGlobalAuditModal()" class="btn btn-slate">Fechar</button>
       </div>
     </div>
   </div>
@@ -673,6 +691,12 @@
       <form id="configEquipmentForm" onsubmit="saveConfigEquipment(event)" class="modal-body">
         <input type="hidden" id="configEquipCondoId">
         
+        <!-- Busca por IP dentro de Gerenciar Equipamentos -->
+        <div class="search-box" style="margin-bottom: 6px;">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="equipmentSearchInput" oninput="filterEquipmentSlots(this.value)" placeholder="Filtrar equipamentos por IP, operadora ou nome..." class="search-input" style="padding: 8px 12px 8px 36px; font-size:12px;">
+        </div>
+
         <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
           <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Múltiplos Slots) - Criptografado:</label>
           
@@ -769,10 +793,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.0 (Busca Avançada por IP & Auditoria Detalhada)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.2.1 (Busca por IP em Gerenciar Equipamentos & Auditoria Reposicionada)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Busca inteligente otimizada por IP de equipamentos (Modens, Câmeras, DVRs, Mikrotiks, etc.).</li>
-            <li>Auditoria detalhada e descritiva na Ficha Técnica, mostrando o resumo das alterações e os quantitativos de equipamentos atualizados.</li>
+            <li>Busca por IP reposicionada para dentro de "Gerenciar Equipamentos".</li>
+            <li>Menu de auditoria detalhada reposicionado em Configurações, logo acima de Instalar Aplicativo.</li>
             <li>Suporte offline mantido com Dexie.js e sincronização automática.</li>
           </ul>
         </div>
@@ -1075,7 +1099,7 @@
       const container = document.getElementById('modemContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Modem / Roteador #${index + 1}</b>
@@ -1107,7 +1131,7 @@
       const container = document.getElementById('mikrotikContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Mikrotik #${index + 1}</b>
@@ -1129,7 +1153,7 @@
       const container = document.getElementById('dvrContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Gravador #${index + 1}</b>
@@ -1156,7 +1180,7 @@
       const container = document.getElementById('cameraContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Câmera IP #${index + 1}</b>
@@ -1182,7 +1206,7 @@
       const container = document.getElementById('controladoraContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Controladora #${index + 1}</b>
@@ -1204,7 +1228,7 @@
       const container = document.getElementById('moduloRfContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Módulo RF IP #${index + 1}</b>
@@ -1223,7 +1247,7 @@
       const container = document.getElementById('moduloPortaContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Módulo Porta IP #${index + 1}</b>
@@ -1242,7 +1266,7 @@
       const container = document.getElementById('facialContainer');
       const index = container.children.length;
       const div = document.createElement('div');
-      div.className = 'dynamic-item-box';
+      div.className = 'dynamic-item-box equipment-slot';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#38bdf8;">Terminal Facial #${index + 1}</b>
@@ -1262,6 +1286,19 @@
         </div>
       `;
       container.appendChild(div);
+    }
+
+    function filterEquipmentSlots(query) {
+      const q = query.toLowerCase();
+      const slots = document.querySelectorAll('.equipment-slot');
+      slots.forEach(slot => {
+        const text = slot.textContent.toLowerCase();
+        if (!q || text.includes(q)) {
+          slot.style.display = 'flex';
+        } else {
+          slot.style.display = 'none';
+        }
+      });
     }
 
     function setupRealtimeUserAndCompanySync(userEmail) {
@@ -1535,6 +1572,37 @@
 
     function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
 
+    function openGlobalAuditModal() {
+      const container = document.getElementById('globalAuditListContainer');
+      let html = '';
+      let hasAudit = false;
+
+      condos.forEach(c => {
+        if (c.lastModifiedAt) {
+          hasAudit = true;
+          html += `
+            <div class="report-card">
+              <div class="report-header">
+                <span>🏢 ${escapeHtml(c.name)}</span>
+                <span style="color:var(--text-muted); font-size:10px;">📅 ${escapeHtml(c.lastModifiedAt)}</span>
+              </div>
+              <div class="report-text">
+                <b>Responsável:</b> ${escapeHtml(c.lastModifiedByName || c.lastModifiedBy || 'Desconhecido')}<br>
+                <b>Ação Detalhada:</b> ${escapeHtml(c.lastModificationSummary || 'Atualização na Ficha Técnica')}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = hasAudit ? html : '<div style="color:var('--text-muted'); text-align:center; padding:20px;">Nenhum registro de auditoria encontrado nos condomínios.</div>';
+      document.getElementById('globalAuditModal').classList.remove('hidden');
+    }
+
+    function closeGlobalAuditModal() {
+      document.getElementById('globalAuditModal').classList.add('hidden');
+    }
+
     function saveDisplayName() {
       const newName = document.getElementById('settingsDisplayNameInput').value.trim();
       if (!newName) return;
@@ -1803,8 +1871,10 @@
         const defaultPerms = { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true, viewRanking: true, viewScope: true, editScope: true, deleteScope: false, downloadPdf: true, manageTeam: false };
         let perms = doc.exists && doc.data().permissions ? { ...defaultPerms, ...doc.data().permissions } : defaultPerms;
         perms[permKey] = value;
-        db.collection("usuarios").doc(memberEmail).update({ permissions: perms }).then(() => {
-          showToast('Permissão atualizada!');
+        db.collection("usuarios").doc(memberEmail).get().then(() => {
+          db.collection("usuarios").doc(memberEmail).update({ permissions: perms }).then(() => {
+            showToast('Permissão atualizada!');
+          });
         });
       });
     }
@@ -1964,7 +2034,6 @@
       const now = new Date();
       const currentUserName = localStorage.getItem('protech_user_name_' + currentUser.email) || currentUser.email;
 
-      // Montando resumo descritivo detalhado para a auditoria
       let summaryParts = [];
       if (encModemsList.length > 0) summaryParts.push(`${encModemsList.length} Modem(s)`);
       if (encMikrotiksList.length > 0) summaryParts.push(`${encMikrotiksList.length} Mikrotik(s)`);
@@ -2440,6 +2509,7 @@
 
       document.getElementById('configEquipCondoId').value = c.id;
       document.getElementById('configEquipTitle').textContent = `⚙️ Configuração de Equipamentos: ${c.name}`;
+      document.getElementById('equipmentSearchInput').value = '';
 
       document.getElementById('modemContainer').innerHTML = '';
       document.getElementById('mikrotikContainer').innerHTML = '';
@@ -2751,18 +2821,6 @@
       if (c.address && c.address.toLowerCase().includes(s)) return true;
       if (c.neighborhood && c.neighborhood.toLowerCase().includes(s)) return true;
       if (c.notes && c.notes.toLowerCase().includes(s)) return true;
-
-      // Pesquisa robusta por IP em todas as listas de equipamentos da Ficha Técnica
-      const equipmentArrays = [c.modems, c.mikrotiks, c.dvrs, c.cameras, c.controladoras, c.modulosRf, c.modulosPorta, c.faciais];
-      for (let arr of equipmentArrays) {
-        if (arr && Array.isArray(arr)) {
-          for (let item of arr) {
-            for (let k in item) {
-              if (item[k] && String(item[k]).toLowerCase().includes(s)) return true;
-            }
-          }
-        }
-      }
       return false;
     }
 
