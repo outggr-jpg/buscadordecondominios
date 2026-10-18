@@ -159,6 +159,10 @@
 
     /* ESTILOS PARA SLOTS MÚLTIPLOS */
     .dynamic-item-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-bottom: 6px; position: relative; display: flex; flex-direction: column; gap: 6px; }
+
+    /* ESTILOS DO ESCOPO CONTRATUAL */
+    .contract-category-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .contract-item-row { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
   </style>
 </head>
 <body>
@@ -254,7 +258,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.3.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.4.0</span>
               </div>
             </div>
           </div>
@@ -410,13 +414,11 @@
       </div>
       <div class="modal-body" style="gap:14px;">
         
-        <!-- ABAS DE NAVEGAÇÃO DA EQUIPE -->
         <div class="tab-nav">
           <button id="tabTeamMembersBtn" onclick="switchTeamTab('members')" class="tab-btn active">Membros e Permissões</button>
           <button id="tabTeamRankingBtn" onclick="switchTeamTab('ranking')" class="tab-btn">🏆 Ranking de Técnicos</button>
         </div>
 
-        <!-- SEÇÃO DE MEMBROS -->
         <div id="teamMembersSection" style="display:flex; flex-direction:column; gap:10px;">
           <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
             <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Membro:</label>
@@ -435,7 +437,6 @@
           </div>
         </div>
 
-        <!-- SEÇÃO DE RANKING -->
         <div id="teamRankingSection" style="display:none; flex-direction:column; gap:10px;">
           <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
             <div style="font-size:12px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🏆 Ranking de Atendimentos Realizados</div>
@@ -490,7 +491,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS (SELEÇÃO POR ID ÚNICO) -->
+  <!-- MODAL DE ROTAS -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -515,7 +516,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHECK-OUT COM MINI-CHECKLIST -->
+  <!-- MODAL DE CHECK-OUT -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -525,7 +526,6 @@
       <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
         <input type="hidden" id="reportCondoId">
         
-        <!-- MINI-CHECKLIST DE MANUTENÇÃO -->
         <div class="checklist-box">
           <div class="checklist-title">📋 Checklist de Manutenção Preventiva:</div>
           <div class="checklist-item">
@@ -578,7 +578,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CADASTRO DE ENDEREÇO DO CONDOMÍNIO (LÁPIS/NOVO) -->
+  <!-- MODAL DE CADASTRO DE ENDEREÇO DO CONDOMÍNIO -->
   <div id="condoModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 480px;">
       <div class="modal-header">
@@ -626,7 +626,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE GESTÃO COMPLETA DE EQUIPAMENTOS (CONFIGURAÇÃO TÉCNICA EM SLOTS MÚLTIPLOS) -->
+  <!-- MODAL DE GESTÃO COMPLETA DE EQUIPAMENTOS -->
   <div id="configEquipmentModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -639,56 +639,48 @@
         <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
           <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Múltiplos Slots):</label>
           
-          <!-- ACORDEÃO MODEM / ROTEADOR -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModem')">🌐 Modems / Roteadores <span>▼</span></button>
           <div id="accModem" class="accordion-body">
             <div id="modemContainer"></div>
             <button type="button" onclick="addModemSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Modem / Roteador</button>
           </div>
 
-          <!-- ACORDEÃO MIKROTIK -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accMikrotik')">📡 Mikrotiks <span>▼</span></button>
           <div id="accMikrotik" class="accordion-body">
             <div id="mikrotikContainer"></div>
             <button type="button" onclick="addMikrotikSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Mikrotik</button>
           </div>
 
-          <!-- ACORDEÃO DVR / NVR -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accDvr')">🎥 DVRs / NVRs <span>▼</span></button>
           <div id="accDvr" class="accordion-body">
             <div id="dvrContainer"></div>
             <button type="button" onclick="addDvrSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Gravador (DVR/NVR)</button>
           </div>
 
-          <!-- ACORDEÃO CÂMERAS IP -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accCameras')">📷 Câmeras IP / Dispositivos <span>▼</span></button>
           <div id="accCameras" class="accordion-body">
             <div id="cameraContainer"></div>
             <button type="button" onclick="addCameraSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Câmera IP</button>
           </div>
 
-          <!-- CONTROLADORAS DE ACESSO -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accControladoras')">🔐 Controladoras de Acesso <span>▼</span></button>
           <div id="accControladoras" class="accordion-body">
             <div id="controladoraContainer"></div>
             <button type="button" onclick="addControladoraSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Controladora de Acesso</button>
           </div>
 
-          <!-- MÓDULOS RF IP -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModulosRf')">📡 Módulos RF IP <span>▼</span></button>
           <div id="accModulosRf" class="accordion-body">
             <div id="moduloRfContainer"></div>
             <button type="button" onclick="addModuloRfSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Módulo RF IP</button>
           </div>
 
-          <!-- MÓDULOS PORTA IP -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModulosPorta')">🚪 Módulos Porta IP <span>▼</span></button>
           <div id="accModulosPorta" class="accordion-body">
             <div id="moduloPortaContainer"></div>
             <button type="button" onclick="addModuloPortaSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Módulo Porta IP</button>
           </div>
 
-          <!-- RECONHECIMENTO FACIAL -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accFaciais')">👤 Reconhecimento Facial <span>▼</span></button>
           <div id="accFaciais" class="accordion-body">
             <div id="facialContainer"></div>
@@ -704,6 +696,30 @@
     </div>
   </div>
 
+  <!-- MODAL DE ESCOPO CONTRATUAL / CHECKLIST DE CONTRATO (~30 ITENS) -->
+  <div id="contractScopeModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 750px;">
+      <div class="modal-header">
+        <h3 id="contractScopeTitle" style="color:var(--text-main); font-size: 16px;">📋 Escopo Contratual do Condomínio</h3>
+        <button onclick="closeContractScopeModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <form id="contractScopeForm" onsubmit="saveContractScope(event)" class="modal-body">
+        <input type="hidden" id="contractCondoId">
+        
+        <div style="font-size:11px; color:#38bdf8; margin-bottom:4px; font-weight:500;">
+          Defina rapidamente o que está coberto, se inclui troca de peças, se é comodato e observações de cada sistema:
+        </div>
+
+        <div id="contractItemsContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px; flex-shrink:0;">
+          <button type="button" onclick="closeContractScopeModal()" class="btn btn-slate">Cancelar</button>
+          <button type="submit" class="btn btn-emerald">Salvar Escopo Contratual</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="changelogModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -712,10 +728,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.3.0 (Campo PPPoE/Modem & Ranking)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.4.0 (Escopo Contratual Detalhado)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Adicionado campo livre de Observações / PPPoE / Dados do Modem em cada slot de modems/roteadores.</li>
-            <li>Implementado o Sistema de Ranking de Produtividade dos Técnicos no menu de equipes.</li>
+            <li>Adicionado Módulo de Escopo Contratual com cerca de 30 itens detalhados divididos por categorias.</li>
+            <li>Controle rápido de Cobertura (Incluso/Não), Peças (Com Peças/Só M.O.), Posse (Comodato/Próprio) e Observação por item.</li>
           </ul>
         </div>
       </div>
@@ -735,6 +751,50 @@
     };
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
+
+    // Lista Padrão com ~30 Itens de Contrato divididos em categorias
+    const CONTRACT_TEMPLATE_ITEMS = [
+      // 1. CFTV / Câmeras
+      { cat: "🎥 CFTV / Câmeras", id: "cftv_cameras", label: "Câmeras Analógicas / IP (Manutenção e Reparo)" },
+      { cat: "🎥 CFTV / Câmeras", id: "cftv_gravador", label: "Gravadores DVR / NVR" },
+      { cat: "🎥 CFTV / Câmeras", id: "cftv_fontes", label: "Fontes de Alimentação / Nobreaks de CFTV" },
+      { cat: "🎥 CFTV / Câmeras", id: "cftv_cabeamento", label: "Cabeamento / Fibra / Conectividade de Câmeras" },
+
+      // 2. Automação de Portões e Garagens
+      { cat: "🚪 Automação de Portões", id: "portao_veicular_basc", label: "Motor Portão Veicular Basculante" },
+      { cat: "🚪 Automação de Portões", id: "portao_veicular_desl", label: "Motor Portão Veicular Deslizante / Pivotante" },
+      { cat: "🚪 Automação de Portões", id: "portao_social_elet", label: "Fechadura / Eletroímã Portão Social" },
+      { cat: "🚪 Automação de Portões", id: "portao_barreiras_ant", label: "Sensor Antiesmagamento / Barreira IV" },
+      { cat: "🚪 Automação de Portões", id: "portao_modulos_rf", label: "Módulos de Acionamento RF / Controles Remotos" },
+
+      // 3. Controle de Acesso e Identificação
+      { cat: "🔐 Controle de Acesso", id: "acesso_facial", label: "Terminais de Reconhecimento Facial" },
+      { cat: "🔐 Controle de Acesso", id: "acesso_biometria", label: "Leitores Biométricos de Impressão Digital" },
+      { cat: "🔐 Controle de Acesso", id: "acesso_proximidade", label: "Leitores de TAG / RFID / Cartões" },
+      { cat: "🔐 Controle de Acesso", id: "acesso_veicular_tag", label: "Antena / Leitor de TAG Veicular de Longo Alcance" },
+      { cat: "🔐 Controle de Acesso", id: "acesso_botoeiras", label: "Botoeiras de Saída (Internas e Externas)" },
+      { cat: "🔐 Controle de Acesso", id: "acesso_software", label: "Software de Gestão de Acesso / Banco de Dados" },
+
+      // 4. Perímetro, Alarme e Cerca Elétrica
+      { cat: "⚡ Perímetro e Alarme", id: "perimetro_cerca", label: "Central e Fiação de Cerca Elétrica" },
+      { cat: "⚡ Perímetro e Alarme", id: "perimetro_sensores", label: "Sensores de Barreira Infravermelho Perimetral" },
+      { cat: "⚡ Perímetro e Alarme", id: "perimetro_alarme", label: "Central de Alarme de Intrusão" },
+      { cat: "⚡ Perímetro e Alarme", id: "perimetro_sirenes", label: "Sirenes e Dispositivos de Alerta" },
+
+      // 5. Interfonia e Comunicação
+      { cat: "📞 Interfonia e Comunicação", id: "interfonia_central", label: "Central de Portaria / Portaria IP / PABX" },
+      { cat: "📞 Interfonia e Comunicação", id: "interfonia_interfones", label: "Interfones / Fechaduras / Monofones dos apartamentos" },
+      { cat: "📞 Interfonia e Comunicação", id: "interfonia_porteiros", label: "Porteiros Eletrônicos Externos / Interfonia Vídeo" },
+      { cat: "📞 Interfonia e Comunicação", id: "interfonia_gateways", label: "Gateways VoIP / Placas GSM / Linhas Telefônicas" },
+
+      // 6. Rede, Energia e Infraestrutura
+      { cat: "🌐 Rede, Energia e Infra", id: "rede_roteadores", label: "Roteadores / Modems de Internet / Links" },
+      { cat: "🌐 Rede, Energia e Infra", id: "rede_switches", label: "Switches PoE / Rede Local" },
+      { cat: "🌐 Rede, Energia e Infra", id: "rede_nobreaks", label: "Nobreaks Principais de Portaria / Racks" },
+      { cat: "🌐 Rede, Energia e Infra", id: "rede_baterias", label: "Baterias Estacionárias (Alarme / Cerca / Nobreak)" },
+      { cat: "🌐 Rede, Energia e Infra", id: "infra_iluminacao", label: "Iluminação de Emergência / Sensores de Presença" },
+      { cat: "🌐 Rede, Energia e Infra", id: "infra_preventiva", label: "Manutenção Preventiva Mensal Presencial" }
+    ];
 
     try { 
       if (!firebase.apps.length) {
@@ -1445,11 +1505,12 @@
         data.modulosRf = [];
         data.modulosPorta = [];
         data.faciais = [];
+        data.contractScope = {};
         db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       }
     }
 
-    /* SALVAR CONFIGURAÇÃO DE EQUIPAMENTOS (FICHA TÉCNICA) */
+    /* SALVAR CONFIGURAÇÃO DE EQUIPAMENTOS */
     function saveConfigEquipment(e) {
       e.preventDefault();
       const id = document.getElementById('configEquipCondoId').value;
@@ -1565,6 +1626,95 @@
       });
     }
 
+    /* ESCOPO CONTRATUAL (~30 ITENS) */
+    function openContractScopeModal(id) {
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('contractCondoId').value = c.id;
+      document.getElementById('contractScopeTitle').textContent = `📋 Escopo Contratual: ${c.name}`;
+
+      const savedScope = c.contractScope || {};
+      const container = document.getElementById('contractItemsContainer');
+
+      // Agrupar por categorias
+      let cats = {};
+      CONTRACT_TEMPLATE_ITEMS.forEach(item => {
+        if (!cats[item.cat]) cats[item.cat] = [];
+        cats[item.cat].push(item);
+      });
+
+      let html = '';
+      for (let catName in cats) {
+        html += `
+          <div class="contract-category-box">
+            <div style="font-weight:bold; color:#38bdf8; font-size:12px; border-bottom:1px solid var(--border-color); padding-bottom:4px;">${catName}</div>
+        `;
+        cats[catName].forEach(item => {
+          let itemData = savedScope[item.id] || { status: 'incluso', pieces: 'com_pecas', posse: 'proprio', note: '' };
+          html += `
+            <div class="contract-item-row" data-item-id="${item.id}">
+              <div style="font-weight:600; color:var(--text-main); font-size:12px;">${item.label}</div>
+              <div class="form-row" style="gap:6px;">
+                <div class="form-group" style="margin:0;">
+                  <label style="font-size:10px;">Status</label>
+                  <select class="form-control item-status" style="font-size:11px; padding:4px;">
+                    <option value="incluso" ${itemData.status === 'incluso' ? 'selected' : ''}>🟢 Incluso</option>
+                    <option value="nao_incluso" ${itemData.status === 'nao_incluso' ? 'selected' : ''}>🔴 Não Incluso</option>
+                    <option value="parcial" ${itemData.status === 'parcial' ? 'selected' : ''}>⚠️ Parcial / Sob Demanda</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label style="font-size:10px;">Peças</label>
+                  <select class="form-control item-pieces" style="font-size:11px; padding:4px;">
+                    <option value="com_pecas" ${itemData.pieces === 'com_pecas' ? 'selected' : ''}>🔧 Com Troca de Peças</option>
+                    <option value="so_mao_de_obra" ${itemData.pieces === 'so_mao_de_obra' ? 'selected' : ''}>🛠️ Apenas Mão de Obra</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label style="font-size:10px;">Posse</label>
+                  <select class="form-control item-posse" style="font-size:11px; padding:4px;">
+                    <option value="proprio" ${itemData.posse === 'proprio' ? 'selected' : ''}>🏢 Próprio Condomínio</option>
+                    <option value="comodato" ${itemData.posse === 'comodato' ? 'selected' : ''}>📦 Comodato Protech</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <input type="text" class="form-control item-note" style="font-size:11px; padding:4px 8px;" placeholder="Observação específica deste item..." value="${escapeHtml(itemData.note || '')}">
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      container.innerHTML = html;
+      document.getElementById('contractScopeModal').classList.remove('hidden');
+    }
+    function closeContractScopeModal() { document.getElementById('contractScopeModal').classList.add('hidden'); }
+
+    function saveContractScope(e) {
+      e.preventDefault();
+      const id = document.getElementById('contractCondoId').value;
+      if (!id) return;
+
+      let newScope = {};
+      document.querySelectorAll('#contractItemsContainer .contract-item-row').forEach(row => {
+        let itemId = row.getAttribute('data-item-id');
+        newScope[itemId] = {
+          status: row.querySelector('.item-status').value,
+          pieces: row.querySelector('.item-pieces').value,
+          posse: row.querySelector('.item-posse').value,
+          note: row.querySelector('.item-note').value.trim()
+        };
+      });
+
+      db.collection("condominios").doc(id).update({ contractScope: newScope }).then(() => {
+        showToast('Escopo contratual salvo!');
+        loadCondosForOwner(ownerEmail);
+        closeContractScopeModal();
+      });
+    }
+
     function captureCurrentGPS() {
       if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
       showToast('Capturando GPS...');
@@ -1590,7 +1740,7 @@
       if (c) openModal(c);
     }
 
-    /* FICHA TÉCNICA LEITURA RÁPIDA (EXIBE TUDO QUE ESTÁ NAS CONFIGURAÇÕES) */
+    /* FICHA TÉCNICA LEITURA RÁPIDA */
     function openTechSheetModal(id) {
       currentActiveTechSheetId = id;
       const c = condos.find(x => x.id === id);
@@ -1696,7 +1846,6 @@
       document.getElementById('moduloPortaContainer').innerHTML = '';
       document.getElementById('facialContainer').innerHTML = '';
 
-      // Recolher acordeões
       document.getElementById('accModem').classList.remove('show');
       document.getElementById('accMikrotik').classList.remove('show');
       document.getElementById('accDvr').classList.remove('show');
@@ -1873,7 +2022,7 @@
       }
     }
 
-    /* ROTAS COM ID ÚNICO */
+    /* ROTAS */
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -1974,7 +2123,10 @@
             </div>
             <div class="card-body">
               <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</div>
-              <button onclick="openTechSheetModal('${c.id}')" class="btn btn-slate" style="font-size:10px; padding:3px 6px; margin-top:4px;">🛠️ Ver Ficha Técnica</button>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button onclick="openTechSheetModal('${c.id}')" class="btn btn-slate" style="font-size:10px; padding:3px 6px; flex:1; justify-content:center;">🛠️ Ficha Técnica</button>
+                <button onclick="openContractScopeModal('${c.id}')" class="btn btn-slate" style="font-size:10px; padding:3px 6px; flex:1; justify-content:center;">📋 Escopo Contratual</button>
+              </div>
               ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
               ${c.checkedIn ? `<div style="font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in desde ${c.checkInTime}</div>` : ''}
             </div>
