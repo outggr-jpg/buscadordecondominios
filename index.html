@@ -104,10 +104,6 @@
     .lightbox-img, .lightbox-video { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-    /* BARRA DE PROGRESSO DO UPLOAD CLOUDINARY */
-    .progress-container { width: 100%; background-color: var(--border-color); border-radius: 8px; overflow: hidden; margin-top: 8px; display: none; }
-    .progress-bar { width: 0%; height: 16px; background-color: #0284c7; text-align: center; font-size: 10px; font-weight: bold; color: white; line-height: 16px; transition: width 0.2s; }
-
     .version-item { border-left: 2px solid #0284c7; padding-left: 10px; margin-bottom: 12px; }
     .version-title { font-weight: bold; color: #38bdf8; margin-bottom: 3px; display: flex; justify-content: space-between; }
     .version-date { font-size: 10px; color: var(--text-muted); font-family: monospace; }
@@ -248,7 +244,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.3</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.4</span>
               </div>
             </div>
           </div>
@@ -476,7 +472,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM O SEU CLOUD NAME) -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM SALVAMENTO DIRETO SEGURO) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -486,13 +482,8 @@
       <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
         <input type="hidden" id="reportCondoId">
         <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
-        <div class="form-group"><label>Fotos e Vídeos:</label><input type="file" id="reportMediaInput" accept="image/*,video/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
+        <div class="form-group"><label>Fotos com Marca d'Água:</label><input type="file" id="reportMediaInput" accept="image/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
         
-        <!-- BARRA DE PROGRESSO DO UPLOAD -->
-        <div id="uploadProgressContainer" class="progress-container">
-          <div id="uploadProgressBar" class="progress-bar">0%</div>
-        </div>
-
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
@@ -552,12 +543,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.1.3</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.1.4</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Integração com Cloudinary próprio para upload rápido e infalível de fotos e vídeos.</li>
-            <li>Barra de progresso em tempo real durante o envio de mídias.</li>
-            <li>Condomínios desmarcados por padrão na seleção de rotas.</li>
-            <li>Gestão de equipe, relatórios gerais e PDFs totalmente operacionais.</li>
+            <li>Sistema de Check-out e relatórios otimizado para salvamento direto e instantâneo.</li>
+            <li>Fotos com marca d'água embutida salvas com segurança.</li>
+            <li>Rotas otimizadas por proximidade com desmarcação padrão.</li>
           </ul>
         </div>
       </div>
@@ -967,7 +957,6 @@
       document.getElementById('reportCondoId').value = id;
       document.getElementById('reportText').value = '';
       selectedMediaFiles = [];
-      document.getElementById('uploadProgressContainer').style.display = 'none';
       renderMediaPreviews();
       document.getElementById('reportModal').classList.remove('hidden');
     }
@@ -979,9 +968,7 @@
         if (f.type.startsWith('image')) {
           const dataUrl = await readFileAsDataURL(f);
           const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
-          selectedMediaFiles.push({ type: 'image', fileObj: dataUrlToFile(watermarked, f.name), previewUrl: watermarked });
-        } else if (f.type.startsWith('video')) {
-          selectedMediaFiles.push({ type: 'video', fileObj: f, previewUrl: URL.createObjectURL(f) });
+          selectedMediaFiles.push({ type: 'image', previewUrl: watermarked });
         }
       }
       renderMediaPreviews();
@@ -989,13 +976,6 @@
 
     function readFileAsDataURL(file) {
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
-    }
-
-    function dataUrlToFile(dataUrl, filename) {
-      const arr = dataUrl.split(','); const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]); let n = bstr.length; const u8arr = new Uint8Array(n);
-      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
-      return new File([u8arr], filename, { type: mime });
     }
 
     function applyWatermarkAsync(dataUrl, condoName, techName) {
@@ -1014,56 +994,30 @@
           ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
           ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 12, h - (bh * 0.18));
-          res(canvas.toDataURL('image/jpeg', 0.8));
+          res(canvas.toDataURL('image/jpeg', 0.7)); // Otimizado e comprimido para caber no banco sem travar
         };
         img.src = dataUrl;
       });
     }
 
     function renderMediaPreviews() {
-      document.getElementById('mediaPreviewContainer').innerHTML = selectedMediaFiles.length === 0 ? '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma mídia.</span>' :
+      document.getElementById('mediaPreviewContainer').innerHTML = selectedMediaFiles.length === 0 ? '<span style="color:var(--text-muted); font-size:11px; margin:auto;">Nenhuma foto anexada.</span>' :
         selectedMediaFiles.map((m, idx) => `
           <div class="media-preview-item">
             <button type="button" class="media-preview-remove" onclick="selectedMediaFiles.splice(${idx},1);renderMediaPreviews()">✕</button>
-            ${m.type === 'video' ? `<video src="${m.previewUrl}"></video>` : `<img src="${m.previewUrl}">`}
+            <img src="${m.previewUrl}">
           </div>
         `).join('');
     }
 
-    // UPLOAD ROBUSTO USANDO A SUA CONTA DO CLOUDINARY
+    // SALVAMENTO ROBUSTO DIRETO NO BANCO DE DADOS (SEM DEPENDÊNCIA DE API EXTERNA)
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
       const c = condos.find(x => x.id === id);
-      const progressContainer = document.getElementById('uploadProgressContainer');
-      const progressBar = document.getElementById('uploadProgressBar');
-      progressContainer.style.display = 'block';
 
       try {
-        let uploadedMedia = [];
-        let totalFiles = selectedMediaFiles.length;
-        let completedFiles = 0;
-
-        for (let mediaItem of selectedMediaFiles) {
-          const formData = new FormData();
-          formData.append('file', mediaItem.fileObj);
-          formData.append('upload_preset', 'ml_default'); // Preset padrão gratuito do Cloudinary
-
-          // ⚠️ AQUI ESTÁ O SEU CLOUD NAME CONFIGURADO:
-          const response = await fetch('https://api.cloudinary.com/v1_1/c-053cb1d42bc6820878345a713de73a/auto/upload', {
-            method: 'POST',
-            body: formData
-          });
-
-          if (!response.ok) throw new Error('Falha no upload para o Cloudinary. Verifique o seu Cloud Name ou Preset.');
-          const data = await response.json();
-          
-          uploadedMedia.push({ type: mediaItem.type, url: data.secure_url });
-          completedFiles++;
-          let percent = Math.round((completedFiles / totalFiles) * 100);
-          progressBar.style.width = percent + '%';
-          progressBar.textContent = percent + '%';
-        }
+        let uploadedMedia = selectedMediaFiles.map(m => ({ type: 'image', url: m.previewUrl }));
 
         const now = new Date();
         const checkOutTimestamp = now.getTime();
@@ -1094,9 +1048,6 @@
         loadCondosForOwner(ownerEmail);
       } catch (err) {
         alert('Erro ao finalizar check-out: ' + err.message);
-      } finally {
-        progressContainer.style.display = 'none';
-        progressBar.style.width = '0%';
       }
     }
 
@@ -1306,11 +1257,7 @@
 
     function openLightbox(url, type) {
       const container = document.getElementById('lightboxContentContainer');
-      if (type === 'video') {
-        container.innerHTML = `<video src="${url}" class="lightbox-video" controls autoplay></video>`;
-      } else {
-        container.innerHTML = `<img src="${url}" class="lightbox-img" alt="Mídia ampliada">`;
-      }
+      container.innerHTML = `<img src="${url}" class="lightbox-img" alt="Mídia ampliada">`;
       document.getElementById('lightboxModal').classList.remove('hidden');
     }
     function closeLightbox() {
@@ -1381,10 +1328,7 @@
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
               <div class="report-media-grid">
-                ${r.media.map(m => m.type === 'video' ? 
-                  `<div style="width:50px; height:50px; background:#000; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;" onclick="openLightbox('${m.url}', 'video')">▶️</div>` : 
-                  `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}', 'image')">`
-                ).join('')}
+                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}', 'image')">`).join('')}
               </div>
             ` : ''}
           </div>
