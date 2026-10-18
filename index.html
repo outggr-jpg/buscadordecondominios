@@ -158,8 +158,8 @@
 
     .dynamic-item-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-bottom: 6px; position: relative; display: flex; flex-direction: column; gap: 6px; }
 
-    .contract-category-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
-    .contract-item-row { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .contract-category-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px; margin-bottom: 8px; }
+    .contract-item-row { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -255,7 +255,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.5.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.6.0</span>
               </div>
             </div>
           </div>
@@ -704,10 +704,10 @@
         <input type="hidden" id="contractCondoId">
         
         <div style="font-size:11px; color:#38bdf8; margin-bottom:6px; font-weight:500;">
-          Gerencie o escopo com múltiplos slots por local/dispositivo e seletores neutros para White-Label:
+          Clique na categoria para abrir, visualize as opções disponíveis e adicione slots com quantidade:
         </div>
 
-        <div id="contractCategoriesContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <div id="contractCategoriesContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px; flex-shrink:0;">
           <button type="button" onclick="closeContractScopeModal()" class="btn btn-slate">Cancelar</button>
@@ -726,13 +726,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.5.0 (White-Label & Múltiplos Slots)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.6.0 (Acordeão, Quantidades e Energia)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Refatoração completa para linguagem SaaS White-Label (substituição de "Comodato Protech" por "Comodato" e "Próprio Condomínio" por "Do Condomínio").</li>
-            <li>Adicionado suporte a múltiplos slots dinâmicos no Escopo Contratual (permite múltiplos portões, fechaduras, faciais e câmeras no mesmo condomínio).</li>
-            <li>Atualizado o cadastro de fechos com "Fechadura eletroímã", "Fechadura solenoide" e "Molas aéreas".</li>
-            <li>Ajustado detalhamento do item "Cabeamento / Fibra / Conectividade (Rede de câmeras e patch cords)".</li>
-            <li>Removido item "Sirenes e Dispositivos de Alerta".</li>
+            <li>Reorganização da categoria CFTV (Câmeras IP, Câmeras Analógicas, Gravadores DVR/NVR, Fontes de Alimentação, Totem).</li>
+            <li>Criada a nova categoria ⚡ Energia (Nobreak para portão, Nobreak para sistema, Elétrica para portão, Elétrica para sistema).</li>
+            <li>Adicionado o campo de Quantidade em cada slot do Escopo Contratual.</li>
+            <li>Implementado efeito de Acordeão expansível por Categoria no Escopo Contratual.</li>
           </ul>
         </div>
       </div>
@@ -753,16 +752,27 @@
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
-    // Mapeamento Categorizado Neutro para o Escopo Contratual
+    // Estrutura Categorizada Atualizada com Quantidades, Energia e CFTV Enxuto
     const CONTRACT_CATEGORIES = [
       {
         catId: "cftv",
         catName: "🎥 CFTV / Câmeras",
         types: [
-          { typeId: "cftv_cam", label: "Câmera (Analógica / IP)" },
-          { typeId: "cftv_dvr", label: "Gravador (DVR / NVR)" },
-          { typeId: "cftv_fonte", label: "Fonte de Alimentação / Nobreak de CFTV" },
-          { typeId: "cftv_cabo", label: "Cabeamento / Fibra / Conectividade (Rede de câmeras e patch cords)" }
+          { typeId: "cftv_ip", label: "📷 Câmeras IP" },
+          { typeId: "cftv_analogica", label: "📹 Câmeras Analógicas" },
+          { typeId: "cftv_dvr", label: "🎥 Gravadores (DVR / NVR)" },
+          { typeId: "cftv_fonte", label: "🔌 Fontes de Alimentação" },
+          { typeId: "cftv_totem", label: "🗿 Totem" }
+        ]
+      },
+      {
+        catId: "energia",
+        catName: "⚡ Energia",
+        types: [
+          { typeId: "nobreak_portao", label: "🔋 Nobreak para Portão" },
+          { typeId: "nobreak_sistema", label: "🔋 Nobreak para o Sistema" },
+          { typeId: "eletrica_portao", label: "⚡ Elétrica para o Portão" },
+          { typeId: "eletrica_sistema", label: "⚡ Elétrica para o Sistema" }
         ]
       },
       {
@@ -792,7 +802,7 @@
       },
       {
         catId: "perimetro",
-        catName: "⚡ Perímetro & Alarme",
+        catName: "🛡️ Perímetro & Alarme",
         types: [
           { typeId: "cerca_eletrica", label: "Central e Fiação de Cerca Elétrica" },
           { typeId: "sensor_iva", label: "Sensor de Barreira Infravermelho (IVA)" },
@@ -811,12 +821,10 @@
       },
       {
         catId: "infra",
-        catName: "🌐 Rede, Energia & Infraestrutura",
+        catName: "🌐 Rede & Infraestrutura",
         types: [
           { typeId: "rede_modem", label: "Roteador / Modem de Internet" },
           { typeId: "rede_switch", label: "Switch PoE / Rede Local" },
-          { typeId: "rede_nobreak", label: "Nobreak Principal" },
-          { typeId: "rede_bateria", label: "Bateria Estacionária / Selada" },
           { typeId: "infra_ilum", label: "Iluminação de Emergência / Sensor de Presença" },
           { typeId: "infra_preventiva", label: "Manutenção Preventiva Mensal Presencial" }
         ]
@@ -1644,7 +1652,7 @@
       });
     }
 
-    /* ESCOPO CONTRATUAL COM MÚLTIPLOS SLOTS E WHITE-LABEL */
+    /* ESCOPO CONTRATUAL EXPANSÍVEL COM QUANTIDADES */
     function openContractScopeModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
@@ -1658,19 +1666,21 @@
       CONTRACT_CATEGORIES.forEach(cat => {
         const catBox = document.createElement('div');
         catBox.className = 'contract-category-box';
+        const accId = `acc_contract_${cat.catId}`;
         
-        let typeOptionsHtml = cat.types.map(t => `<option value="${t.typeId}">${t.label}</option>`).join('');
-
         catBox.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
-            <div style="font-weight:bold; color:#38bdf8; font-size:12px;">${cat.catName}</div>
-            <button type="button" onclick="addContractSlotToCategory('${cat.catId}')" class="btn btn-slate" style="font-size:10px; padding:2px 8px;">+ Adicionar Slot</button>
+          <button type="button" class="accordion-btn" onclick="toggleAccordion('${accId}')">
+            <span>${cat.catName}</span>
+            <span>▼</span>
+          </button>
+          <div id="${accId}" class="accordion-body">
+            <div id="cat_slots_${cat.catId}" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <button type="button" onclick="addContractSlotToCategory('${cat.catId}')" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:6px;">+ Adicionar Slot em ${cat.catName}</button>
           </div>
-          <div id="cat_slots_${cat.catId}" style="display:flex; flex-direction:column; gap:8px;"></div>
         `;
         container.appendChild(catBox);
 
-        // Preencher slots existentes desta categoria
+        // Renderizar slots existentes
         const catSlots = scopeList.filter(s => s.catId === cat.catId);
         catSlots.forEach(slotData => addContractSlotToCategory(cat.catId, slotData));
       });
@@ -1695,16 +1705,23 @@
       `).join('');
 
       div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="flex:1; margin-right:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <div style="flex:1;">
             <select class="form-control item-type" style="font-size:11px; padding:4px; font-weight:bold; color:#38bdf8;">
               ${optionsHtml}
             </select>
           </div>
           <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
         </div>
-        <div class="form-group" style="margin:0;">
-          <input type="text" class="form-control item-location" style="font-size:11px; padding:4px 8px;" placeholder="Localização / Identificação (Ex: Social Bloco A, Portão Garagem G1)" value="${escapeHtml(slotData.location || '')}">
+        <div class="form-row" style="gap:6px;">
+          <div class="form-group" style="flex:2; margin:0;">
+            <label style="font-size:10px;">Localização / Identificação</label>
+            <input type="text" class="form-control item-location" style="font-size:11px; padding:4px 8px;" placeholder="Ex: Hall Bloco A, Portão Principal" value="${escapeHtml(slotData.location || '')}">
+          </div>
+          <div class="form-group" style="flex:1; margin:0;">
+            <label style="font-size:10px;">Quantidade</label>
+            <input type="number" min="1" class="form-control item-qty" style="font-size:11px; padding:4px 8px;" placeholder="Qtd" value="${slotData.qty || 1}">
+          </div>
         </div>
         <div class="form-row" style="gap:6px;">
           <div class="form-group" style="margin:0;">
@@ -1731,7 +1748,7 @@
           </div>
         </div>
         <div class="form-group" style="margin:0;">
-          <input type="text" class="form-control item-note" style="font-size:11px; padding:4px 8px;" placeholder="Observações específicas deste slot..." value="${escapeHtml(slotData.note || '')}">
+          <input type="text" class="form-control item-note" style="font-size:11px; padding:4px 8px;" placeholder="Observações específicas deste item..." value="${escapeHtml(slotData.note || '')}">
         </div>
       `;
       slotsContainer.appendChild(div);
@@ -1748,6 +1765,7 @@
           catId: row.getAttribute('data-cat-id'),
           typeId: row.querySelector('.item-type').value,
           location: row.querySelector('.item-location').value.trim(),
+          qty: parseInt(row.querySelector('.item-qty').value, 10) || 1,
           status: row.querySelector('.item-status').value,
           pieces: row.querySelector('.item-pieces').value,
           posse: row.querySelector('.item-posse').value,
