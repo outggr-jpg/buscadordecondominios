@@ -556,8 +556,8 @@
         <div class="version-item">
           <div class="version-title"><span>Versão 6.1.7</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Correção definitiva de sintaxe de funções assíncronas e fluxo de login.</li>
-            <li>Gestão de equipe com permissões granulares e exclusão de membros.</li>
+            <li>Correção de funções assíncronas no carregamento de imagens em PDF.</li>
+            <li>Tela de login e botões restaurados com sucesso.</li>
           </ul>
         </div>
       </div>
@@ -1447,22 +1447,22 @@
       showToast('Relatório geral filtrado em PDF gerado!');
     }
 
-    function getBase64ImageFromUrl(url) {
-      return new Promise(async (resolve) => {
-        try {
-          const response = await fetch(url);
-          const blob = await response.blob();
+    async function getBase64ImageFromUrl(url) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
           reader.onerror = () => resolve(null);
           reader.readAsDataURL(blob);
-        } catch (e) {
-          resolve(null);
-        }
-      });
+        });
+      } catch (e) {
+        return null;
+      }
     }
 
-    function downloadSingleReportPDF(condoName, report) {
+    async function downloadSingleReportPDF(condoName, report) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
