@@ -159,7 +159,8 @@
     .dynamic-item-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-bottom: 6px; position: relative; display: flex; flex-direction: column; gap: 6px; }
 
     .contract-category-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px; margin-bottom: 8px; }
-    .contract-item-row { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .contract-subtype-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .contract-item-row { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -255,7 +256,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.6.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.7.0</span>
               </div>
             </div>
           </div>
@@ -704,7 +705,7 @@
         <input type="hidden" id="contractCondoId">
         
         <div style="font-size:11px; color:#38bdf8; margin-bottom:6px; font-weight:500;">
-          Clique na categoria para abrir, visualize as opções disponíveis e adicione slots com quantidade:
+          Clique na categoria para abrir. Cada tipo de equipamento possui seu próprio botão de adicionar slots:
         </div>
 
         <div id="contractCategoriesContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -726,12 +727,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.6.0 (Acordeão, Quantidades e Energia)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.7.0 (Sub-blocos Diretos por Categoria)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Reorganização da categoria CFTV (Câmeras IP, Câmeras Analógicas, Gravadores DVR/NVR, Fontes de Alimentação, Totem).</li>
-            <li>Criada a nova categoria ⚡ Energia (Nobreak para portão, Nobreak para sistema, Elétrica para portão, Elétrica para sistema).</li>
-            <li>Adicionado o campo de Quantidade em cada slot do Escopo Contratual.</li>
-            <li>Implementado efeito de Acordeão expansível por Categoria no Escopo Contratual.</li>
+            <li>Exibição nativa de todos os tipos de equipamentos dentro da categoria expandida no Escopo Contratual.</li>
+            <li>Botão de adicionar slots específicos diretamente abaixo do tipo correspondente (ex: Câmeras IP, Câmeras Analógicas, Nobreak, etc.).</li>
+            <li>Mantido o controle de quantidade, status, peças, posse e observações para cada item.</li>
           </ul>
         </div>
       </div>
@@ -752,14 +752,14 @@
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
-    // Estrutura Categorizada Atualizada com Quantidades, Energia e CFTV Enxuto
+    // Estrutura Categorizada com Subtipos Expostos
     const CONTRACT_CATEGORIES = [
       {
         catId: "cftv",
         catName: "🎥 CFTV / Câmeras",
         types: [
-          { typeId: "cftv_ip", label: "📷 Câmeras IP" },
           { typeId: "cftv_analogica", label: "📹 Câmeras Analógicas" },
+          { typeId: "cftv_ip", label: "📷 Câmeras IP" },
           { typeId: "cftv_dvr", label: "🎥 Gravadores (DVR / NVR)" },
           { typeId: "cftv_fonte", label: "🔌 Fontes de Alimentação" },
           { typeId: "cftv_totem", label: "🗿 Totem" }
@@ -1652,7 +1652,7 @@
       });
     }
 
-    /* ESCOPO CONTRATUAL EXPANSÍVEL COM QUANTIDADES */
+    /* ESCOPO CONTRATUAL COM SUB-BLOCOS FIXOS DIRETO NA CATEGORIA */
     function openContractScopeModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
@@ -1668,49 +1668,50 @@
         catBox.className = 'contract-category-box';
         const accId = `acc_contract_${cat.catId}`;
         
+        let subTypesHtml = cat.types.map(t => `
+          <div class="contract-subtype-box">
+            <div style="font-weight:bold; font-size:11px; color:#38bdf8;">${t.label}</div>
+            <div id="slots_${cat.catId}_${t.typeId}" style="display:flex; flex-direction:column; gap:6px;"></div>
+            <button type="button" onclick="addContractSlotDirect('${cat.catId}', '${t.typeId}', '${escapeHtml(t.label)}')" class="btn btn-slate" style="justify-content:center; width:100%; font-size:10px; margin-top:2px;">+ Adicionar ${t.label}</button>
+          </div>
+        `).join('');
+
         catBox.innerHTML = `
           <button type="button" class="accordion-btn" onclick="toggleAccordion('${accId}')">
             <span>${cat.catName}</span>
             <span>▼</span>
           </button>
           <div id="${accId}" class="accordion-body">
-            <div id="cat_slots_${cat.catId}" style="display:flex; flex-direction:column; gap:8px;"></div>
-            <button type="button" onclick="addContractSlotToCategory('${cat.catId}')" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:6px;">+ Adicionar Slot em ${cat.catName}</button>
+            ${subTypesHtml}
           </div>
         `;
         container.appendChild(catBox);
 
-        // Renderizar slots existentes
-        const catSlots = scopeList.filter(s => s.catId === cat.catId);
-        catSlots.forEach(slotData => addContractSlotToCategory(cat.catId, slotData));
+        // Renderizar slots salvos no container específico do seu tipo
+        cat.types.forEach(t => {
+          const matchingSlots = scopeList.filter(s => s.catId === cat.catId && s.typeId === t.typeId);
+          matchingSlots.forEach(slotData => {
+            addContractSlotDirect(cat.catId, t.typeId, t.label, slotData);
+          });
+        });
       });
 
       document.getElementById('contractScopeModal').classList.remove('hidden');
     }
     function closeContractScopeModal() { document.getElementById('contractScopeModal').classList.add('hidden'); }
 
-    function addContractSlotToCategory(catId, slotData = {}) {
-      const slotsContainer = document.getElementById(`cat_slots_${catId}`);
+    function addContractSlotDirect(catId, typeId, typeLabel, slotData = {}) {
+      const slotsContainer = document.getElementById(`slots_${catId}_${typeId}`);
       if (!slotsContainer) return;
-
-      const catDef = CONTRACT_CATEGORIES.find(c => c.catId === catId);
-      if (!catDef) return;
 
       const div = document.createElement('div');
       div.className = 'contract-item-row';
       div.setAttribute('data-cat-id', catId);
-
-      let optionsHtml = catDef.types.map(t => `
-        <option value="${t.typeId}" ${slotData.typeId === t.typeId ? 'selected' : ''}>${t.label}</option>
-      `).join('');
+      div.setAttribute('data-type-id', typeId);
 
       div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
-          <div style="flex:1;">
-            <select class="form-control item-type" style="font-size:11px; padding:4px; font-weight:bold; color:#38bdf8;">
-              ${optionsHtml}
-            </select>
-          </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:10px; color:#38bdf8;">Slot - ${escapeHtml(typeLabel)}</b>
           <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
         </div>
         <div class="form-row" style="gap:6px;">
@@ -1763,7 +1764,7 @@
       document.querySelectorAll('#contractCategoriesContainer .contract-item-row').forEach(row => {
         newScopeList.push({
           catId: row.getAttribute('data-cat-id'),
-          typeId: row.querySelector('.item-type').value,
+          typeId: row.getAttribute('data-type-id'),
           location: row.querySelector('.item-location').value.trim(),
           qty: parseInt(row.querySelector('.item-qty').value, 10) || 1,
           status: row.querySelector('.item-status').value,
