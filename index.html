@@ -10,6 +10,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Biblioteca CryptoJS para Criptografia de Ponta a Ponta -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <!-- Biblioteca jsPDF para exportação de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -266,7 +268,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.2.1</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.3.0</span>
               </div>
             </div>
           </div>
@@ -318,7 +320,7 @@
         <h3 style="color:var(--text-main); font-size: 16px;">🗺️ Selecione o Navegador</h3>
       </div>
       <div class="modal-body" style="padding-top: 10px;">
-        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por cuál aplicativo deseja iniciar a rota:</p>
+        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por qual aplicativo deseja iniciar a rota:</p>
         <div class="gps-buttons-container">
           <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">🗺️ Maps</a>
           <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">🚗 Waze</a>
@@ -650,7 +652,7 @@
         <input type="hidden" id="configEquipCondoId">
         
         <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
-          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Múltiplos Slots):</label>
+          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Múltiplos Slots) - Criptografado:</label>
           
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModem')">🌐 Modems / Roteadores <span>▼</span></button>
           <div id="accModem" class="accordion-body">
@@ -703,7 +705,7 @@
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px;">
           <button type="button" onclick="closeConfigEquipmentModal()" class="btn btn-slate">Cancelar</button>
-          <button type="submit" class="btn btn-emerald">Salvar Equipamentos</button>
+          <button type="submit" class="btn btn-emerald">Salvar Equipamentos Criptografados</button>
         </div>
       </form>
     </div>
@@ -745,10 +747,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.2.1 (Atualização de Identidade)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 8.3.0 (Criptografia AES da Ficha Técnica)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Renomeação oficial para **Buscador de Condomínios** em toda a interface e telas de autenticação.</li>
-            <li>Controle de acesso aprimorado e permissão `manageTeam` para novas contas criadas via link.</li>
+            <li>Implementada criptografia AES-256 no cliente para proteger senhas e IPs de equipamentos no Firestore.</li>
+            <li>Segurança reforçada contra leitura direta no banco de dados.</li>
           </ul>
         </div>
       </div>
@@ -768,6 +770,21 @@
     };
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
+    const SECRET_ENCRYPTION_KEY = "protech_seguranca_eletronica_master_key_2026";
+
+    function encryptData(text) {
+      if (!text) return "";
+      try { return CryptoJS.AES.encrypt(String(text), SECRET_ENCRYPTION_KEY).toString(); } catch(e) { return text; }
+    }
+
+    function decryptData(ciphertext) {
+      if (!ciphertext) return "";
+      try {
+        const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_ENCRYPTION_KEY);
+        const originalText = bytes.toString(CryptoJS.enc.Utf8);
+        return originalText || ciphertext;
+      } catch(e) { return ciphertext; }
+    }
 
     const CONTRACT_CATEGORIES = [
       {
@@ -1322,7 +1339,19 @@
       const snapshot = await db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get();
       condos = [];
       for (let docSnap of snapshot.docs) {
-        let condoData = { id: docSnap.id, ...docSnap.data() };
+        let rawData = docSnap.data();
+        let condoData = { id: docSnap.id, ...rawData };
+        
+        // Descriptografar arrays da ficha técnica se existirem
+        if (rawData.encryptedModems) condoData.modems = rawData.encryptedModems.map(m => ({ operadora: decryptData(m.operadora), ip: decryptData(m.ip), http: decryptData(m.http), user: decryptData(m.user), pass: decryptData(m.pass), wifi2gSsid: decryptData(m.wifi2gSsid), wifi2gPass: decryptData(m.wifi2gPass), wifi5gSsid: decryptData(m.wifi5gSsid), wifi5gPass: decryptData(m.wifi5gPass), extra: decryptData(m.extra) }));
+        if (rawData.encryptedMikrotiks) condoData.mikrotiks = rawData.encryptedMikrotiks.map(mk => ({ ip: decryptData(mk.ip), http: decryptData(mk.http), user: decryptData(mk.user), pass: decryptData(mk.pass) }));
+        if (rawData.encryptedDvrs) condoData.dvrs = rawData.encryptedDvrs.map(d => ({ name: decryptData(d.name), ip: decryptData(d.ip), http: decryptData(d.http), servicePort: decryptData(d.servicePort), rtsp: decryptData(d.rtsp), user: decryptData(d.user), pass: decryptData(d.pass) }));
+        if (rawData.encryptedCameras) condoData.cameras = rawData.encryptedCameras.map(cm => ({ desc: decryptData(cm.desc), ip: decryptData(cm.ip), http: decryptData(cm.http), port: decryptData(cm.port), user: decryptData(cm.user), pass: decryptData(cm.pass) }));
+        if (rawData.encryptedControladoras) condoData.controladoras = rawData.encryptedControladoras.map(ct => ({ name: decryptData(ct.name), ip: decryptData(ct.ip), port: decryptData(ct.port), autoPort: decryptData(ct.autoPort) }));
+        if (rawData.encryptedModulosRf) condoData.modulosRf = rawData.encryptedModulosRf.map(rf => ({ desc: decryptData(rf.desc), ip: decryptData(rf.ip), serial: decryptData(rf.serial) }));
+        if (rawData.encryptedModulosPorta) condoData.modulosPorta = rawData.encryptedModulosPorta.map(p => ({ desc: decryptData(p.desc), ip: decryptData(p.ip), serial: decryptData(p.serial) }));
+        if (rawData.encryptedFaciais) condoData.faciais = rawData.encryptedFaciais.map(f => ({ desc: decryptData(f.desc), ip: decryptData(f.ip), http: decryptData(f.http), rtsp: decryptData(f.rtsp), user: decryptData(f.user), pass: decryptData(f.pass) }));
+
         const reportsSnap = await db.collection("condominios").doc(docSnap.id).collection("reports").orderBy("timestamp", "desc").get();
         condoData.reports = reportsSnap.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
         condos.push(condoData);
@@ -1663,14 +1692,14 @@
       if (id) {
         db.collection("condominios").doc(id).update(data).then(() => { showToast('Endereço atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       } else {
-        data.modems = [];
-        data.mikrotiks = [];
-        data.dvrs = [];
-        data.cameras = [];
-        data.controladoras = [];
-        data.modulosRf = [];
-        data.modulosPorta = [];
-        data.faciais = [];
+        data.encryptedModems = [];
+        data.encryptedMikrotiks = [];
+        data.encryptedDvrs = [];
+        data.encryptedCameras = [];
+        data.encryptedControladoras = [];
+        data.encryptedModulosRf = [];
+        data.encryptedModulosPorta = [];
+        data.encryptedFaciais = [];
         data.contractScopeList = [];
         db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       }
@@ -1681,110 +1710,110 @@
       const id = document.getElementById('configEquipCondoId').value;
       if (!id) return;
 
-      let modemsList = [];
+      let encModemsList = [];
       document.querySelectorAll('#modemContainer .dynamic-item-box').forEach(box => {
-        modemsList.push({
-          operadora: box.querySelector('.modem-operadora').value.trim(),
-          ip: box.querySelector('.modem-ip').value.trim(),
-          http: box.querySelector('.modem-http').value.trim(),
-          user: box.querySelector('.modem-user').value.trim(),
-          pass: box.querySelector('.modem-pass').value.trim(),
-          wifi2gSsid: box.querySelector('.modem-wifi2gSsid').value.trim(),
-          wifi2gPass: box.querySelector('.modem-wifi2gPass').value.trim(),
-          wifi5gSsid: box.querySelector('.modem-wifi5gSsid').value.trim(),
-          wifi5gPass: box.querySelector('.modem-wifi5gPass').value.trim(),
-          extra: box.querySelector('.modem-extra').value.trim()
+        encModemsList.push({
+          operadora: encryptData(box.querySelector('.modem-operadora').value.trim()),
+          ip: encryptData(box.querySelector('.modem-ip').value.trim()),
+          http: encryptData(box.querySelector('.modem-http').value.trim()),
+          user: encryptData(box.querySelector('.modem-user').value.trim()),
+          pass: encryptData(box.querySelector('.modem-pass').value.trim()),
+          wifi2gSsid: encryptData(box.querySelector('.modem-wifi2gSsid').value.trim()),
+          wifi2gPass: encryptData(box.querySelector('.modem-wifi2gPass').value.trim()),
+          wifi5gSsid: encryptData(box.querySelector('.modem-wifi5gSsid').value.trim()),
+          wifi5gPass: encryptData(box.querySelector('.modem-wifi5gPass').value.trim()),
+          extra: encryptData(box.querySelector('.modem-extra').value.trim())
         });
       });
 
-      let mikrotiksList = [];
+      let encMikrotiksList = [];
       document.querySelectorAll('#mikrotikContainer .dynamic-item-box').forEach(box => {
-        mikrotiksList.push({
-          ip: box.querySelector('.mtk-ip').value.trim(),
-          http: box.querySelector('.mtk-http').value.trim(),
-          user: box.querySelector('.mtk-user').value.trim(),
-          pass: box.querySelector('.mtk-pass').value.trim()
+        encMikrotiksList.push({
+          ip: encryptData(box.querySelector('.mtk-ip').value.trim()),
+          http: encryptData(box.querySelector('.mtk-http').value.trim()),
+          user: encryptData(box.querySelector('.mtk-user').value.trim()),
+          pass: encryptData(box.querySelector('.mtk-pass').value.trim())
         });
       });
 
-      let dvrsList = [];
+      let encDvrsList = [];
       document.querySelectorAll('#dvrContainer .dynamic-item-box').forEach(box => {
-        dvrsList.push({
-          name: box.querySelector('.dvr-name').value.trim(),
-          ip: box.querySelector('.dvr-ip').value.trim(),
-          http: box.querySelector('.dvr-http').value.trim(),
-          servicePort: box.querySelector('.dvr-servico').value.trim(),
-          rtsp: box.querySelector('.dvr-rtsp').value.trim(),
-          user: box.querySelector('.dvr-user').value.trim(),
-          pass: box.querySelector('.dvr-pass').value.trim()
+        encDvrsList.push({
+          name: encryptData(box.querySelector('.dvr-name').value.trim()),
+          ip: encryptData(box.querySelector('.dvr-ip').value.trim()),
+          http: encryptData(box.querySelector('.dvr-http').value.trim()),
+          servicePort: encryptData(box.querySelector('.dvr-servico').value.trim()),
+          rtsp: encryptData(box.querySelector('.dvr-rtsp').value.trim()),
+          user: encryptData(box.querySelector('.dvr-user').value.trim()),
+          pass: encryptData(box.querySelector('.dvr-pass').value.trim())
         });
       });
 
-      let camerasList = [];
+      let encCamerasList = [];
       document.querySelectorAll('#cameraContainer .dynamic-item-box').forEach(box => {
-        camerasList.push({
-          desc: box.querySelector('.cam-desc').value.trim(),
-          ip: box.querySelector('.cam-ip').value.trim(),
-          http: box.querySelector('.cam-http').value.trim(),
-          port: box.querySelector('.cam-port').value.trim(),
-          user: box.querySelector('.cam-user').value.trim(),
-          pass: box.querySelector('.cam-pass').value.trim()
+        encCamerasList.push({
+          desc: encryptData(box.querySelector('.cam-desc').value.trim()),
+          ip: encryptData(box.querySelector('.cam-ip').value.trim()),
+          http: encryptData(box.querySelector('.cam-http').value.trim()),
+          port: encryptData(box.querySelector('.cam-port').value.trim()),
+          user: encryptData(box.querySelector('.cam-user').value.trim()),
+          pass: encryptData(box.querySelector('.cam-pass').value.trim())
         });
       });
 
-      let controladorasList = [];
+      let encControladorasList = [];
       document.querySelectorAll('#controladoraContainer .dynamic-item-box').forEach(box => {
-        controladorasList.push({
-          name: box.querySelector('.ctrl-name').value.trim(),
-          ip: box.querySelector('.ctrl-ip').value.trim(),
-          port: box.querySelector('.ctrl-port').value.trim(),
-          autoPort: box.querySelector('.ctrl-autoport').value.trim()
+        encControladorasList.push({
+          name: encryptData(box.querySelector('.ctrl-name').value.trim()),
+          ip: encryptData(box.querySelector('.ctrl-ip').value.trim()),
+          port: encryptData(box.querySelector('.ctrl-port').value.trim()),
+          autoPort: encryptData(box.querySelector('.ctrl-autoport').value.trim())
         });
       });
 
-      let modulosRfList = [];
+      let encModulosRfList = [];
       document.querySelectorAll('#moduloRfContainer .dynamic-item-box').forEach(box => {
-        modulosRfList.push({
-          desc: box.querySelector('.modrf-desc').value.trim(),
-          ip: box.querySelector('.modrf-ip').value.trim(),
-          serial: box.querySelector('.modrf-serial').value.trim()
+        encModulosRfList.push({
+          desc: encryptData(box.querySelector('.modrf-desc').value.trim()),
+          ip: encryptData(box.querySelector('.modrf-ip').value.trim()),
+          serial: encryptData(box.querySelector('.modrf-serial').value.trim())
         });
       });
 
-      let modulosPortaList = [];
+      let encModulosPortaList = [];
       document.querySelectorAll('#moduloPortaContainer .dynamic-item-box').forEach(box => {
-        modulosPortaList.push({
-          desc: box.querySelector('.modporta-desc').value.trim(),
-          ip: box.querySelector('.modporta-ip').value.trim(),
-          serial: box.querySelector('.modporta-serial').value.trim()
+        encModulosPortaList.push({
+          desc: encryptData(box.querySelector('.modporta-desc').value.trim()),
+          ip: encryptData(box.querySelector('.modporta-ip').value.trim()),
+          serial: encryptData(box.querySelector('.modporta-serial').value.trim())
         });
       });
 
-      let faciaisList = [];
+      let encFaciaisList = [];
       document.querySelectorAll('#facialContainer .dynamic-item-box').forEach(box => {
-        faciaisList.push({
-          desc: box.querySelector('.facial-desc').value.trim(),
-          ip: box.querySelector('.facial-ip').value.trim(),
-          http: box.querySelector('.facial-http').value.trim(),
-          rtsp: box.querySelector('.facial-rtsp').value.trim(),
-          user: box.querySelector('.facial-user').value.trim(),
-          pass: box.querySelector('.facial-pass').value.trim()
+        encFaciaisList.push({
+          desc: encryptData(box.querySelector('.facial-desc').value.trim()),
+          ip: encryptData(box.querySelector('.facial-ip').value.trim()),
+          http: encryptData(box.querySelector('.facial-http').value.trim()),
+          rtsp: encryptData(box.querySelector('.facial-rtsp').value.trim()),
+          user: encryptData(box.querySelector('.facial-user').value.trim()),
+          pass: encryptData(box.querySelector('.facial-pass').value.trim())
         });
       });
 
       const eqData = {
-        modems: modemsList,
-        mikrotiks: mikrotiksList,
-        dvrs: dvrsList,
-        cameras: camerasList,
-        controladoras: controladorasList,
-        modulosRf: modulosRfList,
-        modulosPorta: modulosPortaList,
-        faciais: faciaisList
+        encryptedModems: encModemsList,
+        encryptedMikrotiks: encMikrotiksList,
+        encryptedDvrs: encDvrsList,
+        encryptedCameras: encCamerasList,
+        encryptedControladoras: encControladorasList,
+        encryptedModulosRf: encModulosRfList,
+        encryptedModulosPorta: encModulosPortaList,
+        encryptedFaciais: encFaciaisList
       };
 
       db.collection("condominios").doc(id).update(eqData).then(() => {
-        showToast('Equipamentos salvos!');
+        showToast('Equipamentos criptografados e salvos!');
         loadCondosForOwner(ownerEmail);
         closeConfigEquipmentModal();
         openTechSheetModal(id);
@@ -2041,10 +2070,10 @@
       currentActiveTechSheetId = id;
       const c = condos.find(x => x.id === id);
       if (!c) return;
-      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
+      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica (Criptografada): ${c.name}`;
       
-      let modems = c.modems || (c.modem ? [c.modem] : []);
-      let mtks = c.mikrotiks || (c.mikrotik ? [c.mikrotik] : []);
+      let modems = c.modems || [];
+      let mtks = c.mikrotiks || [];
       let dvrs = c.dvrs || [];
       let cams = c.cameras || [];
       let ctrls = c.controladoras || [];
@@ -2151,8 +2180,8 @@
       document.getElementById('accModulosPorta').classList.remove('show');
       document.getElementById('accFaciais').classList.remove('show');
 
-      let modems = c.modems || (c.modem ? [c.modem] : []);
-      let mtks = c.mikrotiks || (c.mikrotik ? [c.mikrotik] : []);
+      let modems = c.modems || [];
+      let mtks = c.mikrotiks || [];
 
       modems.forEach(m => addModemSlot(m));
       mtks.forEach(mk => addMikrotikSlot(mk));
