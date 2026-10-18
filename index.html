@@ -254,7 +254,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.2.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.3.0</span>
               </div>
             </div>
           </div>
@@ -370,7 +370,7 @@
         <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
           <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">📋 Menu Operacional e Gestão:</label>
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe e Permissões</button>
+            <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe, Permissões e Ranking</button>
             <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
             <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
           </div>
@@ -401,31 +401,53 @@
     </div>
   </div>
 
-  <!-- MODAL DE GESTÃO DE EQUIPE COM PERMISSÕES GRANULARES -->
+  <!-- MODAL DE GESTÃO DE EQUIPE E RANKING DE TÉCNICOS -->
   <div id="teamModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 600px;">
+    <div class="modal" style="max-width: 650px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Permissões</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Ranking de Produtividade</h3>
         <button onclick="closeTeamModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-      <div class="modal-body">
-        <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Membro:</label>
-          <div class="form-group">
-            <input type="email" id="inviteEmailInput" class="form-control" placeholder="email.do.membro@empresa.com">
-          </div>
-          <button onclick="generateTeamInviteLink()" class="btn btn-emerald" style="width:100%; justify-content:center;">🔗 Gerar Link de Convite</button>
-          <div id="inviteLinkResult" style="margin-top:8px; font-size:11px; word-break:break-all; color:#38bdf8; display:none;"></div>
+      <div class="modal-body" style="gap:14px;">
+        
+        <!-- ABAS DE NAVEGAÇÃO DA EQUIPE -->
+        <div class="tab-nav">
+          <button id="tabTeamMembersBtn" onclick="switchTeamTab('members')" class="tab-btn active">Membros e Permissões</button>
+          <button id="tabTeamRankingBtn" onclick="switchTeamTab('ranking')" class="tab-btn">🏆 Ranking de Técnicos</button>
         </div>
 
-        <div style="margin-top:10px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe e Permissões:</label>
-          <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;">
-            <div style="color:var(--text-muted); text-align:center; padding:10px;">Carregando membros...</div>
+        <!-- SEÇÃO DE MEMBROS -->
+        <div id="teamMembersSection" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
+            <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Membro:</label>
+            <div class="form-group">
+              <input type="email" id="inviteEmailInput" class="form-control" placeholder="email.do.membro@empresa.com">
+            </div>
+            <button onclick="generateTeamInviteLink()" class="btn btn-emerald" style="width:100%; justify-content:center;">🔗 Gerar Link de Convite</button>
+            <div id="inviteLinkResult" style="margin-top:8px; font-size:11px; word-break:break-all; color:#38bdf8; display:none;"></div>
+          </div>
+
+          <div>
+            <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe:</label>
+            <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto;">
+              <div style="color:var(--text-muted); text-align:center; padding:10px;">Carregando membros...</div>
+            </div>
           </div>
         </div>
+
+        <!-- SEÇÃO DE RANKING -->
+        <div id="teamRankingSection" style="display:none; flex-direction:column; gap:10px;">
+          <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
+            <div style="font-size:12px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🏆 Ranking de Atendimentos Realizados</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Baseado na quantidade de check-outs e relatórios concluídos por cada técnico.</div>
+            <div id="teamRankingListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;">
+              <div style="color:var(--text-muted); text-align:center; padding:10px;">Calculando ranking...</div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
         <button onclick="closeTeamModal()" class="btn btn-slate">Fechar</button>
       </div>
     </div>
@@ -461,7 +483,7 @@
         </div>
         <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
-      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px;">
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
         <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
         <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Relatório Filtrado em PDF</button>
       </div>
@@ -483,7 +505,7 @@
         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Selecione os condomínios que deseja visitar:</p>
         <div id="routeSelectionList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;"></div>
       </div>
-      <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
+      <div style="margin-top:16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
         <button onclick="toggleSelectAllRoutes()" class="btn btn-slate" style="font-size: 11px;">Selecionar Todos</button>
         <div style="display: flex; gap: 8px;">
           <button onclick="closeRouteModal()" class="btn btn-slate">Cancelar</button>
@@ -552,7 +574,7 @@
         <button onclick="closeHistoryModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body" id="historyListContainer"></div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button></div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;"><button onclick="closeHistoryModal()" class="btn btn-slate">Fechar</button></div>
     </div>
   </div>
 
@@ -589,7 +611,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE VISUALIZAÇÃO COMPLETA DA FICHA TÉCNICA (CONFIGURAÇÕES ATUAIS) -->
+  <!-- MODAL DE VISUALIZAÇÃO COMPLETA DA FICHA TÉCNICA -->
   <div id="techSheetModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
@@ -690,15 +712,14 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.2.0 (Separação Endereço x Equipamentos)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.3.0 (Campo PPPoE/Modem & Ranking)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Modal de cadastro/edição (lápis) restrito exclusivamente a dados de endereço, nome e localização GPS.</li>
-            <li>Modal de Ficha Técnica exibe fielmente todas as configurações atuais e permite gerenciar os equipamentos por slots múltiplos.</li>
-            <li>Correção de scroll e fluidez garantidas em modais longos.</li>
+            <li>Adicionado campo livre de Observações / PPPoE / Dados do Modem em cada slot de modems/roteadores.</li>
+            <li>Implementado o Sistema de Ranking de Produtividade dos Técnicos no menu de equipes.</li>
           </ul>
         </div>
       </div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;"><button onclick="closeChangelogModal()" class="btn btn-slate">Fechar</button></div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;"><button onclick="closeChangelogModal()" class="btn btn-slate">Fechar</button></div>
     </div>
   </div>
 
@@ -781,7 +802,7 @@
       }
     }
 
-    // Slots Múltiplos de Modem / Roteador
+    // Slots Múltiplos de Modem / Roteador com Campo PPPoE/Extra
     function addModemSlot(data = {}) {
       const container = document.getElementById('modemContainer');
       const index = container.children.length;
@@ -809,6 +830,7 @@
           <div class="form-group"><label>Wi-Fi 5G (SSID)</label><input type="text" class="form-control modem-wifi5gSsid" value="${escapeHtml(data.wifi5gSsid || '')}" placeholder="Nome 5G"></div>
           <div class="form-group"><label>Senha 5G</label><input type="text" class="form-control modem-wifi5gPass" value="${escapeHtml(data.wifi5gPass || '')}" placeholder="Senha 5G"></div>
         </div>
+        <div class="form-group"><label>PPPoE / Dados Adicionais / Observações</label><textarea class="form-control modem-extra" rows="2" placeholder="Ex: User PPPoE, VLAN, VCI/VPI ou detalhes">${escapeHtml(data.extra || '')}</textarea></div>
       `;
       container.appendChild(div);
     }
@@ -1258,7 +1280,28 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
+    function switchTeamTab(tab) {
+      const membersBtn = document.getElementById('tabTeamMembersBtn');
+      const rankingBtn = document.getElementById('tabTeamRankingBtn');
+      const membersSec = document.getElementById('teamMembersSection');
+      const rankingSec = document.getElementById('teamRankingSection');
+
+      if (tab === 'members') {
+        membersBtn.classList.add('active');
+        rankingBtn.classList.remove('active');
+        membersSec.style.display = 'flex';
+        rankingSec.style.display = 'none';
+      } else {
+        membersBtn.classList.remove('active');
+        rankingBtn.classList.add('active');
+        membersSec.style.display = 'none';
+        rankingSec.style.display = 'flex';
+        renderTeamRanking();
+      }
+    }
+
     function openTeamModal() {
+      switchTeamTab('members');
       document.getElementById('inviteLinkResult').style.display = 'none';
       db.collection("usuarios").where("companyOwnerEmail", "==", ownerEmail).get().then(snapshot => {
         let html = '';
@@ -1302,6 +1345,42 @@
       document.getElementById('teamModal').classList.remove('hidden');
     }
     function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
+
+    function renderTeamRanking() {
+      let stats = {};
+      condos.forEach(c => {
+        if (c.reports) {
+          c.reports.forEach(r => {
+            let tech = r.userEmail || 'Desconhecido';
+            stats[tech] = (stats[tech] || 0) + 1;
+          });
+        }
+      });
+
+      let sortedTechs = Object.keys(stats).map(tech => ({ tech, count: stats[tech] })).sort((a, b) => b.count - a.count);
+      const container = document.getElementById('teamRankingListContainer');
+
+      if (sortedTechs.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento registrado no ranking ainda.</div>';
+        return;
+      }
+
+      let medals = ['🥇', '🥈', '🥉'];
+      container.innerHTML = sortedTechs.map((item, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; border-radius:8px; border:1px solid var(--border-color);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:16px;">${medals[idx] || `<b>#${idx+1}</b>`}</span>
+            <div>
+              <div style="font-weight:bold; color:var(--text-main); font-size:12px;">${escapeHtml(item.tech)}</div>
+              <div style="font-size:10px; color:var(--text-muted);">Técnico de Campo</div>
+            </div>
+          </div>
+          <div style="background:rgba(2,132,199,0.2); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); padding:2px 8px; border-radius:12px; font-weight:bold; font-size:11px;">
+            ${item.count} atendimento${item.count > 1 ? 's' : ''}
+          </div>
+        </div>
+      `).join('');
+    }
 
     function generateTeamInviteLink() {
       const email = document.getElementById('inviteEmailInput').value.trim();
@@ -1387,7 +1466,8 @@
           wifi2gSsid: box.querySelector('.modem-wifi2gSsid').value.trim(),
           wifi2gPass: box.querySelector('.modem-wifi2gPass').value.trim(),
           wifi5gSsid: box.querySelector('.modem-wifi5gSsid').value.trim(),
-          wifi5gPass: box.querySelector('.modem-wifi5gPass').value.trim()
+          wifi5gPass: box.querySelector('.modem-wifi5gPass').value.trim(),
+          extra: box.querySelector('.modem-extra').value.trim()
         });
       });
 
@@ -1532,6 +1612,7 @@
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modems / Roteadores (${modems.length}):</b>`;
         modems.forEach((m, i) => {
           html += `<br>• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Pass: ${escapeHtml(m.pass || '--')} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${escapeHtml(m.wifi2gPass || '--')}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${escapeHtml(m.wifi5gPass || '--')})`;
+          if (m.extra) html += `<br>&nbsp;&nbsp;📝 <i>PPPoE/Extra:</i> ${escapeHtml(m.extra)}`;
         });
         html += `</div>`;
       }
