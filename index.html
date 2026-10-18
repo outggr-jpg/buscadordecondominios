@@ -123,7 +123,7 @@
     .tab-btn.active { background: var(--bg-card); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
     .role-selector { display: flex; background: var(--bg-main); border-radius: 10px; padding: 3px; margin-bottom: 12px; gap: 2px; border: 1px solid var(--border-color); }
-    .role-btn { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
+    .role-btn { flex: 1; text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .role-btn.active { background: #0284c7; color: white; }
 
     .user-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 16px; }
@@ -190,10 +190,11 @@
 
       <form id="registerForm" onsubmit="handleUnifiedRegister(event)" style="display: none; flex-direction: column; gap: 10px;">
         <div>
-          <label style="font-size: 11px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; display: block;">Selecione seu Perfil:</label>
+          <label style="font-size: 11px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; display: block;">Selecione seu Perfil Inicial:</label>
           <div class="role-selector">
             <button type="button" id="roleProprietario" onclick="selectRole('owner')" class="role-btn active">👑 Proprietário</button>
-            <button type="button" id="roleUsuario" onclick="selectRole('user')" class="role-btn">👤 Usuário / Técnico</button>
+            <button type="button" id="roleAdmin" onclick="selectRole('admin')" class="role-btn">🛡️ Administrador</button>
+            <button type="button" id="roleUsuario" onclick="selectRole('user')" class="role-btn">👤 Técnico</button>
           </div>
         </div>
 
@@ -240,7 +241,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.7</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.2.0</span>
               </div>
             </div>
           </div>
@@ -249,7 +250,7 @@
             <div style="text-align: right; line-height: 1.2;">
               <h1 id="headerUserNameDisplay" class="title">Usuário</h1>
               <div class="company-row" style="justify-content: flex-end;">
-                <span class="subtitle">Perfil Operacional</span>
+                <span id="headerUserRoleBadge" class="subtitle">Perfil Operacional</span>
               </div>
             </div>
             <div id="headerUserAvatarContainer">
@@ -396,16 +397,16 @@
       </div>
       <div class="modal-body">
         <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Técnico/Usuário:</label>
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Membro:</label>
           <div class="form-group">
-            <input type="email" id="inviteEmailInput" class="form-control" placeholder="email.do.tecnico@empresa.com">
+            <input type="email" id="inviteEmailInput" class="form-control" placeholder="email.do.membro@empresa.com">
           </div>
           <button onclick="generateTeamInviteLink()" class="btn btn-emerald" style="width:100%; justify-content:center;">🔗 Gerar Link de Convite</button>
           <div id="inviteLinkResult" style="margin-top:8px; font-size:11px; word-break:break-all; color:#38bdf8; display:none;"></div>
         </div>
 
         <div style="margin-top:10px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe Vinculados e Permissões:</label>
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe e Níveis de Acesso:</label>
           <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;">
             <div style="color:var(--text-muted); text-align:center; padding:10px;">Carregando membros...</div>
           </div>
@@ -554,10 +555,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.1.7</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.2.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Correção de funções assíncronas no carregamento de imagens em PDF.</li>
-            <li>Tela de login e botões restaurados com sucesso.</li>
+            <li>Implementação de 3 níveis de acesso: Proprietário, Administrador e Técnico.</li>
+            <li>Restrição de exclusão de locais para técnicos e restrição de alteração de nome/logo da empresa para administradores.</li>
+            <li>Controle dinâmico de cargos diretamente na Gestão de Equipe.</li>
+            <li>Correção nos checkboxes do modal de rotas durante buscas.</li>
           </ul>
         </div>
       </div>
@@ -592,8 +595,7 @@
     let condos = [];
     let currentUser = null;
     let ownerEmail = null;
-    let userRole = 'owner';
-    let userPermissions = { canManageCondos: true, canViewReports: true };
+    let userRole = 'owner'; // 'owner', 'admin', 'user'
     let selectedMediaFiles = [];
     let currentCompanyName = '';
     let currentCompanyLogo = '';
@@ -619,7 +621,7 @@
           if (user) {
             currentUser = user;
             resolveUserSession(user.email);
-            setupRealtimeUserAndCompanySync(user.uid, user.email);
+            setupRealtimeUserAndCompanySync(user.email);
           } else {
             const authScreen = document.getElementById('authScreen');
             const mainApp = document.getElementById('mainApp');
@@ -632,7 +634,7 @@
       }
     });
 
-    function setupRealtimeUserAndCompanySync(userId, userEmail) {
+    function setupRealtimeUserAndCompanySync(userEmail) {
       db.collection("empresas").onSnapshot((snapshot) => {
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
@@ -648,16 +650,8 @@
         if (doc.exists) {
           const data = doc.data();
           userRole = data.role || 'owner';
-          userPermissions = data.permissions || { canManageCondos: true, canViewReports: true };
-          if (userRole === 'user') {
-            ownerEmail = data.companyOwnerEmail;
-            const teamMenuBtn = document.getElementById('settingsTeamMenuBtn');
-            if (teamMenuBtn) teamMenuBtn.style.display = 'none';
-            if (!userPermissions.canManageCondos) {
-              const newCondoBtn = document.getElementById('newCondoBtn');
-              if (newCondoBtn) newCondoBtn.style.display = 'none';
-            }
-          }
+          ownerEmail = userRole === 'user' || userRole === 'admin' ? data.companyOwnerEmail : userEmail;
+          updateRoleUIElements();
         }
       });
 
@@ -668,6 +662,15 @@
       const userAvatarImg = document.getElementById('headerUserAvatarImg');
       if (userNameDisplay) userNameDisplay.textContent = storedName;
       if (userAvatarImg) userAvatarImg.src = storedAvatar;
+    }
+
+    function updateRoleUIElements() {
+      const roleBadge = document.getElementById('headerUserRoleBadge');
+      if (roleBadge) {
+        if (userRole === 'owner') roleBadge.textContent = 'Proprietário';
+        else if (userRole === 'admin') roleBadge.textContent = 'Administrador';
+        else roleBadge.textContent = 'Técnico';
+      }
     }
 
     function changeAppThemeColor(colorHex, save = true) {
@@ -711,20 +714,28 @@
     function selectRole(role) {
       userRole = role;
       const roleProp = document.getElementById('roleProprietario');
+      const roleAdmin = document.getElementById('roleAdmin');
       const roleUser = document.getElementById('roleUsuario');
       const groupComp = document.getElementById('groupCompanyName');
       const groupUser = document.getElementById('groupUserName');
       const groupOwnerEmail = document.getElementById('groupCompanyOwnerEmail');
 
+      if (roleProp) roleProp.classList.remove('active');
+      if (roleAdmin) roleAdmin.classList.remove('active');
+      if (roleUser) roleUser.classList.remove('active');
+
       if (role === 'owner') {
         if (roleProp) roleProp.classList.add('active');
-        if (roleUser) roleUser.classList.remove('active');
         if (groupComp) groupComp.style.display = 'block';
         if (groupUser) groupUser.style.display = 'none';
         if (groupOwnerEmail) groupOwnerEmail.style.display = 'none';
+      } else if (role === 'admin') {
+        if (roleAdmin) roleAdmin.classList.add('active');
+        if (groupComp) groupComp.style.display = 'none';
+        if (groupUser) groupUser.style.display = 'block';
+        if (groupOwnerEmail) groupOwnerEmail.style.display = 'block';
       } else {
         if (roleUser) roleUser.classList.add('active');
-        if (roleProp) roleProp.classList.remove('active');
         if (groupComp) groupComp.style.display = 'none';
         if (groupUser) groupUser.style.display = 'block';
         if (groupOwnerEmail) groupOwnerEmail.style.display = 'block';
@@ -741,13 +752,13 @@
         if (userRole === 'owner') {
           const companyName = document.getElementById('regCompanyName').value.trim() || 'Minha Empresa';
           db.collection("empresas").doc(email).set({ companyName: companyName, ownerEmail: email, companyLogo: '' });
-          db.collection("usuarios").doc(email).set({ role: 'owner', companyOwnerEmail: email, name: email.split('@')[0], permissions: { canManageCondos: true, canViewReports: true } });
+          db.collection("usuarios").doc(email).set({ role: 'owner', companyOwnerEmail: email, name: email.split('@')[0] });
           ownerEmail = email;
           showMainApp(companyName, '', email);
         } else {
           const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
           const userName = document.getElementById('regUserName').value.trim() || email.split('@')[0];
-          db.collection("usuarios").doc(email).set({ role: 'user', companyOwnerEmail: companyOwnerEmail, name: userName, permissions: { canManageCondos: true, canViewReports: true } });
+          db.collection("usuarios").doc(email).set({ role: userRole, companyOwnerEmail: companyOwnerEmail, name: userName });
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
           showMainApp('Protech Condomínios', '', companyOwnerEmail);
@@ -790,7 +801,7 @@
         if (doc.exists) {
           const data = doc.data();
           userRole = data.role || 'owner';
-          ownerEmail = userRole === 'user' ? data.companyOwnerEmail : userEmail;
+          ownerEmail = userRole === 'user' || userRole === 'admin' ? data.companyOwnerEmail : userEmail;
         } else {
           ownerEmail = userEmail;
         }
@@ -826,9 +837,14 @@
       document.getElementById('settingsDisplayNameInput').value = storedName;
       document.getElementById('settingsAvatarImg').src = storedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(storedName)}&background=0284c7&color=fff`;
       document.getElementById('settingsCompanyNameInput').value = currentCompanyName;
-      document.getElementById('settingsUserRole').textContent = `Cargo: ${userRole === 'owner' ? 'Proprietário' : 'Técnico / Usuário'}`;
+      
+      let roleDesc = 'Proprietário';
+      if (userRole === 'admin') roleDesc = 'Administrador';
+      else if (userRole === 'user') roleDesc = 'Técnico';
+      document.getElementById('settingsUserRole').textContent = `Cargo: ${roleDesc}`;
 
-      if (userRole === 'user') {
+      // Apenas o Proprietário pode alterar nome e logo da empresa matriz
+      if (userRole !== 'owner') {
         document.getElementById('companySettingsSection').style.display = 'none';
       } else {
         document.getElementById('companySettingsSection').style.display = 'block';
@@ -864,6 +880,7 @@
     }
 
     function saveCompanyName() {
+      if (userRole !== 'owner') { alert('Apenas o Proprietário pode alterar o nome da empresa.'); return; }
       const newName = document.getElementById('settingsCompanyNameInput').value.trim();
       if (!newName) return;
       db.collection("empresas").doc(ownerEmail).update({ companyName: newName }).then(() => {
@@ -874,6 +891,7 @@
     }
 
     function handleCompanyLogoUpload(e) {
+      if (userRole !== 'owner') { alert('Apenas o Proprietário pode alterar o logotipo da empresa.'); return; }
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -902,7 +920,7 @@
           const data = doc.data();
           const docEmail = doc.id;
           const isOwner = data.role === 'owner';
-          const perms = data.permissions || { canManageCondos: true, canViewReports: true };
+          const roleVal = data.role || 'user';
 
           html += `
             <div style="background:var(--bg-card); padding:10px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
@@ -912,22 +930,15 @@
                   <div style="font-size:10px; color:var(--text-muted);">${docEmail}</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
-                  <span style="font-size:10px; color:#38bdf8; font-weight:bold;">${isOwner ? 'Proprietário' : 'Técnico'}</span>
-                  ${!isOwner ? `<button onclick="removeTeamMember('${docEmail}')" class="btn btn-rose" style="padding:2px 6px; font-size:10px;" title="Remover da Equipe">🗑️ Remover</button>` : ''}
+                  ${!isOwner ? `
+                    <select onchange="updateMemberRole('${docEmail}', this.value)" class="form-control" style="font-size:11px; padding:2px 6px; width:120px;">
+                      <option value="admin" ${roleVal === 'admin' ? 'selected' : ''}>🛡️ Administrador</option>
+                      <option value="user" ${roleVal === 'user' ? 'selected' : ''}>👤 Técnico</option>
+                    </select>
+                    <button onclick="removeTeamMember('${docEmail}')" class="btn btn-rose" style="padding:4px 6px; font-size:10px;" title="Remover da Equipe">🗑️</button>
+                  ` : `<span style="font-size:11px; color:#38bdf8; font-weight:bold;">👑 Proprietário</span>`}
                 </div>
               </div>
-              ${!isOwner ? `
-                <div style="border-top:1px solid var(--border-color); padding-top:6px; display:flex; gap:14px; font-size:11px;">
-                  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
-                    <input type="checkbox" ${perms.canManageCondos ? 'checked' : ''} onchange="updateMemberPermission('${docEmail}', 'canManageCondos', this.checked)">
-                    Pode Cadastrar/Editar Condomínios
-                  </label>
-                  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
-                    <input type="checkbox" ${perms.canViewReports ? 'checked' : ''} onchange="updateMemberPermission('${docEmail}', 'canViewReports', this.checked)">
-                    Pode Ver Relatórios Gerais
-                  </label>
-                </div>
-              ` : ''}
             </div>
           `;
         });
@@ -939,7 +950,7 @@
 
     function generateTeamInviteLink() {
       const email = document.getElementById('inviteEmailInput').value.trim();
-      if (!email) { alert('Informe o e-mail do técnico.'); return; }
+      if (!email) { alert('Informe o e-mail do membro.'); return; }
       const link = `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(ownerEmail)}`;
       const resEl = document.getElementById('inviteLinkResult');
       resEl.style.display = 'block';
@@ -947,19 +958,21 @@
       showToast('Link de convite gerado!');
     }
 
-    function updateMemberPermission(memberEmail, permissionKey, value) {
-      db.collection("usuarios").doc(memberEmail).get().then(doc => {
-        if (doc.exists) {
-          let perms = doc.data().permissions || { canManageCondos: true, canViewReports: true };
-          perms[permissionKey] = value;
-          db.collection("usuarios").doc(memberEmail).update({ permissions: perms }).then(() => {
-            showToast('Permissão atualizada!');
-          });
-        }
-      });
+    function updateMemberRole(memberEmail, newRole) {
+      if (userRole !== 'owner' && userRole !== 'admin') {
+        alert('Você não tem permissão para alterar cargos.');
+        return;
+      }
+      db.collection("usuarios").doc(memberEmail).update({ role: newRole }).then(() => {
+        showToast('Cargo atualizado com sucesso!');
+      }).catch(err => alert('Erro ao atualizar cargo: ' + err.message));
     }
 
     function removeTeamMember(memberEmail) {
+      if (userRole !== 'owner' && userRole !== 'admin') {
+        alert('Você não tem permissão para remover membros.');
+        return;
+      }
       if (!confirm(`Deseja realmente remover ${memberEmail} da equipe?`)) return;
       db.collection("usuarios").doc(memberEmail).delete().then(() => {
         showToast('Membro removido da equipe.');
@@ -969,10 +982,6 @@
 
     function saveCondo(e) {
       e.preventDefault();
-      if (userRole === 'user' && !userPermissions.canManageCondos) {
-        alert('Você não tem permissão para cadastrar ou editar condomínios.');
-        return;
-      }
       const id = document.getElementById('condoId').value;
       const data = {
         name: document.getElementById('condoName').value.trim(),
@@ -1005,8 +1014,9 @@
     }
 
     function deleteCondo(id) {
-      if (userRole === 'user' && !userPermissions.canManageCondos) {
-        alert('Você não tem permissão para excluir condomínios.');
+      // Regra: Técnico não pode excluir locais
+      if (userRole === 'user') {
+        alert('Técnicos não possuem permissão para excluir condomínios.');
         return;
       }
       if (confirm('Excluir este condomínio?')) {
@@ -1015,10 +1025,6 @@
     }
 
     function editCondo(id) {
-      if (userRole === 'user' && !userPermissions.canManageCondos) {
-        alert('Você não tem permissão para editar condomínios.');
-        return;
-      }
       const c = condos.find(x => x.id === id);
       if (c) openModal(c);
     }
@@ -1045,7 +1051,11 @@
     }
 
     function adminForceCheckout(id) {
-      if (!confirm('Deseja encerrar esta visita manualmente como Administrador?')) return;
+      if (userRole !== 'owner' && userRole !== 'admin') {
+        alert('Apenas Proprietários e Administradores podem encerrar visitas manualmente.');
+        return;
+      }
+      if (!confirm('Deseja encerrar esta visita manualmente?')) return;
       const c = condos.find(x => x.id === id);
       if (!c) return;
 
@@ -1066,13 +1076,13 @@
         checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         duration: durationText,
         userEmail: currentUser.email,
-        text: '[Fechado Manualmente pelo Administrador]',
+        text: '[Fechado Manualmente pela Gestão]',
         media: []
       };
 
       let reps = c.reports || []; reps.unshift(newRep);
       db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps }).then(() => {
-        showToast('Visita encerrada pelo Administrador!');
+        showToast('Visita encerrada com sucesso!');
         loadCondosForOwner(ownerEmail);
       });
     }
@@ -1532,10 +1542,18 @@
       const filtered = condos.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
       document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length}`;
       document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
+      
+      // Se for técnico, oculta o botão de excluir (lixo) nas cards
       document.getElementById('condoGrid').innerHTML = filtered.map(c => `
         <div class="card ${c.checkedIn ? 'checked-in' : ''}">
           <div>
-            <div class="card-header"><div class="card-title">${escapeHtml(c.name)}</div><div>${userRole === 'owner' || userPermissions.canManageCondos ? `<button onclick="editCondo('${c.id}')" class="icon-btn">✏️</button><button onclick="deleteCondo('${c.id}')" class="icon-btn delete">🗑️</button>` : ''}</div></div>
+            <div class="card-header">
+              <div class="card-title">${escapeHtml(c.name)}</div>
+              <div>
+                <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>
+                ${userRole !== 'user' ? `<button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>` : ''}
+              </div>
+            </div>
             <div class="card-body">
               <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</div>
               ${c.lat && c.lng ? '<div style="font-size:10px; color:#10b981;">🌐 GPS Ativo</div>' : '<div style="font-size:10px; color:#f43f5e;">⚠️ Sem GPS</div>'}
@@ -1547,7 +1565,7 @@
             <div class="card-footer-row"><button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${(c.reports||[]).length})</button></div>
             <div class="card-footer-row">
               <button onclick="abrirOpcoesGps('${escapeHtml(c.address)}, ${escapeHtml(c.number)} - ${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">🗺️ GPS</button>
-              ${c.checkedIn && userRole === 'owner' ? `<button onclick="adminForceCheckout('${c.id}')" class="btn btn-rose" style="font-size:10px;" title="Encerrar visita como Admin">🔓 Admin</button>` : ''}
+              ${c.checkedIn && (userRole === 'owner' || userRole === 'admin') ? `<button onclick="adminForceCheckout('${c.id}')" class="btn btn-rose" style="font-size:10px;" title="Encerrar visita">🔓 Admin</button>` : ''}
               <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}</button>
             </div>
           </div>
@@ -1556,10 +1574,6 @@
     }
 
     function openModal(c = null) {
-      if (userRole === 'user' && !userPermissions.canManageCondos) {
-        alert('Você não tem permissão para cadastrar condomínios.');
-        return;
-      }
       document.getElementById('condoForm').reset();
       document.getElementById('condoId').value = c ? c.id : '';
       document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
