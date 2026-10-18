@@ -167,7 +167,7 @@
     .masked-pwd { cursor: pointer; background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1px 6px; border-radius: 6px; color: #38bdf8; font-family: monospace; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; user-select: none; }
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
     
-    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 10px; color: var(--text-muted); margin-top: 8px; }
+    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 11px; color: var(--text-muted); margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -273,7 +273,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.5.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.5.1</span>
               </div>
             </div>
           </div>
@@ -303,7 +303,7 @@
     <main>
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, IP de equipamento, modelo de DVR ou operadora..." class="search-input">
+        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, bairro ou observações..." class="search-input">
       </div>
 
       <div class="meta-bar">
@@ -313,7 +313,7 @@
       <div id="condoGrid" class="grid"></div>
       <div id="emptyState" style="display:none; text-align:center; padding: 50px 20px; color: #64748b;">
         <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-        Nenhum condomínio ou equipamento encontrado.
+        Nenhum condomínio encontrado.
       </div>
     </main>
   </div>
@@ -391,6 +391,7 @@
           <div style="display:flex; flex-direction:column; gap:6px;">
             <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe, Permissões e Ranking</button>
             <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
+            <button onclick="closeSettingsModal(); openAuditLogModal();" class="btn btn-slate" style="justify-content: flex-start;">📜 Log de Auditoria de Fichas Técnicas</button>
             <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
           </div>
         </div>
@@ -416,6 +417,22 @@
 
       <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
         <button onclick="closeSettingsModal()" class="btn btn-slate">Concluído</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE LOG DE AUDITORIA -->
+  <div id="auditLogModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">📜 Log de Auditoria das Fichas Técnicas</h3>
+        <button onclick="closeAuditLogModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" id="auditLogListContainer">
+        <div style="color:var(--text-muted); text-align:center; padding:15px;">Carregando logs de auditoria...</div>
+      </div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
+        <button onclick="closeAuditLogModal()" class="btn btn-slate">Fechar</button>
       </div>
     </div>
   </div>
@@ -638,7 +655,13 @@
         <h3 id="techSheetTitle" style="color:var(--text-main); font-size: 16px;">🛠️ Ficha Técnica</h3>
         <button onclick="closeTechSheetModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-      <div class="modal-body" id="techSheetContent" style="gap:10px;"></div>
+      <div class="modal-body" style="gap:10px;">
+        <div class="search-box" style="margin-bottom: 4px;">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="techSheetSearchInput" oninput="filterTechSheetContent(this.value)" placeholder="Pesquisar IP, usuário, senha, modelo ou operadora..." class="search-input" style="padding: 8px 12px 8px 36px; font-size:12px;">
+        </div>
+        <div id="techSheetContent" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
       <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0; flex-wrap:wrap; gap:8px;">
         <button onclick="downloadTechSheetPDF()" class="btn btn-slate">📄 Exportar Ficha em PDF</button>
         <div style="display:flex; gap:8px;">
@@ -755,12 +778,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.5.0 (Exportação da Ficha em PDF & Log de Auditoria)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 8.5.1 (Busca Focada & Log em Configurações)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Exportação completa da Ficha Técnica do Condomínio em PDF formatado.</li>
-            <li>Log de Auditoria automático: rastreamento de quem alterou a ficha técnica e a data/hora exata.</li>
-            <li>Mascaramento inteligente de senhas com alternância em um clique.</li>
-            <li>Criptografia de ponta a ponta AES-256 no banco de dados mantida.</li>
+            <li>Busca principal limpa (apenas nome, endereço, bairro e observações).</li>
+            <li>Barra de pesquisa interna adicionada dentro do modal da Ficha Técnica.</li>
+            <li>Log de Auditoria transferido para o menu Configurações para consulta centralizada.</li>
+            <li>Criptografia de ponta a ponta AES-256 mantida.</li>
           </ul>
         </div>
       </div>
@@ -1370,7 +1393,6 @@
         let rawData = docSnap.data();
         let condoData = { id: docSnap.id, ...rawData };
         
-        // Descriptografar arrays da ficha técnica se existirem
         if (rawData.encryptedModems) condoData.modems = rawData.encryptedModems.map(m => ({ operadora: decryptData(m.operadora), ip: decryptData(m.ip), http: decryptData(m.http), user: decryptData(m.user), pass: decryptData(m.pass), wifi2gSsid: decryptData(m.wifi2gSsid), wifi2gPass: decryptData(m.wifi2gPass), wifi5gSsid: decryptData(m.wifi5gSsid), wifi5gPass: decryptData(m.wifi5gPass), extra: decryptData(m.extra) }));
         if (rawData.encryptedMikrotiks) condoData.mikrotiks = rawData.encryptedMikrotiks.map(mk => ({ ip: decryptData(mk.ip), http: decryptData(mk.http), user: decryptData(mk.user), pass: decryptData(mk.pass) }));
         if (rawData.encryptedDvrs) condoData.dvrs = rawData.encryptedDvrs.map(d => ({ name: decryptData(d.name), ip: decryptData(d.ip), http: decryptData(d.http), servicePort: decryptData(d.servicePort), rtsp: decryptData(d.rtsp), user: decryptData(d.user), pass: decryptData(d.pass) }));
@@ -1413,6 +1435,25 @@
     }
 
     function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+    function openAuditLogModal() {
+      const container = document.getElementById('auditLogListContainer');
+      let modifiedCondos = condos.filter(c => c.lastModifiedAt);
+
+      if (modifiedCondos.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum registro de alteração em Ficha Técnica encontrado ainda.</div>';
+      } else {
+        container.innerHTML = modifiedCondos.map(c => `
+          <div style="background:var(--bg-main); padding:10px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
+            <div style="font-weight:bold; color:#38bdf8; font-size:12px;">🏢 ${escapeHtml(c.name)}</div>
+            <div style="font-size:11px; color:var(--text-main);">Última alteração por <b style="color:#38bdf8;">${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</b></div>
+            <div style="font-size:10px; color:var(--text-muted);">📅 Data/Hora: ${escapeHtml(c.lastModifiedAt)}</div>
+          </div>
+        `).join('');
+      }
+      document.getElementById('auditLogModal').classList.remove('hidden');
+    }
+    function closeAuditLogModal() { document.getElementById('auditLogModal').classList.add('hidden'); }
 
     function saveDisplayName() {
       const newName = document.getElementById('settingsDisplayNameInput').value.trim();
@@ -2174,12 +2215,7 @@
       if (c) openModal(c);
     }
 
-    function openTechSheetModal(id) {
-      currentActiveTechSheetId = id;
-      const c = condos.find(x => x.id === id);
-      if (!c) return;
-      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
-      
+    function generateTechSheetHtml(c, filterQuery = '') {
       let modems = c.modems || [];
       let mtks = c.mikrotiks || [];
       let dvrs = c.dvrs || [];
@@ -2189,84 +2225,106 @@
       let portas = c.modulosPorta || [];
       let faciais = c.faciais || [];
 
+      const matches = (text) => {
+        if (!filterQuery) return true;
+        return String(text).toLowerCase().includes(filterQuery.toLowerCase());
+      };
+
       let html = '';
 
-      if (modems.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modems / Roteadores (${modems.length}):</b>`;
-        modems.forEach((m, i) => {
-          html += `<br>• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Senha: ${renderMaskedPassword(m.pass, `modem_${i}`)} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${renderMaskedPassword(m.wifi2gPass, `wifi2g_${i}`)}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${renderMaskedPassword(m.wifi5gPass, `wifi5g_${i}`)})`;
-          if (m.extra) html += `<br>&nbsp;&nbsp;📝 <i>PPPoE/Extra:</i> ${escapeHtml(m.extra)}`;
-        });
-        html += `</div>`;
-      }
+      let modemsHtml = '';
+      modems.forEach((m, i) => {
+        let content = `• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Senha: ${renderMaskedPassword(m.pass, `modem_${i}`)} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${renderMaskedPassword(m.wifi2gPass, `wifi2g_${i}`)}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${renderMaskedPassword(m.wifi5gPass, `wifi5g_${i}`)})`;
+        if (m.extra) content += `<br>&nbsp;&nbsp;📝 <i>PPPoE/Extra:</i> ${escapeHtml(m.extra)}`;
+        if (!filterQuery || matches(m.operadora) || matches(m.ip) || matches(m.user) || matches(m.pass) || matches(m.wifi2gSsid) || matches(m.wifi5gSsid) || matches(m.extra)) {
+          modemsHtml += `<br>${content}`;
+        }
+      });
+      if (modemsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modems / Roteadores:</b>${modemsHtml}</div>`;
 
-      if (mtks.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Mikrotiks (${mtks.length}):</b>`;
-        mtks.forEach((mk, i) => {
-          html += `<br>• #${i+1} IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')} | User: ${escapeHtml(mk.user || '--')} | Senha: ${renderMaskedPassword(mk.pass, `mtk_${i}`)}`;
-        });
-        html += `</div>`;
-      }
+      let mtksHtml = '';
+      mtks.forEach((mk, i) => {
+        let content = `• #${i+1} IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')} | User: ${escapeHtml(mk.user || '--')} | Senha: ${renderMaskedPassword(mk.pass, `mtk_${i}`)}`;
+        if (!filterQuery || matches(mk.ip) || matches(mk.user) || matches(mk.pass)) {
+          mtksHtml += `<br>${content}`;
+        }
+      });
+      if (mtksHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Mikrotiks:</b>${mtksHtml}</div>`;
 
-      if (dvrs.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs (${dvrs.length}):</b>`;
-        dvrs.forEach((d, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
-        });
-        html += `</div>`;
-      }
+      let dvrsHtml = '';
+      dvrs.forEach((d, i) => {
+        let content = `• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
+        if (!filterQuery || matches(d.name) || matches(d.ip) || matches(d.user) || matches(d.pass)) {
+          dvrsHtml += `<br>${content}`;
+        }
+      });
+      if (dvrsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs:</b>${dvrsHtml}</div>`;
 
-      if (cams.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP (${cams.length}):</b>`;
-        cams.forEach((cm, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Senha: ${renderMaskedPassword(cm.pass, `cam_${i}`)}`;
-        });
-        html += `</div>`;
-      }
+      let camsHtml = '';
+      cams.forEach((cm, i) => {
+        let content = `• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Senha: ${renderMaskedPassword(cm.pass, `cam_${i}`)}`;
+        if (!filterQuery || matches(cm.desc) || matches(cm.ip) || matches(cm.user) || matches(cm.pass)) {
+          camsHtml += `<br>${content}`;
+        }
+      });
+      if (camsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP:</b>${camsHtml}</div>`;
 
-      if (ctrls.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔐 Controladoras (${ctrls.length}):</b>`;
-        ctrls.forEach((ct, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(ct.name || 'Controladora')} | IP: ${escapeHtml(ct.ip || '--')} | Com: ${escapeHtml(ct.port || '--')} | Auto: ${escapeHtml(ct.autoPort || '--')}`;
-        });
-        html += `</div>`;
-      }
+      let ctrlsHtml = '';
+      ctrls.forEach((ct, i) => {
+        let content = `• #${i+1} ${escapeHtml(ct.name || 'Controladora')} | IP: ${escapeHtml(ct.ip || '--')} | Com: ${escapeHtml(ct.port || '--')} | Auto: ${escapeHtml(ct.autoPort || '--')}`;
+        if (!filterQuery || matches(ct.name) || matches(ct.ip)) {
+          ctrlsHtml += `<br>${content}`;
+        }
+      });
+      if (ctrlsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔐 Controladoras:</b>${ctrlsHtml}</div>`;
 
-      if (rfs.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Módulos RF IP (${rfs.length}):</b>`;
-        rfs.forEach((rf, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(rf.desc || 'Módulo RF')} | IP: ${escapeHtml(rf.ip || '--')} | Serial: ${escapeHtml(rf.serial || '--')}`;
-        });
-        html += `</div>`;
-      }
+      let rfsHtml = '';
+      rfs.forEach((rf, i) => {
+        let content = `• #${i+1} ${escapeHtml(rf.desc || 'Módulo RF')} | IP: ${escapeHtml(rf.ip || '--')} | Serial: ${escapeHtml(rf.serial || '--')}`;
+        if (!filterQuery || matches(rf.desc) || matches(rf.ip) || matches(rf.serial)) {
+          rfsHtml += `<br>${content}`;
+        }
+      });
+      if (rfsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Módulos RF IP:</b>${rfsHtml}</div>`;
 
-      if (portas.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚪 Módulos Porta IP (${portas.length}):</b>`;
-        portas.forEach((p, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(p.desc || 'Módulo Porta')} | IP: ${escapeHtml(p.ip || '--')} | Serial: ${escapeHtml(p.serial || '--')}`;
-        });
-        html += `</div>`;
-      }
+      let portasHtml = '';
+      portas.forEach((p, i) => {
+        let content = `• #${i+1} ${escapeHtml(p.desc || 'Módulo Porta')} | IP: ${escapeHtml(p.ip || '--')} | Serial: ${escapeHtml(p.serial || '--')}`;
+        if (!filterQuery || matches(p.desc) || matches(p.ip) || matches(p.serial)) {
+          portasHtml += `<br>${content}`;
+        }
+      });
+      if (portasHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚪 Módulos Porta IP:</b>${portasHtml}</div>`;
 
-      if (faciais.length > 0) {
-        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial (${faciais.length}):</b>`;
-        faciais.forEach((f, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Senha: ${renderMaskedPassword(f.pass, `facial_${i}`)}`;
-        });
-        html += `</div>`;
-      }
+      let faciaisHtml = '';
+      faciais.forEach((f, i) => {
+        let content = `• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Senha: ${renderMaskedPassword(f.pass, `facial_${i}`)}`;
+        if (!filterQuery || matches(f.desc) || matches(f.ip) || matches(f.user) || matches(f.pass)) {
+          faciaisHtml += `<br>${content}`;
+        }
+      });
+      if (faciaisHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial:</b>${faciaisHtml}</div>`;
 
-      if (c.lastModifiedAt) {
-        html += `
-          <div class="audit-log-box">
-            <b>📜 Log de Auditoria:</b> Última alteração realizada por <b style="color:#38bdf8;">${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</b> em <b>${escapeHtml(c.lastModifiedAt)}</b>.
-          </div>
-        `;
-      }
+      return html || '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum equipamento encontrado com este filtro.</div>';
+    }
 
-      document.getElementById('techSheetContent').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum equipamento configurado ainda.<br>Clique em "Gerenciar / Adicionar Equipamentos" abaixo.</div>';
+    function openTechSheetModal(id) {
+      currentActiveTechSheetId = id;
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
+      document.getElementById('techSheetSearchInput').value = '';
+      document.getElementById('techSheetContent').innerHTML = generateTechSheetHtml(c);
       document.getElementById('techSheetModal').classList.remove('hidden');
     }
+
+    function filterTechSheetContent(query) {
+      if (!currentActiveTechSheetId) return;
+      const c = condos.find(x => x.id === currentActiveTechSheetId);
+      if (!c) return;
+      document.getElementById('techSheetContent').innerHTML = generateTechSheetHtml(c, query);
+    }
+
     function closeTechSheetModal() { document.getElementById('techSheetModal').classList.add('hidden'); }
 
     function openConfigEquipmentModalFromTechSheet() {
@@ -2571,18 +2629,6 @@
       if (c.address && c.address.toLowerCase().includes(s)) return true;
       if (c.neighborhood && c.neighborhood.toLowerCase().includes(s)) return true;
       if (c.notes && c.notes.toLowerCase().includes(s)) return true;
-
-      // Busca nos equipamentos da ficha técnica
-      const equipmentArrays = [c.modems, c.mikrotiks, c.dvrs, c.cameras, c.controladoras, c.modulosRf, c.modulosPorta, c.faciais];
-      for (let arr of equipmentArrays) {
-        if (arr && Array.isArray(arr)) {
-          for (let item of arr) {
-            for (let k in item) {
-              if (item[k] && String(item[k]).toLowerCase().includes(s)) return true;
-            }
-          }
-        }
-      }
       return false;
     }
 
