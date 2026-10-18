@@ -179,7 +179,7 @@
     .masked-pwd { cursor: pointer; background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1px 6px; border-radius: 6px; color: #38bdf8; font-family: monospace; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; user-select: none; }
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
     
-    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 10px; color: var(--text-muted); margin-top: 8px; }
+    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-size: 11px; color: var(--text-muted); margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
   </style>
 </head>
 <body>
@@ -285,7 +285,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.1.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.0</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
@@ -316,7 +316,7 @@
     <main>
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, IP de equipamento, modelo de DVR ou operadora..." class="search-input">
+        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, IP do modem, IP da câmera, DVR ou operadora..." class="search-input">
       </div>
 
       <div class="meta-bar">
@@ -769,12 +769,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.1.0 (Suporte Offline com Dexie.js & Sincronização)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.2.0 (Busca Avançada por IP & Auditoria Detalhada)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Banco de dados local via IndexedDB para funcionamento em subsolos e áreas sem sinal.</li>
-            <li>Fila de sincronização automática ao restabelecer a conexão com a internet.</li>
-            <li>Indicador visual de status de rede (Online / Offline / Sincronizando).</li>
-            <li>Todas as funcionalidades anteriores mantidas: Ficha Técnica em PDF, criptografia AES-256 e gestão de equipe.</li>
+            <li>Busca inteligente otimizada por IP de equipamentos (Modens, Câmeras, DVRs, Mikrotiks, etc.).</li>
+            <li>Auditoria detalhada e descritiva na Ficha Técnica, mostrando o resumo das alterações e os quantitativos de equipamentos atualizados.</li>
+            <li>Suporte offline mantido com Dexie.js e sincronização automática.</li>
           </ul>
         </div>
       </div>
@@ -796,7 +795,6 @@
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
     const SECRET_ENCRYPTION_KEY = "protech_seguranca_eletronica_master_key_2026";
 
-    // Configuração do Banco de Dados Local com Dexie.js (Offline First)
     const localDb = new Dexie("BuscadorCondominiosOffline");
     localDb.version(1).stores({
       condos: 'id, name, address, ownerEmail',
@@ -829,7 +827,7 @@
     }
 
     async function cacheCondoLocally(condoObj) {
-      try { await localDb.condos.put(condoObj); } catch(e) { console.error(e); }
+      try { await localDb.condos.put(condoObj); } catch(e) {}
     }
 
     async function enqueueOfflineSync(type, docId, payload) {
@@ -1498,7 +1496,6 @@
             await cacheCondoLocally(condoData);
           }
         } else {
-          // Modo Offline: Carrega do IndexedDB local
           const localCondos = await localDb.condos.where("ownerEmail").equals(rootOwnerEmail).toArray();
           condos = localCondos;
           showToast('Modo Offline: Carregando dados locais.');
@@ -1607,7 +1604,7 @@
         const perms = data.permissions ? { ...defaultPerms, ...data.permissions } : defaultPerms;
         return !!perms[permKey];
       } catch (e) {
-        return true; // Se offline, permite por padrão
+        return true;
       }
     }
 
@@ -1859,7 +1856,6 @@
         if (isOnline) {
           await db.collection("condominios").add(data);
         } else {
-          // Salva localmente caso esteja offline
           data.id = 'local_' + Date.now();
           await cacheCondoLocally(data);
         }
@@ -1968,6 +1964,19 @@
       const now = new Date();
       const currentUserName = localStorage.getItem('protech_user_name_' + currentUser.email) || currentUser.email;
 
+      // Montando resumo descritivo detalhado para a auditoria
+      let summaryParts = [];
+      if (encModemsList.length > 0) summaryParts.push(`${encModemsList.length} Modem(s)`);
+      if (encMikrotiksList.length > 0) summaryParts.push(`${encMikrotiksList.length} Mikrotik(s)`);
+      if (encDvrsList.length > 0) summaryParts.push(`${encDvrsList.length} DVR/NVR(s)`);
+      if (encCamerasList.length > 0) summaryParts.push(`${encCamerasList.length} Câmera(s) IP`);
+      if (encControladorasList.length > 0) summaryParts.push(`${encControladorasList.length} Controladora(s)`);
+      if (encModulosRfList.length > 0) summaryParts.push(`${encModulosRfList.length} Módulo(s) RF`);
+      if (encModulosPortaList.length > 0) summaryParts.push(`${encModulosPortaList.length} Módulo(s) Porta`);
+      if (encFaciaisList.length > 0) summaryParts.push(`${encFaciaisList.length} Terminal(is) Facial`);
+
+      const summaryText = summaryParts.length > 0 ? `Atualizou os equipamentos cadastrados: ${summaryParts.join(', ')}.` : `Ficha técnica limpa/redefinida.`;
+
       const eqData = {
         encryptedModems: encModemsList,
         encryptedMikrotiks: encMikrotiksList,
@@ -1979,7 +1988,8 @@
         encryptedFaciais: encFaciaisList,
         lastModifiedBy: currentUser.email,
         lastModifiedByName: currentUserName,
-        lastModifiedAt: `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        lastModifiedAt: `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        lastModificationSummary: summaryText
       };
 
       if (isOnline) {
@@ -2286,7 +2296,7 @@
         if (y > 260) { doc.addPage(); y = 20; }
         doc.setFont("helvetica", "italic");
         doc.setFontSize(8);
-        doc.text(`Ultima alteracao na ficha tecnica feita por ${cleanText(c.lastModifiedByName || c.lastModifiedBy)} em ${c.lastModifiedAt}`, 14, y + 4);
+        doc.text(`Ultima alteracao: ${cleanText(c.lastModificationSummary || 'Atualizacao de equipamentos')} por ${cleanText(c.lastModifiedByName || c.lastModifiedBy)} em ${c.lastModifiedAt}`, 14, y + 4);
       }
 
       doc.save(`ficha_tecnica_${c.name.toLowerCase().replace(/\s+/g, '_')}.pdf`);
@@ -2409,7 +2419,10 @@
       if (c.lastModifiedAt) {
         html += `
           <div class="audit-log-box">
-            <b>📜 Log de Auditoria:</b> Última alteração realizada por <b style="color:#38bdf8;">${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</b> em <b>${escapeHtml(c.lastModifiedAt)}</b>.
+            <div style="font-weight:bold; color:#38bdf8; margin-bottom:2px;">📜 Histórico de Auditoria Detalhada:</div>
+            <div><b>Última Modificação:</b> ${escapeHtml(c.lastModifiedAt)}</div>
+            <div><b>Responsável:</b> ${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</div>
+            <div><b>Resumo da Ação:</b> ${escapeHtml(c.lastModificationSummary || 'Atualização de equipamentos na Ficha Técnica')}</div>
           </div>
         `;
       }
@@ -2739,6 +2752,7 @@
       if (c.neighborhood && c.neighborhood.toLowerCase().includes(s)) return true;
       if (c.notes && c.notes.toLowerCase().includes(s)) return true;
 
+      // Pesquisa robusta por IP em todas as listas de equipamentos da Ficha Técnica
       const equipmentArrays = [c.modems, c.mikrotiks, c.dvrs, c.cameras, c.controladoras, c.modulosRf, c.modulosPorta, c.faciais];
       for (let arr of equipmentArrays) {
         if (arr && Array.isArray(arr)) {
