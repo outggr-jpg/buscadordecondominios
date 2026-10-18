@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Protech Condomínios</title>
+  <title>Gestão Operacional de Condomínios</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   <!-- SDKs do Firebase Compat -->
@@ -151,16 +151,13 @@
     .gps-cancel-btn { width: 100%; background-color: #f1f3f4; color: #3c4043; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }
     .gps-cancel-btn:hover { background-color: #e4e6e7; }
 
-    /* ESTILOS PARA OS ACORDEÕES */
     .accordion-btn { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; font-size: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
     .accordion-btn:hover { border-color: #0284c7; }
     .accordion-body { display: none; background: var(--bg-main); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 10px; margin-bottom: 6px; flex-direction: column; gap: 8px; }
     .accordion-body.show { display: flex !important; }
 
-    /* ESTILOS PARA SLOTS MÚLTIPLOS */
     .dynamic-item-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-bottom: 6px; position: relative; display: flex; flex-direction: column; gap: 6px; }
 
-    /* ESTILOS DO ESCOPO CONTRATUAL */
     .contract-category-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
     .contract-item-row { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
   </style>
@@ -181,7 +178,7 @@
       <div style="text-align: center; margin-bottom: 12px;">
         <div style="background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);">🏢</div>
       </div>
-      <h2 class="auth-title">Protech Condomínios</h2>
+      <h2 class="auth-title">Gestão de Condomínios</h2>
       <p class="auth-subtitle">Acesso Operacional e Gestão de Campo</p>
 
       <div id="inviteNotice" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; text-align: center;">
@@ -216,8 +213,8 @@
         </div>
 
         <div class="form-group" id="groupCompanyName">
-          <label>Nome da Empresa (Matriz) *</label>
-          <input type="text" id="regCompanyName" placeholder="Ex: Protech Segurança Eletrônica" class="form-control">
+          <label>Nome da Empresa *</label>
+          <input type="text" id="regCompanyName" placeholder="Ex: Minha Empresa de Segurança" class="form-control">
         </div>
 
         <div class="form-group" id="groupUserName" style="display: none;">
@@ -255,10 +252,10 @@
               <div class="brand-icon">🏢</div>
             </div>
             <div>
-              <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
+              <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.4.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.5.0</span>
               </div>
             </div>
           </div>
@@ -351,7 +348,7 @@
         </div>
 
         <div id="companySettingsSection" style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🏢 Dados da Empresa (Matriz):</label>
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px;">🏢 Dados da Empresa:</label>
           <div class="form-group" style="margin-top:6px;">
             <label>Nome da Empresa:</label>
             <div style="display:flex; gap:6px;">
@@ -388,7 +385,7 @@
             <div class="color-presets">
               <div class="color-preset-dot" style="background:#0f172a;" onclick="changeAppThemeColor('#0f172a')" title="Azul Noturno"></div>
               <div class="color-preset-dot" style="background:#000000;" onclick="changeAppThemeColor('#000000')" title="Preto OLED"></div>
-              <div class="color-preset-dot" style="background:#064e3b;" onclick="changeAppThemeColor('#064e3b')" title="Verde Protech"></div>
+              <div class="color-preset-dot" style="background:#064e3b;" onclick="changeAppThemeColor('#064e3b')" title="Verde Escuro"></div>
               <div class="color-preset-dot" style="background:#1e1b4b;" onclick="changeAppThemeColor('#1e1b4b')" title="Azul Marinho"></div>
             </div>
           </div>
@@ -696,7 +693,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE ESCOPO CONTRATUAL / CHECKLIST DE CONTRATO (~30 ITENS) -->
+  <!-- MODAL DE ESCOPO CONTRATUAL / CHECKLIST DE CONTRATO DINÂMICO WHITE-LABEL -->
   <div id="contractScopeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 750px;">
       <div class="modal-header">
@@ -706,11 +703,11 @@
       <form id="contractScopeForm" onsubmit="saveContractScope(event)" class="modal-body">
         <input type="hidden" id="contractCondoId">
         
-        <div style="font-size:11px; color:#38bdf8; margin-bottom:4px; font-weight:500;">
-          Defina rapidamente o que está coberto, se inclui troca de peças, se é comodato e observações de cada sistema:
+        <div style="font-size:11px; color:#38bdf8; margin-bottom:6px; font-weight:500;">
+          Gerencie o escopo com múltiplos slots por local/dispositivo e seletores neutros para White-Label:
         </div>
 
-        <div id="contractItemsContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <div id="contractCategoriesContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px; flex-shrink:0;">
           <button type="button" onclick="closeContractScopeModal()" class="btn btn-slate">Cancelar</button>
@@ -720,6 +717,7 @@
     </div>
   </div>
 
+  <!-- HISTÓRICO DE VERSÕES -->
   <div id="changelogModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -728,10 +726,13 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.4.0 (Escopo Contratual Detalhado)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.5.0 (White-Label & Múltiplos Slots)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Adicionado Módulo de Escopo Contratual com cerca de 30 itens detalhados divididos por categorias.</li>
-            <li>Controle rápido de Cobertura (Incluso/Não), Peças (Com Peças/Só M.O.), Posse (Comodato/Próprio) e Observação por item.</li>
+            <li>Refatoração completa para linguagem SaaS White-Label (substituição de "Comodato Protech" por "Comodato" e "Próprio Condomínio" por "Do Condomínio").</li>
+            <li>Adicionado suporte a múltiplos slots dinâmicos no Escopo Contratual (permite múltiplos portões, fechaduras, faciais e câmeras no mesmo condomínio).</li>
+            <li>Atualizado o cadastro de fechos com "Fechadura eletroímã", "Fechadura solenoide" e "Molas aéreas".</li>
+            <li>Ajustado detalhamento do item "Cabeamento / Fibra / Conectividade (Rede de câmeras e patch cords)".</li>
+            <li>Removido item "Sirenes e Dispositivos de Alerta".</li>
           </ul>
         </div>
       </div>
@@ -752,48 +753,74 @@
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
-    // Lista Padrão com ~30 Itens de Contrato divididos em categorias
-    const CONTRACT_TEMPLATE_ITEMS = [
-      // 1. CFTV / Câmeras
-      { cat: "🎥 CFTV / Câmeras", id: "cftv_cameras", label: "Câmeras Analógicas / IP (Manutenção e Reparo)" },
-      { cat: "🎥 CFTV / Câmeras", id: "cftv_gravador", label: "Gravadores DVR / NVR" },
-      { cat: "🎥 CFTV / Câmeras", id: "cftv_fontes", label: "Fontes de Alimentação / Nobreaks de CFTV" },
-      { cat: "🎥 CFTV / Câmeras", id: "cftv_cabeamento", label: "Cabeamento / Fibra / Conectividade de Câmeras" },
-
-      // 2. Automação de Portões e Garagens
-      { cat: "🚪 Automação de Portões", id: "portao_veicular_basc", label: "Motor Portão Veicular Basculante" },
-      { cat: "🚪 Automação de Portões", id: "portao_veicular_desl", label: "Motor Portão Veicular Deslizante / Pivotante" },
-      { cat: "🚪 Automação de Portões", id: "portao_social_elet", label: "Fechadura / Eletroímã Portão Social" },
-      { cat: "🚪 Automação de Portões", id: "portao_barreiras_ant", label: "Sensor Antiesmagamento / Barreira IV" },
-      { cat: "🚪 Automação de Portões", id: "portao_modulos_rf", label: "Módulos de Acionamento RF / Controles Remotos" },
-
-      // 3. Controle de Acesso e Identificação
-      { cat: "🔐 Controle de Acesso", id: "acesso_facial", label: "Terminais de Reconhecimento Facial" },
-      { cat: "🔐 Controle de Acesso", id: "acesso_biometria", label: "Leitores Biométricos de Impressão Digital" },
-      { cat: "🔐 Controle de Acesso", id: "acesso_proximidade", label: "Leitores de TAG / RFID / Cartões" },
-      { cat: "🔐 Controle de Acesso", id: "acesso_veicular_tag", label: "Antena / Leitor de TAG Veicular de Longo Alcance" },
-      { cat: "🔐 Controle de Acesso", id: "acesso_botoeiras", label: "Botoeiras de Saída (Internas e Externas)" },
-      { cat: "🔐 Controle de Acesso", id: "acesso_software", label: "Software de Gestão de Acesso / Banco de Dados" },
-
-      // 4. Perímetro, Alarme e Cerca Elétrica
-      { cat: "⚡ Perímetro e Alarme", id: "perimetro_cerca", label: "Central e Fiação de Cerca Elétrica" },
-      { cat: "⚡ Perímetro e Alarme", id: "perimetro_sensores", label: "Sensores de Barreira Infravermelho Perimetral" },
-      { cat: "⚡ Perímetro e Alarme", id: "perimetro_alarme", label: "Central de Alarme de Intrusão" },
-      { cat: "⚡ Perímetro e Alarme", id: "perimetro_sirenes", label: "Sirenes e Dispositivos de Alerta" },
-
-      // 5. Interfonia e Comunicação
-      { cat: "📞 Interfonia e Comunicação", id: "interfonia_central", label: "Central de Portaria / Portaria IP / PABX" },
-      { cat: "📞 Interfonia e Comunicação", id: "interfonia_interfones", label: "Interfones / Fechaduras / Monofones dos apartamentos" },
-      { cat: "📞 Interfonia e Comunicação", id: "interfonia_porteiros", label: "Porteiros Eletrônicos Externos / Interfonia Vídeo" },
-      { cat: "📞 Interfonia e Comunicação", id: "interfonia_gateways", label: "Gateways VoIP / Placas GSM / Linhas Telefônicas" },
-
-      // 6. Rede, Energia e Infraestrutura
-      { cat: "🌐 Rede, Energia e Infra", id: "rede_roteadores", label: "Roteadores / Modems de Internet / Links" },
-      { cat: "🌐 Rede, Energia e Infra", id: "rede_switches", label: "Switches PoE / Rede Local" },
-      { cat: "🌐 Rede, Energia e Infra", id: "rede_nobreaks", label: "Nobreaks Principais de Portaria / Racks" },
-      { cat: "🌐 Rede, Energia e Infra", id: "rede_baterias", label: "Baterias Estacionárias (Alarme / Cerca / Nobreak)" },
-      { cat: "🌐 Rede, Energia e Infra", id: "infra_iluminacao", label: "Iluminação de Emergência / Sensores de Presença" },
-      { cat: "🌐 Rede, Energia e Infra", id: "infra_preventiva", label: "Manutenção Preventiva Mensal Presencial" }
+    // Mapeamento Categorizado Neutro para o Escopo Contratual
+    const CONTRACT_CATEGORIES = [
+      {
+        catId: "cftv",
+        catName: "🎥 CFTV / Câmeras",
+        types: [
+          { typeId: "cftv_cam", label: "Câmera (Analógica / IP)" },
+          { typeId: "cftv_dvr", label: "Gravador (DVR / NVR)" },
+          { typeId: "cftv_fonte", label: "Fonte de Alimentação / Nobreak de CFTV" },
+          { typeId: "cftv_cabo", label: "Cabeamento / Fibra / Conectividade (Rede de câmeras e patch cords)" }
+        ]
+      },
+      {
+        catId: "automacao",
+        catName: "🚪 Automação de Portões & Fechaduras",
+        types: [
+          { typeId: "portao_basc", label: "Motor Portão Veicular Basculante" },
+          { typeId: "portao_desl", label: "Motor Portão Veicular Deslizante / Pivotante" },
+          { typeId: "fech_eletroima", label: "Fechadura eletroímã" },
+          { typeId: "fech_solenoide", label: "Fechadura solenoide" },
+          { typeId: "mola_aerea", label: "Molas aéreas" },
+          { typeId: "sensor_barreira", label: "Sensor Antiesmagamento / Barreira IV" },
+          { typeId: "modulo_rf", label: "Módulo de Acionamento RF / Controles Remotos" }
+        ]
+      },
+      {
+        catId: "acesso",
+        catName: "🔐 Controle de Acesso & Identificação",
+        types: [
+          { typeId: "acesso_facial", label: "Terminal de Reconhecimento Facial" },
+          { typeId: "acesso_biometria", label: "Leitor Biométrico" },
+          { typeId: "acesso_tag", label: "Leitor de TAG / RFID / Proximidade" },
+          { typeId: "acesso_uhf", label: "Antena / Leitor de TAG Veicular (UHF)" },
+          { typeId: "acesso_botoeira", label: "Botoeira de Saída" },
+          { typeId: "acesso_software", label: "Software de Gestão de Acesso" }
+        ]
+      },
+      {
+        catId: "perimetro",
+        catName: "⚡ Perímetro & Alarme",
+        types: [
+          { typeId: "cerca_eletrica", label: "Central e Fiação de Cerca Elétrica" },
+          { typeId: "sensor_iva", label: "Sensor de Barreira Infravermelho (IVA)" },
+          { typeId: "central_alarme", label: "Central de Alarme de Intrusão" }
+        ]
+      },
+      {
+        catId: "interfonia",
+        catName: "📞 Interfonia & Comunicação",
+        types: [
+          { typeId: "interfonia_central", label: "Central de Portaria / Portaria IP / PABX" },
+          { typeId: "interfonia_apto", label: "Interfone / Monofone do Apartamento" },
+          { typeId: "interfonia_porteiro", label: "Porteiro Eletrônico Externo / Vídeo Interfone" },
+          { typeId: "interfonia_gateway", label: "Gateway VoIP / Placa GSM / Linha Telefônica" }
+        ]
+      },
+      {
+        catId: "infra",
+        catName: "🌐 Rede, Energia & Infraestrutura",
+        types: [
+          { typeId: "rede_modem", label: "Roteador / Modem de Internet" },
+          { typeId: "rede_switch", label: "Switch PoE / Rede Local" },
+          { typeId: "rede_nobreak", label: "Nobreak Principal" },
+          { typeId: "rede_bateria", label: "Bateria Estacionária / Selada" },
+          { typeId: "infra_ilum", label: "Iluminação de Emergência / Sensor de Presença" },
+          { typeId: "infra_preventiva", label: "Manutenção Preventiva Mensal Presencial" }
+        ]
+      }
     ];
 
     try { 
@@ -862,7 +889,7 @@
       }
     }
 
-    // Slots Múltiplos de Modem / Roteador com Campo PPPoE/Extra
+    // Slots Múltiplos da Ficha Técnica
     function addModemSlot(data = {}) {
       const container = document.getElementById('modemContainer');
       const index = container.children.length;
@@ -895,7 +922,6 @@
       container.appendChild(div);
     }
 
-    // Slots Múltiplos de Mikrotik
     function addMikrotikSlot(data = {}) {
       const container = document.getElementById('mikrotikContainer');
       const index = container.children.length;
@@ -918,7 +944,6 @@
       container.appendChild(div);
     }
 
-    // Slots de DVRs
     function addDvrSlot(data = {}) {
       const container = document.getElementById('dvrContainer');
       const index = container.children.length;
@@ -946,7 +971,6 @@
       container.appendChild(div);
     }
 
-    // Slots de Câmeras IP
     function addCameraSlot(data = {}) {
       const container = document.getElementById('cameraContainer');
       const index = container.children.length;
@@ -973,7 +997,6 @@
       container.appendChild(div);
     }
 
-    // Slots de Controladoras de Acesso
     function addControladoraSlot(data = {}) {
       const container = document.getElementById('controladoraContainer');
       const index = container.children.length;
@@ -996,7 +1019,6 @@
       container.appendChild(div);
     }
 
-    // Slots de Módulos RF IP
     function addModuloRfSlot(data = {}) {
       const container = document.getElementById('moduloRfContainer');
       const index = container.children.length;
@@ -1016,7 +1038,6 @@
       container.appendChild(div);
     }
 
-    // Slots de Módulos Porta IP
     function addModuloPortaSlot(data = {}) {
       const container = document.getElementById('moduloPortaContainer');
       const index = container.children.length;
@@ -1036,7 +1057,6 @@
       container.appendChild(div);
     }
 
-    // Slots de Reconhecimento Facial
     function addFacialSlot(data = {}) {
       const container = document.getElementById('facialContainer');
       const index = container.children.length;
@@ -1068,7 +1088,7 @@
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail) {
-            currentCompanyName = data.companyName || 'Protech Condomínios';
+            currentCompanyName = data.companyName || 'Gestão de Condomínios';
             currentCompanyLogo = data.companyLogo || '';
             updateHeaderBrandDisplay();
           }
@@ -1190,7 +1210,7 @@
           db.collection("usuarios").doc(email).set({ role: userRole, companyOwnerEmail: companyOwnerEmail, name: userName });
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
-          showMainApp('Protech Condomínios', '', companyOwnerEmail);
+          showMainApp('Gestão de Condomínios', '', companyOwnerEmail);
         }
         showToast('Conta criada com sucesso!');
       }).catch(err => alert('Erro ao criar conta: ' + err.message));
@@ -1234,10 +1254,10 @@
         } else {
           ownerEmail = userEmail;
         }
-        showMainApp('Protech Condomínios', '', ownerEmail);
+        showMainApp('Gestão de Condomínios', '', ownerEmail);
       }).catch(() => {
         ownerEmail = userEmail;
-        showMainApp('Protech Condomínios', '', ownerEmail);
+        showMainApp('Gestão de Condomínios', '', ownerEmail);
       });
     }
 
@@ -1335,7 +1355,7 @@
     }
 
     function updateHeaderBrandDisplay() {
-      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Protech Condomínios';
+      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Gestão de Condomínios';
       const logoContainer = document.getElementById('headerBrandLogoContainer');
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
@@ -1476,7 +1496,6 @@
       });
     }
 
-    /* SALVAR DADOS DE ENDEREÇO DO CONDOMÍNIO (LÁPIS) */
     function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
@@ -1505,12 +1524,11 @@
         data.modulosRf = [];
         data.modulosPorta = [];
         data.faciais = [];
-        data.contractScope = {};
+        data.contractScopeList = [];
         db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       }
     }
 
-    /* SALVAR CONFIGURAÇÃO DE EQUIPAMENTOS */
     function saveConfigEquipment(e) {
       e.preventDefault();
       const id = document.getElementById('configEquipCondoId').value;
@@ -1626,89 +1644,118 @@
       });
     }
 
-    /* ESCOPO CONTRATUAL (~30 ITENS) */
+    /* ESCOPO CONTRATUAL COM MÚLTIPLOS SLOTS E WHITE-LABEL */
     function openContractScopeModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
       document.getElementById('contractCondoId').value = c.id;
       document.getElementById('contractScopeTitle').textContent = `📋 Escopo Contratual: ${c.name}`;
 
-      const savedScope = c.contractScope || {};
-      const container = document.getElementById('contractItemsContainer');
+      const scopeList = c.contractScopeList || [];
+      const container = document.getElementById('contractCategoriesContainer');
+      container.innerHTML = '';
 
-      // Agrupar por categorias
-      let cats = {};
-      CONTRACT_TEMPLATE_ITEMS.forEach(item => {
-        if (!cats[item.cat]) cats[item.cat] = [];
-        cats[item.cat].push(item);
+      CONTRACT_CATEGORIES.forEach(cat => {
+        const catBox = document.createElement('div');
+        catBox.className = 'contract-category-box';
+        
+        let typeOptionsHtml = cat.types.map(t => `<option value="${t.typeId}">${t.label}</option>`).join('');
+
+        catBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
+            <div style="font-weight:bold; color:#38bdf8; font-size:12px;">${cat.catName}</div>
+            <button type="button" onclick="addContractSlotToCategory('${cat.catId}')" class="btn btn-slate" style="font-size:10px; padding:2px 8px;">+ Adicionar Slot</button>
+          </div>
+          <div id="cat_slots_${cat.catId}" style="display:flex; flex-direction:column; gap:8px;"></div>
+        `;
+        container.appendChild(catBox);
+
+        // Preencher slots existentes desta categoria
+        const catSlots = scopeList.filter(s => s.catId === cat.catId);
+        catSlots.forEach(slotData => addContractSlotToCategory(cat.catId, slotData));
       });
 
-      let html = '';
-      for (let catName in cats) {
-        html += `
-          <div class="contract-category-box">
-            <div style="font-weight:bold; color:#38bdf8; font-size:12px; border-bottom:1px solid var(--border-color); padding-bottom:4px;">${catName}</div>
-        `;
-        cats[catName].forEach(item => {
-          let itemData = savedScope[item.id] || { status: 'incluso', pieces: 'com_pecas', posse: 'proprio', note: '' };
-          html += `
-            <div class="contract-item-row" data-item-id="${item.id}">
-              <div style="font-weight:600; color:var(--text-main); font-size:12px;">${item.label}</div>
-              <div class="form-row" style="gap:6px;">
-                <div class="form-group" style="margin:0;">
-                  <label style="font-size:10px;">Status</label>
-                  <select class="form-control item-status" style="font-size:11px; padding:4px;">
-                    <option value="incluso" ${itemData.status === 'incluso' ? 'selected' : ''}>🟢 Incluso</option>
-                    <option value="nao_incluso" ${itemData.status === 'nao_incluso' ? 'selected' : ''}>🔴 Não Incluso</option>
-                    <option value="parcial" ${itemData.status === 'parcial' ? 'selected' : ''}>⚠️ Parcial / Sob Demanda</option>
-                  </select>
-                </div>
-                <div class="form-group" style="margin:0;">
-                  <label style="font-size:10px;">Peças</label>
-                  <select class="form-control item-pieces" style="font-size:11px; padding:4px;">
-                    <option value="com_pecas" ${itemData.pieces === 'com_pecas' ? 'selected' : ''}>🔧 Com Troca de Peças</option>
-                    <option value="so_mao_de_obra" ${itemData.pieces === 'so_mao_de_obra' ? 'selected' : ''}>🛠️ Apenas Mão de Obra</option>
-                  </select>
-                </div>
-                <div class="form-group" style="margin:0;">
-                  <label style="font-size:10px;">Posse</label>
-                  <select class="form-control item-posse" style="font-size:11px; padding:4px;">
-                    <option value="proprio" ${itemData.posse === 'proprio' ? 'selected' : ''}>🏢 Próprio Condomínio</option>
-                    <option value="comodato" ${itemData.posse === 'comodato' ? 'selected' : ''}>📦 Comodato Protech</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group" style="margin:0;">
-                <input type="text" class="form-control item-note" style="font-size:11px; padding:4px 8px;" placeholder="Observação específica deste item..." value="${escapeHtml(itemData.note || '')}">
-              </div>
-            </div>
-          `;
-        });
-        html += `</div>`;
-      }
-
-      container.innerHTML = html;
       document.getElementById('contractScopeModal').classList.remove('hidden');
     }
     function closeContractScopeModal() { document.getElementById('contractScopeModal').classList.add('hidden'); }
+
+    function addContractSlotToCategory(catId, slotData = {}) {
+      const slotsContainer = document.getElementById(`cat_slots_${catId}`);
+      if (!slotsContainer) return;
+
+      const catDef = CONTRACT_CATEGORIES.find(c => c.catId === catId);
+      if (!catDef) return;
+
+      const div = document.createElement('div');
+      div.className = 'contract-item-row';
+      div.setAttribute('data-cat-id', catId);
+
+      let optionsHtml = catDef.types.map(t => `
+        <option value="${t.typeId}" ${slotData.typeId === t.typeId ? 'selected' : ''}>${t.label}</option>
+      `).join('');
+
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="flex:1; margin-right:8px;">
+            <select class="form-control item-type" style="font-size:11px; padding:4px; font-weight:bold; color:#38bdf8;">
+              ${optionsHtml}
+            </select>
+          </div>
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-rose" style="padding:2px 6px; font-size:10px;">Remover</button>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <input type="text" class="form-control item-location" style="font-size:11px; padding:4px 8px;" placeholder="Localização / Identificação (Ex: Social Bloco A, Portão Garagem G1)" value="${escapeHtml(slotData.location || '')}">
+        </div>
+        <div class="form-row" style="gap:6px;">
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:10px;">Status</label>
+            <select class="form-control item-status" style="font-size:11px; padding:4px;">
+              <option value="incluso" ${slotData.status === 'incluso' || !slotData.status ? 'selected' : ''}>🟢 Incluso</option>
+              <option value="nao_incluso" ${slotData.status === 'nao_incluso' ? 'selected' : ''}>🔴 Não Incluso</option>
+              <option value="parcial" ${slotData.status === 'parcial' ? 'selected' : ''}>⚠️ Parcial / Sob Demanda</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:10px;">Peças</label>
+            <select class="form-control item-pieces" style="font-size:11px; padding:4px;">
+              <option value="com_pecas" ${slotData.pieces === 'com_pecas' || !slotData.pieces ? 'selected' : ''}>🔧 Com Troca de Peças</option>
+              <option value="so_mao_de_obra" ${slotData.pieces === 'so_mao_de_obra' ? 'selected' : ''}>🛠️ Apenas Mão de Obra</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:10px;">Posse</label>
+            <select class="form-control item-posse" style="font-size:11px; padding:4px;">
+              <option value="proprio" ${slotData.posse === 'proprio' || !slotData.posse ? 'selected' : ''}>🏢 Do Condomínio</option>
+              <option value="comodato" ${slotData.posse === 'comodato' ? 'selected' : ''}>📦 Comodato</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <input type="text" class="form-control item-note" style="font-size:11px; padding:4px 8px;" placeholder="Observações específicas deste slot..." value="${escapeHtml(slotData.note || '')}">
+        </div>
+      `;
+      slotsContainer.appendChild(div);
+    }
 
     function saveContractScope(e) {
       e.preventDefault();
       const id = document.getElementById('contractCondoId').value;
       if (!id) return;
 
-      let newScope = {};
-      document.querySelectorAll('#contractItemsContainer .contract-item-row').forEach(row => {
-        let itemId = row.getAttribute('data-item-id');
-        newScope[itemId] = {
+      let newScopeList = [];
+      document.querySelectorAll('#contractCategoriesContainer .contract-item-row').forEach(row => {
+        newScopeList.push({
+          catId: row.getAttribute('data-cat-id'),
+          typeId: row.querySelector('.item-type').value,
+          location: row.querySelector('.item-location').value.trim(),
           status: row.querySelector('.item-status').value,
           pieces: row.querySelector('.item-pieces').value,
           posse: row.querySelector('.item-posse').value,
           note: row.querySelector('.item-note').value.trim()
-        };
+        });
       });
 
-      db.collection("condominios").doc(id).update({ contractScope: newScope }).then(() => {
+      db.collection("condominios").doc(id).update({ contractScopeList: newScopeList }).then(() => {
         showToast('Escopo contratual salvo!');
         loadCondosForOwner(ownerEmail);
         closeContractScopeModal();
@@ -1740,7 +1787,6 @@
       if (c) openModal(c);
     }
 
-    /* FICHA TÉCNICA LEITURA RÁPIDA */
     function openTechSheetModal(id) {
       currentActiveTechSheetId = id;
       const c = condos.find(x => x.id === id);
@@ -1920,7 +1966,7 @@
       return new Promise((res) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.readAsDataURL(file); });
     }
 
-    function applyWatermarkAsync(dataUrl, condoName, techName) {
+    function applyWatermarkAsync(dataUrl, companyName, techName) {
       return new Promise((res) => {
         const img = new Image();
         img.onload = () => {
@@ -1933,7 +1979,7 @@
           const bh = Math.max(28, h * 0.08);
           ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, h - bh, w, bh);
           ctx.font = `bold ${Math.max(12, Math.floor(bh * 0.38))}px sans-serif`; ctx.fillStyle = '#ffffff';
-          ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
+          ctx.fillText(`📍 ${companyName} | 👤 ${techName}`, 12, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
           ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 12, h - (bh * 0.18));
           res(canvas.toDataURL('image/jpeg', 0.8));
@@ -2022,7 +2068,6 @@
       }
     }
 
-    /* ROTAS */
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -2305,7 +2350,7 @@
       const doc = new jsPDF();
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(currentCompanyName || "Protech Condomínios", 14, 20);
+      doc.text(currentCompanyName || "Gestão de Condomínios", 14, 20);
       doc.setFontSize(12);
       doc.text("Relatório Geral de Atendimentos Consolidado", 14, 28);
       
@@ -2336,7 +2381,7 @@
         y += (split.length * 6) + 4;
         y += 6;
       }
-      doc.save(`relatorio_geral_filtrado_protech.pdf`);
+      doc.save(`relatorio_geral_filtrado.pdf`);
       showToast('Relatório geral filtrado em PDF gerado!');
     }
   </script>
