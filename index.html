@@ -182,12 +182,8 @@
       </div>
       <div class="modal-body" style="gap:10px;">
         <input type="hidden" id="resetTargetEmail">
-        <p style="font-size: 11px; color: var(--text-muted);">Defina uma nova senha temporária para o usuário <b id="resetTargetEmailDisplay" style="color:#38bdf8;"></b>:</p>
-        <div class="form-group">
-          <label>Nova Senha (mínimo 6 dígitos)</label>
-          <input type="password" id="newTempPassword" class="form-control" placeholder="••••••••" minlength="6">
-        </div>
-        <button onclick="executePasswordResetByAdmin()" class="btn btn-emerald" style="width:100%; justify-content:center; margin-top:4px;">Salvar Nova Senha</button>
+        <p style="font-size: 11px; color: var(--text-muted);">Enviar e-mail de redefinição de senha para o usuário <b id="resetTargetEmailDisplay" style="color:#38bdf8;"></b>:</p>
+        <button onclick="executePasswordResetByAdmin()" class="btn btn-emerald" style="width:100%; justify-content:center; margin-top:4px;">Enviar E-mail de Redefinição</button>
       </div>
     </div>
   </div>
@@ -202,7 +198,7 @@
       <p class="auth-subtitle">Acesso Operacional e Gestão de Campo</p>
 
       <div id="inviteNotice" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; text-align: center;">
-        🎉 Convite detectado! Crie sua conta de técnico.
+        🎉 Convite da empresa detectado! Crie sua conta abaixo.
       </div>
 
       <div id="authTabNavContainer" class="tab-nav">
@@ -247,11 +243,6 @@
           <input type="email" id="regEmail" required placeholder="seu.email@empresa.com" class="form-control">
         </div>
 
-        <div class="form-group" id="groupCompanyOwnerEmail" style="display: none;">
-          <label>E-mail da Empresa (Proprietário) *</label>
-          <input type="email" id="regCompanyOwnerEmail" placeholder="dono@empresa.com" class="form-control">
-        </div>
-
         <div class="form-group">
           <label>Senha (mínimo 6 dígitos) *</label>
           <input type="password" id="regPassword" required minlength="6" placeholder="••••••••" class="form-control">
@@ -275,7 +266,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.0.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.1.0</span>
               </div>
             </div>
           </div>
@@ -438,11 +429,9 @@
 
         <div id="teamMembersSection" style="display:flex; flex-direction:column; gap:10px;">
           <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
-            <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Membro:</label>
-            <div class="form-group">
-              <input type="email" id="inviteEmailInput" class="form-control" placeholder="email.do.membro@empresa.com">
-            </div>
-            <button onclick="generateTeamInviteLink()" class="btn btn-emerald" style="width:100%; justify-content:center;">🔗 Gerar Link de Convite</button>
+            <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Convidar Novo Técnico:</label>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Gere o link de convite e envie para o técnico. Ao abrir, ele criará a conta diretamente vinculada à sua empresa.</p>
+            <button onclick="generateTeamInviteLink()" class="btn btn-emerald" style="width:100%; justify-content:center;">🔗 Gerar Link de Convite da Empresa</button>
             <div id="inviteLinkResult" style="margin-top:8px; font-size:11px; word-break:break-all; color:#38bdf8; display:none;"></div>
           </div>
 
@@ -756,11 +745,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.0.0 (Convites Diretos & Redefinição de Senha)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 8.1.0 (Segurança e Convites Otimizados)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Links de convite agora configuram automaticamente o novo usuário como Técnico, simplificando o cadastro.</li>
-            <li>Adicionada a funcionalidade para Proprietários e Administradores redefinirem a senha de qualquer usuário da equipe diretamente pelo app.</li>
-            <li>Rankings múltiplos, permissões granulares por membro e relatórios em PDF com fotos incorporadas.</li>
+            <li>Links de convite simplificados (sem necessidade de digitar e-mail na geração).</li>
+            <li>Novos técnicos cadastrados via link agora entram com permissões padrão seguras (sem exclusão de condomínios ou escopos).</li>
+            <li>Funcionalidade de redefinição de senha para administradores e proprietários.</li>
           </ul>
         </div>
       </div>
@@ -891,7 +880,6 @@
         const inviteNotice = document.getElementById('inviteNotice');
         if (inviteNotice) inviteNotice.style.display = 'block';
         
-        // Se entrou via link de convite, força o modo registro, oculta aba de login e oculta seletor de cargo (já define como técnico)
         switchAuthMode('register');
         selectRole('user');
         
@@ -900,9 +888,6 @@
         
         const roleBox = document.getElementById('roleSelectorBox');
         if (roleBox) roleBox.style.display = 'none';
-
-        const ownerEmailInput = document.getElementById('regCompanyOwnerEmail');
-        if (ownerEmailInput) ownerEmailInput.value = inviteParam;
       }
 
       try {
@@ -1211,7 +1196,6 @@
       const roleUser = document.getElementById('roleUsuario');
       const groupComp = document.getElementById('groupCompanyName');
       const groupUser = document.getElementById('groupUserName');
-      const groupOwnerEmail = document.getElementById('groupCompanyOwnerEmail');
 
       if (roleProp) roleProp.classList.remove('active');
       if (roleAdmin) roleAdmin.classList.remove('active');
@@ -1221,17 +1205,14 @@
         if (roleProp) roleProp.classList.add('active');
         if (groupComp) groupComp.style.display = 'block';
         if (groupUser) groupUser.style.display = 'none';
-        if (groupOwnerEmail) groupOwnerEmail.style.display = 'none';
       } else if (role === 'admin') {
         if (roleAdmin) roleAdmin.classList.add('active');
         if (groupComp) groupComp.style.display = 'none';
         if (groupUser) groupUser.style.display = 'block';
-        if (groupOwnerEmail) groupOwnerEmail.style.display = 'block';
       } else {
         if (roleUser) roleUser.classList.add('active');
         if (groupComp) groupComp.style.display = 'none';
         if (groupUser) groupUser.style.display = 'block';
-        if (groupOwnerEmail) groupOwnerEmail.style.display = 'block';
       }
     }
 
@@ -1240,7 +1221,6 @@
       const email = document.getElementById('regEmail').value.trim();
       const password = document.getElementById('regPassword').value.trim();
 
-      // Verifica se entrou via link de convite. Se sim, força o perfil de técnico automaticamente
       const urlParams = new URLSearchParams(window.location.search);
       const inviteParam = urlParams.get('invite');
       if (inviteParam) {
@@ -1256,9 +1236,29 @@
           ownerEmail = email;
           showMainApp(companyName, '', email);
         } else {
-          const companyOwnerEmail = inviteParam || document.getElementById('regCompanyOwnerEmail').value.trim();
+          const companyOwnerEmail = inviteParam;
           const userName = document.getElementById('regUserName').value.trim() || email.split('@')[0];
-          db.collection("usuarios").doc(email).set({ role: userRole, companyOwnerEmail: companyOwnerEmail, name: userName });
+          
+          // Permissões seguras padrão para novos técnicos cadastrados por link (sem exclusão de condomínio/escopo)
+          const safeDefaultPerms = {
+            addCondo: true,
+            editCondo: true,
+            deleteCondo: false,
+            requireGps: true,
+            viewRanking: true,
+            viewScope: true,
+            editScope: true,
+            deleteScope: false,
+            downloadPdf: true
+          };
+
+          db.collection("usuarios").doc(email).set({
+            role: userRole,
+            companyOwnerEmail: companyOwnerEmail,
+            name: userName,
+            permissions: safeDefaultPerms
+          });
+
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
           showMainApp('Gestão de Condomínios', '', companyOwnerEmail);
@@ -1517,7 +1517,6 @@
       }
       document.getElementById('resetTargetEmail').value = email;
       document.getElementById('resetTargetEmailDisplay').textContent = email;
-      document.getElementById('newTempPassword').value = '';
       document.getElementById('resetPasswordModal').classList.remove('hidden');
     }
 
@@ -1527,15 +1526,7 @@
 
     async function executePasswordResetByAdmin() {
       const email = document.getElementById('resetTargetEmail').value;
-      const newPass = document.getElementById('newTempPassword').value.trim();
-
-      if (!newPass || newPass.length < 6) {
-        alert('A nova senha deve ter no mínimo 6 caracteres.');
-        return;
-      }
-
       try {
-        // Envia um link de redefinição oficial do Firebase para o e-mail do usuário
         await auth.sendPasswordResetEmail(email);
         showToast('E-mail de redefinição de senha enviado para o usuário!');
         closeResetPasswordModal();
@@ -1615,12 +1606,10 @@
     }
 
     function generateTeamInviteLink() {
-      const email = document.getElementById('inviteEmailInput').value.trim();
-      if (!email) { alert('Informe o e-mail do membro.'); return; }
       const link = `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(ownerEmail)}`;
       const resEl = document.getElementById('inviteLinkResult');
       resEl.style.display = 'block';
-      resEl.innerHTML = `Link gerado para <b>${email}</b>:<br><a href="${link}" target="_blank" style="color:#38bdf8;">${link}</a>`;
+      resEl.innerHTML = `Link de convite gerado:<br><a href="${link}" target="_blank" style="color:#38bdf8;">${link}</a>`;
       showToast('Link de convite gerado!');
     }
 
