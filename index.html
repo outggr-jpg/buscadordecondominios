@@ -82,7 +82,7 @@
     
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 12px; }
     .modal-overlay.hidden { display: none; }
-    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 540px; width: 100%; padding: 20px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 600px; width: 100%; padding: 20px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; font-size: 12px; color: var(--text-main); }
     
@@ -240,7 +240,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.5</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.7</span>
               </div>
             </div>
           </div>
@@ -261,7 +261,7 @@
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
-            <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate">+ Novo</button>
+            <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate" style="display:inline-flex;">+ Novo</button>
           </div>
         </div>
       </div>
@@ -387,11 +387,11 @@
     </div>
   </div>
 
-  <!-- MODAL DE GESTÃO DE EQUIPE -->
+  <!-- MODAL DE GESTÃO DE EQUIPE (COM PERMISSÕES E REMOÇÃO) -->
   <div id="teamModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 550px;">
+    <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Convites</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">👥 Gestão de Equipe e Permissões</h3>
         <button onclick="closeTeamModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body">
@@ -405,9 +405,9 @@
         </div>
 
         <div style="margin-top:10px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe Vinculados:</label>
-          <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
-            <div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum outro membro cadastrado.</div>
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe Vinculados e Permissões:</label>
+          <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;">
+            <div style="color:var(--text-muted); text-align:center; padding:10px;">Carregando membros...</div>
           </div>
         </div>
       </div>
@@ -419,22 +419,37 @@
 
   <!-- MODAL DE RELATÓRIO GERAL -->
   <div id="globalReportModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 650px;">
+    <div class="modal" style="max-width: 700px;">
       <div class="modal-header">
         <h3 style="color:var(--text-main); font-size: 16px;">📊 Relatório Geral de Atendimentos</h3>
         <button onclick="closeGlobalReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body">
         <div style="background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:10px;">
+          <label style="font-weight:bold; color:#38bdf8; font-size:12px;">Filtros de Pesquisa:</label>
           <div class="form-row">
-            <div class="form-group"><label>Filtrar por Mês/Ano</label><input type="month" id="filterMonthInput" onchange="renderGlobalReports()" class="form-control"></div>
+            <div class="form-group"><label>Data Inicial</label><input type="date" id="filterStartDate" onchange="renderGlobalReports()" class="form-control"></div>
+            <div class="form-group"><label>Data Final</label><input type="date" id="filterEndDate" onchange="renderGlobalReports()" class="form-control"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Técnico</label>
+              <select id="filterUserSelect" onchange="renderGlobalReports()" class="form-control"><option value="">Todos os Técnicos</option></select>
+            </div>
+            <div class="form-group">
+              <label>Condomínio</label>
+              <select id="filterCondoSelect" onchange="renderGlobalReports()" class="form-control"><option value="">Todos os Condomínios</option></select>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end;">
+            <button onclick="clearGlobalFilters()" class="btn btn-slate" style="font-size:11px; padding:4px 8px;">Limpar Filtros</button>
           </div>
         </div>
         <div id="globalReportListContainer" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
       <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px;">
         <button onclick="closeGlobalReportModal()" class="btn btn-slate">Fechar</button>
-        <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Resumo em PDF</button>
+        <button onclick="downloadGlobalReportPDF()" class="btn btn-slate">📄 Exportar Relatório Filtrado em PDF</button>
       </div>
     </div>
   </div>
@@ -464,7 +479,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM ENVIO PARA GOOGLE DRIVE) -->
+  <!-- MODAL DE CHECK-OUT -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -480,7 +495,6 @@
           <div id="mediaPreviewContainer" class="media-preview-container"></div>
           <div id="uploadProgressInfo" style="font-size:11px; color:#38bdf8; margin-top:4px; display:none;">Enviando fotos para o Google Drive... <span id="uploadProgressCount"></span></div>
         </div>
-        
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" id="checkoutSubmitBtn" class="btn btn-rose">Finalizar e Check-out</button>
@@ -540,10 +554,9 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.1.5</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.1.7</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Integração direta com o Google Drive via Google Apps Script configurada para a pasta "Buscador de condominios".</li>
-            <li>Upload automático de fotos com marca d'água embutida direto para o Drive da empresa.</li>
+            <li>Gestão de equipe aprimorada com controle de permissões por usuário e opção de remoção de membros.</li>
           </ul>
         </div>
       </div>
@@ -562,7 +575,6 @@
       measurementId: "G-BQ1ECYGF8T"
     };
 
-    // URL DO SEU GOOGLE APPS SCRIPT PARA O GOOGLE DRIVE
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
     try { firebase.initializeApp(firebaseConfig); } catch(err) {}
@@ -572,6 +584,7 @@
     let currentUser = null;
     let ownerEmail = null;
     let userRole = 'owner';
+    let userPermissions = { canManageCondos: true, canViewReports: true };
     let selectedMediaFiles = [];
     let currentCompanyName = '';
     let currentCompanyLogo = '';
@@ -615,10 +628,16 @@
 
       db.collection("usuarios").doc(userEmail).get().then(doc => {
         if (doc.exists) {
-          userRole = doc.data().role || 'owner';
+          const data = doc.data();
+          userRole = data.role || 'owner';
+          userPermissions = data.permissions || { canManageCondos: true, canViewReports: true };
           if (userRole === 'user') {
-            ownerEmail = doc.data().companyOwnerEmail;
+            ownerEmail = data.companyOwnerEmail;
             document.getElementById('settingsTeamMenuBtn').style.display = 'none';
+            // Aplicar permissões visuais para técnicos
+            if (!userPermissions.canManageCondos) {
+              document.getElementById('newCondoBtn').style.display = 'none';
+            }
           }
         }
       });
@@ -688,13 +707,13 @@
         if (userRole === 'owner') {
           const companyName = document.getElementById('regCompanyName').value.trim() || 'Minha Empresa';
           db.collection("empresas").doc(email).set({ companyName: companyName, ownerEmail: email, companyLogo: '' });
-          db.collection("usuarios").doc(email).set({ role: 'owner', companyOwnerEmail: email, name: email.split('@')[0] });
+          db.collection("usuarios").doc(email).set({ role: 'owner', companyOwnerEmail: email, name: email.split('@')[0], permissions: { canManageCondos: true, canViewReports: true } });
           ownerEmail = email;
           showMainApp(companyName, '', email);
         } else {
           const companyOwnerEmail = document.getElementById('regCompanyOwnerEmail').value.trim();
           const userName = document.getElementById('regUserName').value.trim() || email.split('@')[0];
-          db.collection("usuarios").doc(email).set({ role: 'user', companyOwnerEmail: companyOwnerEmail, name: userName });
+          db.collection("usuarios").doc(email).set({ role: 'user', companyOwnerEmail: companyOwnerEmail, name: userName, permissions: { canManageCondos: true, canViewReports: true } });
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
           showMainApp('Protech Condomínios', '', companyOwnerEmail);
@@ -827,18 +846,45 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
+    // GESTÃO DE EQUIPE COM PERMISSÕES E REMOÇÃO
     function openTeamModal() {
       document.getElementById('inviteLinkResult').style.display = 'none';
       db.collection("usuarios").where("companyOwnerEmail", "==", ownerEmail).get().then(snapshot => {
         let html = '';
         snapshot.forEach(doc => {
           const data = doc.data();
-          html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px; border-radius:8px; border:1px solid var(--border-color);">
-            <div><b>${escapeHtml(data.name || doc.id)}</b><div style="font-size:10px; color:var(--text-muted);">${doc.id}</div></div>
-            <span style="font-size:10px; color:#38bdf8;">${data.role === 'owner' ? 'Proprietário' : 'Técnico'}</span>
-          </div>`;
+          const docEmail = doc.id;
+          const isOwner = data.role === 'owner';
+          const perms = data.permissions || { canManageCondos: true, canViewReports: true };
+
+          html += `
+            <div style="background:var(--bg-card); padding:10px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <b>${escapeHtml(data.name || docEmail)}</b>
+                  <div style="font-size:10px; color:var(--text-muted);">${docEmail}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-size:10px; color:#38bdf8; font-weight:bold;">${isOwner ? 'Proprietário' : 'Técnico'}</span>
+                  ${!isOwner ? `<button onclick="removeTeamMember('${docEmail}')" class="btn btn-rose" style="padding:2px 6px; font-size:10px;" title="Remover da Equipe">🗑️ Remover</button>` : ''}
+                </div>
+              </div>
+              ${!isOwner ? `
+                <div style="border-top:1px solid var(--border-color); padding-top:6px; display:flex; gap:14px; font-size:11px;">
+                  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                    <input type="checkbox" ${perms.canManageCondos ? 'checked' : ''} onchange="updateMemberPermission('${docEmail}', 'canManageCondos', this.checked)">
+                    Pode Cadastrar/Editar Condomínios
+                  </label>
+                  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                    <input type="checkbox" ${perms.canViewReports ? 'checked' : ''} onchange="updateMemberPermission('${docEmail}', 'canViewReports', this.checked)">
+                    Pode Ver Relatórios Gerais
+                  </label>
+                </div>
+              ` : ''}
+            </div>
+          `;
         });
-        document.getElementById('teamMemberListContainer').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum outro membro cadastrado.</div>';
+        document.getElementById('teamMemberListContainer').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum membro cadastrado.</div>';
       });
       document.getElementById('teamModal').classList.remove('hidden');
     }
@@ -854,8 +900,32 @@
       showToast('Link de convite gerado!');
     }
 
+    function updateMemberPermission(memberEmail, permissionKey, value) {
+      db.collection("usuarios").doc(memberEmail).get().then(doc => {
+        if (doc.exists) {
+          let perms = doc.data().permissions || { canManageCondos: true, canViewReports: true };
+          perms[permissionKey] = value;
+          db.collection("usuarios").doc(memberEmail).update({ permissions: perms }).then(() => {
+            showToast('Permissão atualizada!');
+          });
+        }
+      });
+    }
+
+    function removeTeamMember(memberEmail) {
+      if (!confirm(`Deseja realmente remover ${memberEmail} da equipe?`)) return;
+      db.collection("usuarios").doc(memberEmail).delete().then(() => {
+        showToast('Membro removido da equipe.');
+        openTeamModal();
+      }).catch(err => alert('Erro ao remover: ' + err.message));
+    }
+
     function saveCondo(e) {
       e.preventDefault();
+      if (userRole === 'user' && !userPermissions.canManageCondos) {
+        alert('Você não tem permissão para cadastrar ou editar condomínios.');
+        return;
+      }
       const id = document.getElementById('condoId').value;
       const data = {
         name: document.getElementById('condoName').value.trim(),
@@ -888,12 +958,20 @@
     }
 
     function deleteCondo(id) {
+      if (userRole === 'user' && !userPermissions.canManageCondos) {
+        alert('Você não tem permissão para excluir condomínios.');
+        return;
+      }
       if (confirm('Excluir este condomínio?')) {
         db.collection("condominios").doc(id).delete().then(() => { showToast('Removido.'); loadCondosForOwner(ownerEmail); });
       }
     }
 
     function editCondo(id) {
+      if (userRole === 'user' && !userPermissions.canManageCondos) {
+        alert('Você não tem permissão para editar condomínios.');
+        return;
+      }
       const c = condos.find(x => x.id === id);
       if (c) openModal(c);
     }
@@ -1009,7 +1087,6 @@
         `).join('');
     }
 
-    // ENVIO PARA O GOOGLE DRIVE VIA GOOGLE APPS SCRIPT
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
@@ -1032,8 +1109,6 @@
         for (let i = 0; i < totalFiles; i++) {
           progressCount.textContent = `(${i + 1}/${totalFiles})`;
           const item = selectedMediaFiles[i];
-          
-          // Extrair base64 limpo
           const base64Content = item.previewUrl.split(',')[1];
           const payload = {
             fileName: `foto_${Date.now()}_${i+1}.jpg`,
@@ -1185,33 +1260,70 @@
     }
 
     function openGlobalReportModal() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      document.getElementById('filterMonthInput').value = `${year}-${month}`;
+      populateGlobalFilterDropdowns();
+      document.getElementById('filterStartDate').value = '';
+      document.getElementById('filterEndDate').value = '';
+      document.getElementById('filterUserSelect').value = '';
+      document.getElementById('filterCondoSelect').value = '';
       renderGlobalReports();
       document.getElementById('globalReportModal').classList.remove('hidden');
     }
     function closeGlobalReportModal() { document.getElementById('globalReportModal').classList.add('hidden'); }
 
-    function renderGlobalReports() {
-      const filterVal = document.getElementById('filterMonthInput').value;
-      let allReports = [];
+    function populateGlobalFilterDropdowns() {
+      const userSelect = document.getElementById('filterUserSelect');
+      const condoSelect = document.getElementById('filterCondoSelect');
+      
+      let usersSet = new Set();
       condos.forEach(c => {
         if (c.reports) {
-          c.reports.forEach(r => {
-            const parts = r.date.split('/');
-            const rYearMonth = `${parts[2]}-${parts[1]}`;
-            if (!filterVal || rYearMonth === filterVal) {
-              allReports.push({ condoName: c.name, ...r });
-            }
-          });
+          c.reports.forEach(r => { if (r.userEmail) usersSet.add(r.userEmail); });
         }
       });
 
+      userSelect.innerHTML = '<option value="">Todos os Técnicos</option>' + Array.from(usersSet).map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+      condoSelect.innerHTML = '<option value="">Todos os Condomínios</option>' + condos.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
+    }
+
+    function clearGlobalFilters() {
+      document.getElementById('filterStartDate').value = '';
+      document.getElementById('filterEndDate').value = '';
+      document.getElementById('filterUserSelect').value = '';
+      document.getElementById('filterCondoSelect').value = '';
+      renderGlobalReports();
+    }
+
+    function getFilteredGlobalReports() {
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
+      const selectedUser = document.getElementById('filterUserSelect').value;
+      const selectedCondo = document.getElementById('filterCondoSelect').value;
+
+      let allReports = [];
+      condos.forEach(c => {
+        if (selectedCondo && c.name !== selectedCondo) return;
+        if (c.reports) {
+          c.reports.forEach(r => {
+            if (selectedUser && r.userEmail !== selectedUser) return;
+            const parts = r.date.split('/');
+            if (parts.length === 3) {
+              const rIsoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+              if (startDate && rIsoDate < startDate) return;
+              if (endDate && rIsoDate > endDate) return;
+            }
+            allReports.push({ condoName: c.name, ...r });
+          });
+        }
+      });
+      return allReports;
+    }
+
+    function renderGlobalReports() {
+      const allReports = getFilteredGlobalReports();
       const container = document.getElementById('globalReportListContainer');
+
       if (allReports.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento encontrado neste período.</div>';
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento encontrado com os filtros selecionados.</div>';
         return;
       }
 
@@ -1222,11 +1334,19 @@
             <span style="color:var(--text-muted);">⏱️ ${r.duration || '--'}</span>
           </div>
           <div class="report-text"><b>Técnico:</b> ${escapeHtml(r.userEmail)}<br>${escapeHtml(r.text)}</div>
+          ${r.media && r.media.length > 0 ? `
+            <div class="report-media-grid">
+              ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}')">`).join('')}
+            </div>
+          ` : ''}
         </div>
       `).join('');
     }
 
-    function downloadGlobalReportPDF() {
+    async function downloadGlobalReportPDF() {
+      const allReports = getFilteredGlobalReports();
+      if (allReports.length === 0) { alert('Nenhum relatório para exportar com os filtros atuais.'); return; }
+
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFont("helvetica", "bold");
@@ -1234,29 +1354,65 @@
       doc.text(currentCompanyName || "Protech Condomínios", 14, 20);
       doc.setFontSize(12);
       doc.text("Relatório Geral de Atendimentos Consolidado", 14, 28);
+      
+      let filterDesc = 'Filtros: ';
+      let uFilter = document.getElementById('filterUserSelect').value;
+      let cFilter = document.getElementById('filterCondoSelect').value;
+      let sDate = document.getElementById('filterStartDate').value;
+      let eDate = document.getElementById('filterEndDate').value;
+      filterDesc += `Técnico: ${uFilter || 'Todos'} | Condomínio: ${cFilter || 'Todos'} | Período: ${sDate || 'Início'} até ${eDate || 'Hoje'}`;
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(filterDesc, 14, 34);
 
-      let y = 40;
-      condos.forEach(c => {
-        if (c.reports && c.reports.length > 0) {
-          c.reports.forEach(r => {
-            if (y > 270) { doc.addPage(); y = 20; }
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
-            doc.text(`${c.name} - ${r.date} (${r.checkInTime} às ${r.checkOutTime})`, 14, y);
-            y += 6;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text(`Técnico: ${r.userEmail} | Tempo: ${r.duration || '--'}`, 14, y);
-            y += 6;
-            let split = doc.splitTextToSize(`Serviço: ${r.text}`, 180);
-            doc.text(split, 14, y);
-            y += (split.length * 6) + 6;
-          });
+      let y = 44;
+      for (let i = 0; i < allReports.length; i++) {
+        let r = allReports[i];
+        if (y > 250) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text(`${r.condoName} - ${r.date} (${r.checkInTime} às ${r.checkOutTime})`, 14, y);
+        y += 6;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(`Técnico: ${r.userEmail} | Tempo: ${r.duration || '--'}`, 14, y);
+        y += 6;
+        let split = doc.splitTextToSize(`Serviço: ${r.text}`, 180);
+        doc.text(split, 14, y);
+        y += (split.length * 6) + 4;
+
+        if (r.media && r.media.length > 0) {
+          for (let mIdx = 0; mIdx < r.media.length; mIdx++) {
+            try {
+              let base64Img = await getBase64ImageFromUrl(r.media[mIdx].url);
+              if (base64Img) {
+                if (y > 220) { doc.addPage(); y = 20; }
+                doc.addImage(base64Img, 'JPEG', 14, y, 35, 35);
+                y += 40;
+              }
+            } catch(e) {}
+          }
+        }
+        y += 6;
+      }
+
+      doc.save(`relatorio_geral_filtrado_protech.pdf`);
+      showToast('Relatório geral filtrado em PDF gerado!');
+    }
+
+    function getBase64ImageFromUrl(url) {
+      return new Promise(async (resolve) => {
+        try {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        } catch (e) {
+          resolve(null);
         }
       });
-
-      doc.save(`relatorio_geral_protech.pdf`);
-      showToast('Relatório geral em PDF gerado!');
     }
 
     function downloadSingleReportPDF(condoName, report) {
@@ -1283,9 +1439,23 @@
       doc.text(splitText, 14, 60);
 
       let yPos = 65 + (splitText.length * 6);
+
       if (report.media && report.media.length > 0) {
         doc.setFont("helvetica", "bold");
-        doc.text(`Mídias anexadas: ${report.media.length} item(ns)`, 14, yPos);
+        doc.text(`Mídias anexadas (${report.media.length}):`, 14, yPos);
+        yPos += 8;
+
+        for (let i = 0; i < report.media.length; i++) {
+          let mediaItem = report.media[i];
+          try {
+            let base64Img = await getBase64ImageFromUrl(mediaItem.url);
+            if (base64Img) {
+              if (yPos > 220) { doc.addPage(); yPos = 20; }
+              doc.addImage(base64Img, 'JPEG', 14, yPos, 45, 45);
+              yPos += 50;
+            }
+          } catch (err) {}
+        }
       }
 
       doc.save(`relatorio_${condoName.replace(/\s+/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
@@ -1318,7 +1488,7 @@
       document.getElementById('condoGrid').innerHTML = filtered.map(c => `
         <div class="card ${c.checkedIn ? 'checked-in' : ''}">
           <div>
-            <div class="card-header"><div class="card-title">${escapeHtml(c.name)}</div><div><button onclick="editCondo('${c.id}')" class="icon-btn">✏️</button><button onclick="deleteCondo('${c.id}')" class="icon-btn delete">🗑️</button></div></div>
+            <div class="card-header"><div class="card-title">${escapeHtml(c.name)}</div><div>${userRole === 'owner' || userPermissions.canManageCondos ? `<button onclick="editCondo('${c.id}')" class="icon-btn">✏️</button><button onclick="deleteCondo('${c.id}')" class="icon-btn delete">🗑️</button>` : ''}</div></div>
             <div class="card-body">
               <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</div>
               ${c.lat && c.lng ? '<div style="font-size:10px; color:#10b981;">🌐 GPS Ativo</div>' : '<div style="font-size:10px; color:#f43f5e;">⚠️ Sem GPS</div>'}
@@ -1339,6 +1509,10 @@
     }
 
     function openModal(c = null) {
+      if (userRole === 'user' && !userPermissions.canManageCondos) {
+        alert('Você não tem permissão para cadastrar condomínios.');
+        return;
+      }
       document.getElementById('condoForm').reset();
       document.getElementById('condoId').value = c ? c.id : '';
       document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
