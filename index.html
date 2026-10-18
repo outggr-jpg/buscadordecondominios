@@ -150,11 +150,6 @@
     .gps-card.waze { background-color: #33cc66; }
     .gps-cancel-btn { width: 100%; background-color: #f1f3f4; color: #3c4043; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }
     .gps-cancel-btn:hover { background-color: #e4e6e7; }
-
-    /* ESTILOS PARA OS ACORDEÕES DA FASE 1 */
-    .accordion-btn { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; font-size: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-    .accordion-btn:hover { border-color: #0284c7; }
-    .accordion-body { display: none; background: var(--bg-main); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 10px; margin-bottom: 6px; flex-direction: column; gap: 8px; }
   </style>
 </head>
 <body>
@@ -250,7 +245,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.4.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.3.0</span>
               </div>
             </div>
           </div>
@@ -552,7 +547,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CADASTRO DE CONDOMÍNIO + FICHA TÉCNICA (FASE 1: ACORDEÕES + MODEM + MIKROTIK) -->
+  <!-- MODAL DE CADASTRO DE CONDOMÍNIO + FICHA TÉCNICA -->
   <div id="condoModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -576,43 +571,18 @@
         </div>
         <button type="button" onclick="captureCurrentGPS()" class="btn btn-slate" style="width: 100%; justify-content: center; margin-bottom: 12px;">📍 Capturar Coordenadas GPS</button>
         
-        <!-- FICHA TÉCNICA - FASE 1 (ACORDEÕES) -->
+        <!-- FICHA TÉCNICA DE EQUIPAMENTOS -->
         <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px;">
-          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Fase 1):</label>
-          
-          <!-- ACORDEÃO MODEM / ROTEADOR -->
-          <button type="button" class="accordion-btn" onclick="toggleAccordion('accModem')">🌐 Modem / Roteador <span>▼</span></button>
-          <div id="accModem" class="accordion-body">
-            <div class="form-row">
-              <div class="form-group"><label>IP do Modem</label><input type="text" id="modemIp" placeholder="Ex: 192.168.1.1" class="form-control"></div>
-              <div class="form-group"><label>Porta HTTP</label><input type="text" id="modemHttp" placeholder="Ex: 80" class="form-control"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Usuário Modem</label><input type="text" id="modemUser" placeholder="admin" class="form-control"></div>
-              <div class="form-group"><label>Senha Modem</label><input type="text" id="modemPass" placeholder="senha" class="form-control"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Wi-Fi 2.4G (SSID)</label><input type="text" id="wifi2gSsid" placeholder="Nome da rede 2.4G" class="form-control"></div>
-              <div class="form-group"><label>Senha 2.4G</label><input type="text" id="wifi2gPass" placeholder="Senha 2.4G" class="form-control"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Wi-Fi 5G (SSID)</label><input type="text" id="wifi5gSsid" placeholder="Nome da rede 5G" class="form-control"></div>
-              <div class="form-group"><label>Senha 5G</label><input type="text" id="wifi5gPass" placeholder="Senha 5G" class="form-control"></div>
-            </div>
+          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica de Equipamentos:</label>
+          <div class="form-row">
+            <div class="form-group"><label>DVR / Gravadores</label><input type="text" id="equipDvr" placeholder="Ex: DVR 1 - IP 192.168.1.100 (admin/123)" class="form-control"></div>
+            <div class="form-group"><label>Modem / Roteador</label><input type="text" id="equipModem" placeholder="Ex: Modem IP 192.168.1.1" class="form-control"></div>
           </div>
-
-          <!-- ACORDEÃO MIKROTIK -->
-          <button type="button" class="accordion-btn" onclick="toggleAccordion('accMikrotik')">📡 Mikrotik <span>▼</span></button>
-          <div id="accMikrotik" class="accordion-body">
-            <div class="form-row">
-              <div class="form-group"><label>IP Mikrotik</label><input type="text" id="mikrotikIp" placeholder="Ex: 192.168.88.1" class="form-control"></div>
-              <div class="form-group"><label>Porta HTTP / Winbox</label><input type="text" id="mikrotikHttp" placeholder="Ex: 8291" class="form-control"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Usuário</label><input type="text" id="mikrotikUser" placeholder="admin" class="form-control"></div>
-              <div class="form-group"><label>Senha</label><input type="text" id="mikrotikPass" placeholder="senha" class="form-control"></div>
-            </div>
+          <div class="form-row">
+            <div class="form-group"><label>Travas / Fechaduras</label><input type="text" id="equipTravas" placeholder="Ex: Eletroímã FE 20120" class="form-control"></div>
+            <div class="form-group"><label>Reconhecimento Facial</label><input type="text" id="equipFaciais" placeholder="Ex: Facial Control iD" class="form-control"></div>
           </div>
+          <div class="form-group"><label>Câmeras LPR (Leitura de Placas)</label><input type="text" id="equipLpr" placeholder="Ex: LPR Entrada - IP 192.168.1.105" class="form-control"></div>
         </div>
 
         <div class="form-group"><label>Observações</label><textarea id="condoNotes" rows="2" class="form-control" style="resize:none;"></textarea></div>
@@ -646,11 +616,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.4.0 (Fase 1)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.3.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Início da Ficha Técnica Expandida com acordeões interativos.</li>
-            <li>Campos estruturados para Modem/Roteador e Mikrotik (IP, HTTP, credenciais e Wi-Fi).</li>
-            <li>Preservação total de rotas por ID único, equipas e relatórios em PDF.</li>
+            <li>Seleção de rotas fixa por ID único (marcações preservadas ao pesquisar).</li>
+            <li>Ficha técnica completa de equipamentos por condomínio (DVR, modem, travas, faciais e LPR).</li>
+            <li>Mini-checklist de manutenção preventiva no check-out (câmeras, portões e portas).</li>
+            <li>Gestão de equipe com permissões granulares por caixas (*checkboxes*).</li>
           </ul>
         </div>
       </div>
@@ -685,11 +656,11 @@
     let condos = [];
     let currentUser = null;
     let ownerEmail = null;
-    let userRole = 'owner';
+    let userRole = 'owner'; // 'owner', 'admin', 'user'
     let selectedMediaFiles = [];
     let currentCompanyName = '';
     let currentCompanyLogo = '';
-    let selectedRouteIds = new Set();
+    let selectedRouteIds = new Set(); // ID único para salvar as rotas sem perder na busca
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
@@ -724,14 +695,6 @@
         console.error("Erro no AuthStateChanged:", e);
       }
     });
-
-    // Função para abrir e fechar os acordeões da Ficha Técnica
-    function toggleAccordion(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
-      }
-    }
 
     function setupRealtimeUserAndCompanySync(userEmail) {
       db.collection("empresas").onSnapshot((snapshot) => {
@@ -1090,29 +1053,10 @@
       });
     }
 
-    /* SALVAR CONDOMÍNIO COM A ESTRUTURA DA FASE 1 */
+    /* SALVAR CONDOMÍNIO COM FICHA TÉCNICA */
     function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
-      
-      const modemData = {
-        ip: document.getElementById('modemIp').value.trim(),
-        http: document.getElementById('modemHttp').value.trim(),
-        user: document.getElementById('modemUser').value.trim(),
-        pass: document.getElementById('modemPass').value.trim(),
-        wifi2gSsid: document.getElementById('wifi2gSsid').value.trim(),
-        wifi2gPass: document.getElementById('wifi2gPass').value.trim(),
-        wifi5gSsid: document.getElementById('wifi5gSsid').value.trim(),
-        wifi5gPass: document.getElementById('wifi5gPass').value.trim()
-      };
-
-      const mikrotikData = {
-        ip: document.getElementById('mikrotikIp').value.trim(),
-        http: document.getElementById('mikrotikHttp').value.trim(),
-        user: document.getElementById('mikrotikUser').value.trim(),
-        pass: document.getElementById('mikrotikPass').value.trim()
-      };
-
       const data = {
         name: document.getElementById('condoName').value.trim(),
         address: document.getElementById('condoAddress').value.trim(),
@@ -1121,12 +1065,14 @@
         phone: document.getElementById('condoPhone').value.trim(),
         lat: document.getElementById('condoLat').value.trim(),
         lng: document.getElementById('condoLng').value.trim(),
-        modem: modemData,
-        mikrotik: mikrotikData,
+        equipDvr: document.getElementById('equipDvr').value.trim(),
+        equipModem: document.getElementById('equipModem').value.trim(),
+        equipTravas: document.getElementById('equipTravas').value.trim(),
+        equipFaciais: document.getElementById('equipFaciais').value.trim(),
+        equipLpr: document.getElementById('equipLpr').value.trim(),
         notes: document.getElementById('condoNotes').value.trim(),
         ownerEmail: ownerEmail
       };
-
       if (!data.lat || !data.lng) { alert('Informe Latitude e Longitude.'); return; }
       if (id) {
         db.collection("condominios").doc(id).update(data).then(() => { showToast('Atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
@@ -1161,28 +1107,17 @@
       if (c) openModal(c);
     }
 
-    /* MODAL FICHA TÉCNICA LEITURA RÁPIDA (FASE 1) */
+    /* MODAL FICHA TÉCNICA LEITURA RÁPIDA */
     function openTechSheetModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
       document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
-      
-      let m = c.modem || {};
-      let mk = c.mikrotik || {};
-
       document.getElementById('techSheetContent').innerHTML = `
-        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);">
-          <b>🌐 Modem / Roteador:</b><br>
-          • IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')}<br>
-          • User: ${escapeHtml(m.user || '--')} | Pass: ${escapeHtml(m.pass || '--')}<br>
-          • Wi-Fi 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${escapeHtml(m.wifi2gPass || '--')})<br>
-          • Wi-Fi 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${escapeHtml(m.wifi5gPass || '--')})
-        </div>
-        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);">
-          <b>📡 Mikrotik:</b><br>
-          • IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')}<br>
-          • User: ${escapeHtml(mk.user || '--')} | Pass: ${escapeHtml(mk.pass || '--')}
-        </div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📹 DVR / Gravadores:</b> ${escapeHtml(c.equipDvr || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modem / Roteador:</b> ${escapeHtml(c.equipModem || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔒 Travas / Eletroímãs:</b> ${escapeHtml(c.equipTravas || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial:</b> ${escapeHtml(c.equipFaciais || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚗 Câmeras LPR:</b> ${escapeHtml(c.equipLpr || 'Não informado')}</div>
       `;
       document.getElementById('techSheetModal').classList.remove('hidden');
     }
@@ -1339,7 +1274,7 @@
       }
     }
 
-    /* ROTAS COM ID ÚNICO */
+    /* ROTAS COM ID ÚNICO (MANTÉM CHECKBOXES AO PESQUISAR) */
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -1461,32 +1396,10 @@
       document.getElementById('condoId').value = c ? c.id : '';
       document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
       if (c) {
-        document.getElementById('condoName').value = c.name || '';
-        document.getElementById('condoAddress').value = c.address || '';
-        document.getElementById('condoNumber').value = c.number || '';
-        document.getElementById('condoNeighborhood').value = c.neighborhood || '';
-        document.getElementById('condoPhone').value = c.phone || '';
-        document.getElementById('condoLat').value = c.lat || '';
-        document.getElementById('condoLng').value = c.lng || '';
-        document.getElementById('condoNotes').value = c.notes || '';
-
-        if (c.modem) {
-          document.getElementById('modemIp').value = c.modem.ip || '';
-          document.getElementById('modemHttp').value = c.modem.http || '';
-          document.getElementById('modemUser').value = c.modem.user || '';
-          document.getElementById('modemPass').value = c.modem.pass || '';
-          document.getElementById('wifi2gSsid').value = c.modem.wifi2gSsid || '';
-          document.getElementById('wifi2gPass').value = c.modem.wifi2gPass || '';
-          document.getElementById('wifi5gSsid').value = c.modem.wifi5gSsid || '';
-          document.getElementById('wifi5gPass').value = c.modem.wifi5gPass || '';
-        }
-
-        if (c.mikrotik) {
-          document.getElementById('mikrotikIp').value = c.mikrotik.ip || '';
-          document.getElementById('mikrotikHttp').value = c.mikrotik.http || '';
-          document.getElementById('mikrotikUser').value = c.mikrotik.user || '';
-          document.getElementById('mikrotikPass').value = c.mikrotik.pass || '';
-        }
+        ['Name', 'Address', 'Number', 'Neighborhood', 'Phone', 'Lat', 'Lng', 'Notes', 'EquipDvr', 'EquipModem', 'EquipTravas', 'EquipFaciais', 'EquipLpr'].forEach(k => {
+          const el = document.getElementById('condo' + k) || document.getElementById('equip' + k.replace('Equip',''));
+          if (el) el.value = c[k.toLowerCase()] || c[k.charAt(0).toLowerCase() + k.slice(1)] || '';
+        });
       }
       document.getElementById('condoModal').classList.remove('hidden');
     }
