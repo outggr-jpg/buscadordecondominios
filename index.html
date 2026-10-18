@@ -387,7 +387,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE GESTÃO DE EQUIPE (COM PERMISSÕES E REMOÇÃO) -->
+  <!-- MODAL DE GESTÃO DE EQUIPE -->
   <div id="teamModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
@@ -556,9 +556,8 @@
         <div class="version-item">
           <div class="version-title"><span>Versão 6.1.7</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Autenticação e fluxo de login otimizados e corrigidos.</li>
-            <li>Gestão de equipe aprimorada com controle de permissões por usuário e opção de remoção de membros.</li>
-            <li>Relatório Geral com filtros avançados e suporte completo a imagens no PDF.</li>
+            <li>Correção definitiva de sintaxe de funções assíncronas e fluxo de login.</li>
+            <li>Gestão de equipe com permissões granulares e exclusão de membros.</li>
           </ul>
         </div>
       </div>
@@ -689,33 +688,46 @@
     }
 
     function switchAuthMode(mode) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+
+      if (!loginForm || !registerForm) return;
+
       if (mode === 'login') {
-        document.getElementById('loginForm').style.display = 'flex';
-        document.getElementById('registerForm').style.display = 'none';
-        document.getElementById('tabLoginBtn').classList.add('active');
-        document.getElementById('tabRegisterBtn').classList.remove('active');
+        loginForm.style.display = 'flex';
+        registerForm.style.display = 'none';
+        if (tabLoginBtn) tabLoginBtn.classList.add('active');
+        if (tabRegisterBtn) tabRegisterBtn.classList.remove('active');
       } else {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('registerForm').style.display = 'flex';
-        document.getElementById('tabLoginBtn').classList.remove('active');
-        document.getElementById('tabRegisterBtn').classList.add('active');
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'flex';
+        if (tabLoginBtn) tabLoginBtn.classList.remove('active');
+        if (tabRegisterBtn) tabRegisterBtn.classList.add('active');
       }
     }
 
     function selectRole(role) {
       userRole = role;
+      const roleProp = document.getElementById('roleProprietario');
+      const roleUser = document.getElementById('roleUsuario');
+      const groupComp = document.getElementById('groupCompanyName');
+      const groupUser = document.getElementById('groupUserName');
+      const groupOwnerEmail = document.getElementById('groupCompanyOwnerEmail');
+
       if (role === 'owner') {
-        document.getElementById('roleProprietario').classList.add('active');
-        document.getElementById('roleUsuario').classList.remove('active');
-        document.getElementById('groupCompanyName').style.display = 'block';
-        document.getElementById('groupUserName').style.display = 'none';
-        document.getElementById('groupCompanyOwnerEmail').style.display = 'none';
+        if (roleProp) roleProp.classList.add('active');
+        if (roleUser) roleUser.classList.remove('active');
+        if (groupComp) groupComp.style.display = 'block';
+        if (groupUser) groupUser.style.display = 'none';
+        if (groupOwnerEmail) groupOwnerEmail.style.display = 'none';
       } else {
-        document.getElementById('roleUsuario').classList.add('active');
-        document.getElementById('roleProprietario').classList.remove('active');
-        document.getElementById('groupCompanyName').style.display = 'none';
-        document.getElementById('groupUserName').style.display = 'block';
-        document.getElementById('groupCompanyOwnerEmail').style.display = 'block';
+        if (roleUser) roleUser.classList.add('active');
+        if (roleProp) roleProp.classList.remove('active');
+        if (groupComp) groupComp.style.display = 'none';
+        if (groupUser) groupUser.style.display = 'block';
+        if (groupOwnerEmail) groupOwnerEmail.style.display = 'block';
       }
     }
 
