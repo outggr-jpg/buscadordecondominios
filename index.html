@@ -82,9 +82,9 @@
     
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 12px; }
     .modal-overlay.hidden { display: none !important; }
-    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 600px; width: 100%; padding: 20px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; font-size: 12px; color: var(--text-main); }
+    .modal { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; max-width: 600px; width: 100%; padding: 20px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); overflow: hidden; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
+    .modal-body { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; font-size: 12px; color: var(--text-main); max-height: calc(90vh - 100px); }
     
     .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; max-height: 260px; overflow-y: auto; padding: 4px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; min-height: 120px; }
     .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: #0f172a; }
@@ -254,7 +254,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.1.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.2.0</span>
               </div>
             </div>
           </div>
@@ -556,14 +556,14 @@
     </div>
   </div>
 
-  <!-- MODAL DE CADASTRO DE CONDOMÍNIO + FICHA TÉCNICA -->
+  <!-- MODAL DE CADASTRO DE ENDEREÇO DO CONDOMÍNIO (LÁPIS/NOVO) -->
   <div id="condoModal" class="modal-overlay hidden">
-    <div class="modal">
+    <div class="modal" style="max-width: 480px;">
       <div class="modal-header">
         <h3 id="modalTitle" style="color:var(--text-main); font-size: 16px;">Cadastrar Condomínio</h3>
         <button onclick="closeModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-      <form id="condoForm" onsubmit="saveCondo(event)">
+      <form id="condoForm" onsubmit="saveCondo(event)" class="modal-body">
         <input type="hidden" id="condoId">
         <div class="form-group"><label>Nome do Condomínio *</label><input type="text" id="condoName" required class="form-control"></div>
         <div class="form-row">
@@ -578,20 +578,53 @@
           <div class="form-group"><label>Latitude *</label><input type="text" id="condoLat" required class="form-control"></div>
           <div class="form-group"><label>Longitude *</label><input type="text" id="condoLng" required class="form-control"></div>
         </div>
-        <button type="button" onclick="captureCurrentGPS()" class="btn btn-slate" style="width: 100%; justify-content: center; margin-bottom: 12px;">📍 Capturar Coordenadas GPS</button>
+        <button type="button" onclick="captureCurrentGPS()" class="btn btn-slate" style="width: 100%; justify-content: center; margin-bottom: 4px;">📍 Capturar Coordenadas GPS</button>
+        <div class="form-group"><label>Observações</label><textarea id="condoNotes" rows="2" class="form-control" style="resize:none;"></textarea></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px;">
+          <button type="button" onclick="closeModal()" class="btn btn-slate">Cancelar</button>
+          <button type="submit" class="btn btn-slate">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE VISUALIZAÇÃO COMPLETA DA FICHA TÉCNICA (CONFIGURAÇÕES ATUAIS) -->
+  <div id="techSheetModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 id="techSheetTitle" style="color:var(--text-main); font-size: 16px;">🛠️ Ficha Técnica</h3>
+        <button onclick="closeTechSheetModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" id="techSheetContent" style="gap:10px;"></div>
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0;">
+        <button onclick="openConfigEquipmentModalFromTechSheet()" class="btn btn-emerald">⚙️ Gerenciar / Adicionar Equipamentos</button>
+        <button onclick="closeTechSheetModal()" class="btn btn-slate">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GESTÃO COMPLETA DE EQUIPAMENTOS (CONFIGURAÇÃO TÉCNICA EM SLOTS MÚLTIPLOS) -->
+  <div id="configEquipmentModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="configEquipTitle" style="color:var(--text-main); font-size: 16px;">⚙️ Configuração de Equipamentos</h3>
+        <button onclick="closeConfigEquipmentModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <form id="configEquipmentForm" onsubmit="saveConfigEquipment(event)" class="modal-body">
+        <input type="hidden" id="configEquipCondoId">
         
-        <!-- FICHA TÉCNICA - ACORDEÕES (TODOS EM MÚLTIPLOS SLOTS) -->
-        <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px;">
+        <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
           <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Múltiplos Slots):</label>
           
-          <!-- ACORDEÃO MODEM / ROTEADOR (MÚLTIPLOS SLOTS) -->
+          <!-- ACORDEÃO MODEM / ROTEADOR -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModem')">🌐 Modems / Roteadores <span>▼</span></button>
           <div id="accModem" class="accordion-body">
             <div id="modemContainer"></div>
             <button type="button" onclick="addModemSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Modem / Roteador</button>
           </div>
 
-          <!-- ACORDEÃO MIKROTIK (MÚLTIPLOS SLOTS) -->
+          <!-- ACORDEÃO MIKROTIK -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accMikrotik')">📡 Mikrotiks <span>▼</span></button>
           <div id="accMikrotik" class="accordion-body">
             <div id="mikrotikContainer"></div>
@@ -633,7 +666,7 @@
             <button type="button" onclick="addModuloPortaSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Módulo Porta IP</button>
           </div>
 
-          <!-- RECONHECIMENTO FACIAL (COM PORTA RTSP) -->
+          <!-- RECONHECIMENTO FACIAL -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accFaciais')">👤 Reconhecimento Facial <span>▼</span></button>
           <div id="accFaciais" class="accordion-body">
             <div id="facialContainer"></div>
@@ -641,26 +674,11 @@
           </div>
         </div>
 
-        <div class="form-group"><label>Observações</label><textarea id="condoNotes" rows="2" class="form-control" style="resize:none;"></textarea></div>
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
-          <button type="button" onclick="closeModal()" class="btn btn-slate">Cancelar</button>
-          <button type="submit" class="btn btn-slate">Salvar</button>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px;">
+          <button type="button" onclick="closeConfigEquipmentModal()" class="btn btn-slate">Cancelar</button>
+          <button type="submit" class="btn btn-emerald">Salvar Equipamentos</button>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- MODAL DE VISUALIZAÇÃO RÁPIDA DA FICHA TÉCNICA -->
-  <div id="techSheetModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 500px;">
-      <div class="modal-header">
-        <h3 id="techSheetTitle" style="color:var(--text-main); font-size: 16px;">🛠️ Ficha Técnica</h3>
-        <button onclick="closeTechSheetModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body" id="techSheetContent" style="gap:8px;"></div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <button onclick="closeTechSheetModal()" class="btn btn-slate">Fechar</button>
-      </div>
     </div>
   </div>
 
@@ -672,12 +690,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.1.0 (Múltiplos Slots Totais)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.2.0 (Separação Endereço x Equipamentos)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Modens / Roteadores convertidos para múltiplos slots.</li>
-            <li>Mikrotiks convertidos para múltiplos slots.</li>
-            <li>Reconhecimento Facial atualizado com Porta HTTP e Porta RTSP em múltiplos slots.</li>
-            <li>Ficha técnica rápida e salvamento atualizados de forma unificada.</li>
+            <li>Modal de cadastro/edição (lápis) restrito exclusivamente a dados de endereço, nome e localização GPS.</li>
+            <li>Modal de Ficha Técnica exibe fielmente todas as configurações atuais e permite gerenciar os equipamentos por slots múltiplos.</li>
+            <li>Correção de scroll e fluidez garantidas em modais longos.</li>
           </ul>
         </div>
       </div>
@@ -717,6 +734,7 @@
     let currentCompanyName = '';
     let currentCompanyLogo = '';
     let selectedRouteIds = new Set();
+    let currentActiveTechSheetId = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
@@ -936,7 +954,7 @@
       container.appendChild(div);
     }
 
-    // Slots de Reconhecimento Facial (com Porta HTTP e Porta RTSP)
+    // Slots de Reconhecimento Facial
     function addFacialSlot(data = {}) {
       const container = document.getElementById('facialContainer');
       const index = container.children.length;
@@ -1319,12 +1337,45 @@
       });
     }
 
-    /* SALVAR CONDOMÍNIO (TODOS OS MÓDULOS EM MÚLTIPLOS SLOTS) */
+    /* SALVAR DADOS DE ENDEREÇO DO CONDOMÍNIO (LÁPIS) */
     function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
-      
-      // Coletar Modems / Roteadores
+      const data = {
+        name: document.getElementById('condoName').value.trim(),
+        address: document.getElementById('condoAddress').value.trim(),
+        number: document.getElementById('condoNumber').value.trim(),
+        neighborhood: document.getElementById('condoNeighborhood').value.trim(),
+        phone: document.getElementById('condoPhone').value.trim(),
+        lat: document.getElementById('condoLat').value.trim(),
+        lng: document.getElementById('condoLng').value.trim(),
+        notes: document.getElementById('condoNotes').value.trim(),
+        ownerEmail: ownerEmail
+      };
+
+      if (!data.lat || !data.lng) { alert('Informe Latitude e Longitude.'); return; }
+      if (id) {
+        db.collection("condominios").doc(id).update(data).then(() => { showToast('Endereço atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
+      } else {
+        data.reports = [];
+        data.modems = [];
+        data.mikrotiks = [];
+        data.dvrs = [];
+        data.cameras = [];
+        data.controladoras = [];
+        data.modulosRf = [];
+        data.modulosPorta = [];
+        data.faciais = [];
+        db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
+      }
+    }
+
+    /* SALVAR CONFIGURAÇÃO DE EQUIPAMENTOS (FICHA TÉCNICA) */
+    function saveConfigEquipment(e) {
+      e.preventDefault();
+      const id = document.getElementById('configEquipCondoId').value;
+      if (!id) return;
+
       let modemsList = [];
       document.querySelectorAll('#modemContainer .dynamic-item-box').forEach(box => {
         modemsList.push({
@@ -1340,7 +1391,6 @@
         });
       });
 
-      // Coletar Mikrotiks
       let mikrotiksList = [];
       document.querySelectorAll('#mikrotikContainer .dynamic-item-box').forEach(box => {
         mikrotiksList.push({
@@ -1351,7 +1401,6 @@
         });
       });
 
-      // Coletar DVRs
       let dvrsList = [];
       document.querySelectorAll('#dvrContainer .dynamic-item-box').forEach(box => {
         dvrsList.push({
@@ -1365,7 +1414,6 @@
         });
       });
 
-      // Coletar Câmeras IP
       let camerasList = [];
       document.querySelectorAll('#cameraContainer .dynamic-item-box').forEach(box => {
         camerasList.push({
@@ -1378,7 +1426,6 @@
         });
       });
 
-      // Coletar Controladoras de Acesso
       let controladorasList = [];
       document.querySelectorAll('#controladoraContainer .dynamic-item-box').forEach(box => {
         controladorasList.push({
@@ -1389,7 +1436,6 @@
         });
       });
 
-      // Coletar Módulos RF IP
       let modulosRfList = [];
       document.querySelectorAll('#moduloRfContainer .dynamic-item-box').forEach(box => {
         modulosRfList.push({
@@ -1399,7 +1445,6 @@
         });
       });
 
-      // Coletar Módulos Porta IP
       let modulosPortaList = [];
       document.querySelectorAll('#moduloPortaContainer .dynamic-item-box').forEach(box => {
         modulosPortaList.push({
@@ -1409,7 +1454,6 @@
         });
       });
 
-      // Coletar Terminais Faciais
       let faciaisList = [];
       document.querySelectorAll('#facialContainer .dynamic-item-box').forEach(box => {
         faciaisList.push({
@@ -1422,14 +1466,7 @@
         });
       });
 
-      const data = {
-        name: document.getElementById('condoName').value.trim(),
-        address: document.getElementById('condoAddress').value.trim(),
-        number: document.getElementById('condoNumber').value.trim(),
-        neighborhood: document.getElementById('condoNeighborhood').value.trim(),
-        phone: document.getElementById('condoPhone').value.trim(),
-        lat: document.getElementById('condoLat').value.trim(),
-        lng: document.getElementById('condoLng').value.trim(),
+      const eqData = {
         modems: modemsList,
         mikrotiks: mikrotiksList,
         dvrs: dvrsList,
@@ -1437,18 +1474,15 @@
         controladoras: controladorasList,
         modulosRf: modulosRfList,
         modulosPorta: modulosPortaList,
-        faciais: faciaisList,
-        notes: document.getElementById('condoNotes').value.trim(),
-        ownerEmail: ownerEmail
+        faciais: faciaisList
       };
 
-      if (!data.lat || !data.lng) { alert('Informe Latitude e Longitude.'); return; }
-      if (id) {
-        db.collection("condominios").doc(id).update(data).then(() => { showToast('Atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
-      } else {
-        data.reports = [];
-        db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
-      }
+      db.collection("condominios").doc(id).update(eqData).then(() => {
+        showToast('Equipamentos salvos!');
+        loadCondosForOwner(ownerEmail);
+        closeConfigEquipmentModal();
+        openTechSheetModal(id);
+      });
     }
 
     function captureCurrentGPS() {
@@ -1476,8 +1510,9 @@
       if (c) openModal(c);
     }
 
-    /* FICHA TÉCNICA LEITURA RÁPIDA (TODOS OS MÓDULOS) */
+    /* FICHA TÉCNICA LEITURA RÁPIDA (EXIBE TUDO QUE ESTÁ NAS CONFIGURAÇÕES) */
     function openTechSheetModal(id) {
+      currentActiveTechSheetId = id;
       const c = condos.find(x => x.id === id);
       if (!c) return;
       document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
@@ -1557,10 +1592,54 @@
         html += `</div>`;
       }
 
-      document.getElementById('techSheetContent').innerHTML = html || '<div style="color:var(--text-muted); text-align:center;">Nenhum equipamento cadastrado.</div>';
+      document.getElementById('techSheetContent').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum equipamento configurado ainda.<br>Clique em "Gerenciar / Adicionar Equipamentos" abaixo.</div>';
       document.getElementById('techSheetModal').classList.remove('hidden');
     }
     function closeTechSheetModal() { document.getElementById('techSheetModal').classList.add('hidden'); }
+
+    function openConfigEquipmentModalFromTechSheet() {
+      closeTechSheetModal();
+      if (!currentActiveTechSheetId) return;
+      const c = condos.find(x => x.id === currentActiveTechSheetId);
+      if (!c) return;
+
+      document.getElementById('configEquipCondoId').value = c.id;
+      document.getElementById('configEquipTitle').textContent = `⚙️ Configuração de Equipamentos: ${c.name}`;
+
+      document.getElementById('modemContainer').innerHTML = '';
+      document.getElementById('mikrotikContainer').innerHTML = '';
+      document.getElementById('dvrContainer').innerHTML = '';
+      document.getElementById('cameraContainer').innerHTML = '';
+      document.getElementById('controladoraContainer').innerHTML = '';
+      document.getElementById('moduloRfContainer').innerHTML = '';
+      document.getElementById('moduloPortaContainer').innerHTML = '';
+      document.getElementById('facialContainer').innerHTML = '';
+
+      // Recolher acordeões
+      document.getElementById('accModem').classList.remove('show');
+      document.getElementById('accMikrotik').classList.remove('show');
+      document.getElementById('accDvr').classList.remove('show');
+      document.getElementById('accCameras').classList.remove('show');
+      document.getElementById('accControladoras').classList.remove('show');
+      document.getElementById('accModulosRf').classList.remove('show');
+      document.getElementById('accModulosPorta').classList.remove('show');
+      document.getElementById('accFaciais').classList.remove('show');
+
+      let modems = c.modems || (c.modem ? [c.modem] : []);
+      let mtks = c.mikrotiks || (c.mikrotik ? [c.mikrotik] : []);
+
+      modems.forEach(m => addModemSlot(m));
+      mtks.forEach(mk => addMikrotikSlot(mk));
+      if (c.dvrs && Array.isArray(c.dvrs)) c.dvrs.forEach(d => addDvrSlot(d));
+      if (c.cameras && Array.isArray(c.cameras)) c.cameras.forEach(cm => addCameraSlot(cm));
+      if (c.controladoras && Array.isArray(c.controladoras)) c.controladoras.forEach(ct => addControladoraSlot(ct));
+      if (c.modulosRf && Array.isArray(c.modulosRf)) c.modulosRf.forEach(rf => addModuloRfSlot(rf));
+      if (c.modulosPorta && Array.isArray(c.modulosPorta)) c.modulosPorta.forEach(p => addModuloPortaSlot(p));
+      if (c.faciais && Array.isArray(c.faciais)) c.faciais.forEach(f => addFacialSlot(f));
+
+      document.getElementById('configEquipmentModal').classList.remove('hidden');
+    }
+    function closeConfigEquipmentModal() { document.getElementById('configEquipmentModal').classList.add('hidden'); }
 
     function toggleCheckIn(id) {
       const c = condos.find(x => x.id === id);
@@ -1808,7 +1887,7 @@
             <div class="card-header">
               <div class="card-title">${escapeHtml(c.name)}</div>
               <div>
-                <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>
+                <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar Endereço">✏️</button>
                 ${userRole !== 'user' ? `<button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>` : ''}
               </div>
             </div>
@@ -1832,26 +1911,8 @@
 
     function openModal(c = null) {
       document.getElementById('condoForm').reset();
-      document.getElementById('modemContainer').innerHTML = '';
-      document.getElementById('mikrotikContainer').innerHTML = '';
-      document.getElementById('dvrContainer').innerHTML = '';
-      document.getElementById('cameraContainer').innerHTML = '';
-      document.getElementById('controladoraContainer').innerHTML = '';
-      document.getElementById('moduloRfContainer').innerHTML = '';
-      document.getElementById('moduloPortaContainer').innerHTML = '';
-      document.getElementById('facialContainer').innerHTML = '';
       document.getElementById('condoId').value = c ? c.id : '';
-      document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
-      
-      // Recolher todos os acordeões
-      document.getElementById('accModem').classList.remove('show');
-      document.getElementById('accMikrotik').classList.remove('show');
-      document.getElementById('accDvr').classList.remove('show');
-      document.getElementById('accCameras').classList.remove('show');
-      document.getElementById('accControladoras').classList.remove('show');
-      document.getElementById('accModulosRf').classList.remove('show');
-      document.getElementById('accModulosPorta').classList.remove('show');
-      document.getElementById('accFaciais').classList.remove('show');
+      document.getElementById('modalTitle').textContent = c ? 'Editar Endereço do Condomínio' : 'Cadastrar Condomínio';
 
       if (c) {
         document.getElementById('condoName').value = c.name || '';
@@ -1862,18 +1923,6 @@
         document.getElementById('condoLat').value = c.lat || '';
         document.getElementById('condoLng').value = c.lng || '';
         document.getElementById('condoNotes').value = c.notes || '';
-
-        let modems = c.modems || (c.modem ? [c.modem] : []);
-        let mtks = c.mikrotiks || (c.mikrotik ? [c.mikrotik] : []);
-
-        modems.forEach(m => addModemSlot(m));
-        mtks.forEach(mk => addMikrotikSlot(mk));
-        if (c.dvrs && Array.isArray(c.dvrs)) c.dvrs.forEach(d => addDvrSlot(d));
-        if (c.cameras && Array.isArray(c.cameras)) c.cameras.forEach(cm => addCameraSlot(cm));
-        if (c.controladoras && Array.isArray(c.controladoras)) c.controladoras.forEach(ct => addControladoraSlot(ct));
-        if (c.modulosRf && Array.isArray(c.modulosRf)) c.modulosRf.forEach(rf => addModuloRfSlot(rf));
-        if (c.modulosPorta && Array.isArray(c.modulosPorta)) c.modulosPorta.forEach(p => addModuloPortaSlot(p));
-        if (c.faciais && Array.isArray(c.faciais)) c.faciais.forEach(f => addFacialSlot(f));
       }
       document.getElementById('condoModal').classList.remove('hidden');
     }
