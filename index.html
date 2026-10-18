@@ -163,6 +163,9 @@
     .contract-category-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px; margin-bottom: 8px; }
     .contract-subtype-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
     .contract-item-row { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    
+    .masked-pwd { cursor: pointer; background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1px 6px; border-radius: 6px; color: #38bdf8; font-family: monospace; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; user-select: none; }
+    .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
   </style>
 </head>
 <body>
@@ -268,7 +271,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.3.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.4.0</span>
               </div>
             </div>
           </div>
@@ -298,7 +301,7 @@
     <main>
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, rua, número, bairro ou observação..." class="search-input">
+        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, IP de equipamento, modelo de DVR ou operadora..." class="search-input">
       </div>
 
       <div class="meta-bar">
@@ -308,7 +311,7 @@
       <div id="condoGrid" class="grid"></div>
       <div id="emptyState" style="display:none; text-align:center; padding: 50px 20px; color: #64748b;">
         <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-        Nenhum condomínio encontrado.
+        Nenhum condomínio ou equipamento encontrado.
       </div>
     </main>
   </div>
@@ -747,10 +750,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.3.0 (Criptografia AES da Ficha Técnica)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 8.4.0 (Segurança Visual e Busca por IP)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Implementada criptografia AES-256 no cliente para proteger senhas e IPs de equipamentos no Firestore.</li>
-            <li>Segurança reforçada contra leitura direta no banco de dados.</li>
+            <li>Mascaramento de senhas na Ficha Técnica com exibição individual via clique (👁️) para segurança em campo.</li>
+            <li>Busca global expandida: pesquisa de condomínios por IPs, modelo de DVR, operadora e senhas de Wi-Fi.</li>
+            <li>Criptografia AES-256 no banco mantida para total privacidade.</li>
           </ul>
         </div>
       </div>
@@ -784,6 +788,24 @@
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
         return originalText || ciphertext;
       } catch(e) { return ciphertext; }
+    }
+
+    function renderMaskedPassword(realPass, idSuffix) {
+      if (!realPass) return '--';
+      const elementId = `pwd_${idSuffix}`;
+      return `<span id="${elementId}" class="masked-pwd" onclick="togglePasswordVisibility('${elementId}', '${escapeHtml(realPass)}')">•••••••• 👁️</span>`;
+    }
+
+    function togglePasswordVisibility(elementId, realPass) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (el.getAttribute('data-shown') === 'true') {
+        el.innerHTML = `•••••••• 👁️`;
+        el.setAttribute('data-shown', 'false');
+      } else {
+        el.innerHTML = `${realPass} 🙈`;
+        el.setAttribute('data-shown', 'true');
+      }
     }
 
     const CONTRACT_CATEGORIES = [
@@ -2070,7 +2092,7 @@
       currentActiveTechSheetId = id;
       const c = condos.find(x => x.id === id);
       if (!c) return;
-      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica (Criptografada): ${c.name}`;
+      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
       
       let modems = c.modems || [];
       let mtks = c.mikrotiks || [];
@@ -2086,7 +2108,7 @@
       if (modems.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modems / Roteadores (${modems.length}):</b>`;
         modems.forEach((m, i) => {
-          html += `<br>• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Pass: ${escapeHtml(m.pass || '--')} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${escapeHtml(m.wifi2gPass || '--')}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${escapeHtml(m.wifi5gPass || '--')})`;
+          html += `<br>• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Senha: ${renderMaskedPassword(m.pass, `modem_${i}`)} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${renderMaskedPassword(m.wifi2gPass, `wifi2g_${i}`)}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${renderMaskedPassword(m.wifi5gPass, `wifi5g_${i}`)})`;
           if (m.extra) html += `<br>&nbsp;&nbsp;📝 <i>PPPoE/Extra:</i> ${escapeHtml(m.extra)}`;
         });
         html += `</div>`;
@@ -2095,7 +2117,7 @@
       if (mtks.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Mikrotiks (${mtks.length}):</b>`;
         mtks.forEach((mk, i) => {
-          html += `<br>• #${i+1} IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')} | User: ${escapeHtml(mk.user || '--')} | Pass: ${escapeHtml(mk.pass || '--')}`;
+          html += `<br>• #${i+1} IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')} | User: ${escapeHtml(mk.user || '--')} | Senha: ${renderMaskedPassword(mk.pass, `mtk_${i}`)}`;
         });
         html += `</div>`;
       }
@@ -2103,7 +2125,7 @@
       if (dvrs.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs (${dvrs.length}):</b>`;
         dvrs.forEach((d, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Pass: ${escapeHtml(d.pass || '--')}`;
+          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
         });
         html += `</div>`;
       }
@@ -2111,7 +2133,7 @@
       if (cams.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP (${cams.length}):</b>`;
         cams.forEach((cm, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Pass: ${escapeHtml(cm.pass || '--')}`;
+          html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Senha: ${renderMaskedPassword(cm.pass, `cam_${i}`)}`;
         });
         html += `</div>`;
       }
@@ -2143,7 +2165,7 @@
       if (faciais.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial (${faciais.length}):</b>`;
         faciais.forEach((f, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Pass: ${escapeHtml(f.pass || '--')}`;
+          html += `<br>• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Senha: ${renderMaskedPassword(f.pass, `facial_${i}`)}`;
         });
         html += `</div>`;
       }
@@ -2448,9 +2470,31 @@
       }, { enableHighAccuracy: true });
     }
 
+    function condoMatchesSearch(c, search) {
+      if (!search) return true;
+      const s = search.toLowerCase();
+      if (c.name && c.name.toLowerCase().includes(s)) return true;
+      if (c.address && c.address.toLowerCase().includes(s)) return true;
+      if (c.neighborhood && c.neighborhood.toLowerCase().includes(s)) return true;
+      if (c.notes && c.notes.toLowerCase().includes(s)) return true;
+
+      // Busca nos equipamentos da ficha técnica
+      const equipmentArrays = [c.modems, c.mikrotiks, c.dvrs, c.cameras, c.controladoras, c.modulosRf, c.modulosPorta, c.faciais];
+      for (let arr of equipmentArrays) {
+        if (arr && Array.isArray(arr)) {
+          for (let item of arr) {
+            for (let k in item) {
+              if (item[k] && String(item[k]).toLowerCase().includes(s)) return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
     function renderCondos() {
-      const search = document.getElementById('searchInput').value.toLowerCase().trim();
-      const filtered = condos.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
+      const search = document.getElementById('searchInput').value.trim();
+      const filtered = condos.filter(c => condoMatchesSearch(c, search));
       document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length}`;
       document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
       
