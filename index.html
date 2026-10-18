@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestão Operacional de Condomínios</title>
+  <title>Buscador de Condomínios</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   <!-- SDKs do Firebase Compat -->
@@ -194,7 +194,7 @@
       <div style="text-align: center; margin-bottom: 12px;">
         <div style="background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);">🏢</div>
       </div>
-      <h2 class="auth-title">Gestão de Condomínios</h2>
+      <h2 class="auth-title">Buscador de Condomínios</h2>
       <p class="auth-subtitle">Acesso Operacional e Gestão de Campo</p>
 
       <div id="inviteNotice" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; text-align: center;">
@@ -263,10 +263,10 @@
               <div class="brand-icon">🏢</div>
             </div>
             <div>
-              <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
+              <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.2.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.2.1</span>
               </div>
             </div>
           </div>
@@ -318,7 +318,7 @@
         <h3 style="color:var(--text-main); font-size: 16px;">🗺️ Selecione o Navegador</h3>
       </div>
       <div class="modal-body" style="padding-top: 10px;">
-        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por qual aplicativo deseja iniciar a rota:</p>
+        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por cuál aplicativo deseja iniciar a rota:</p>
         <div class="gps-buttons-container">
           <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">🗺️ Maps</a>
           <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">🚗 Waze</a>
@@ -745,11 +745,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.2.0 (Controle de Acesso ao Gestor de Equipes)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 8.2.1 (Atualização de Identidade)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Adicionada permissão explícita para o Gestor de Equipes e Permissões (`manageTeam`).</li>
-            <li>Novos técnicos cadastrados via link entram com acesso ao gestor de equipes bloqueado por padrão.</li>
-            <li>Restrição de segurança reforçada para impedir que usuários sem permissão abram a gestão de equipe ou editem cargos.</li>
+            <li>Renomeação oficial para **Buscador de Condomínios** em toda a interface e telas de autenticação.</li>
+            <li>Controle de acesso aprimorado e permissão `manageTeam` para novas contas criadas via link.</li>
           </ul>
         </div>
       </div>
@@ -1117,7 +1116,7 @@
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail) {
-            currentCompanyName = data.companyName || 'Gestão de Condomínios';
+            currentCompanyName = data.companyName || 'Buscador de Condomínios';
             currentCompanyLogo = data.companyLogo || '';
             updateHeaderBrandDisplay();
           }
@@ -1239,7 +1238,6 @@
           const companyOwnerEmail = inviteParam;
           const userName = document.getElementById('regUserName').value.trim() || email.split('@')[0];
           
-          // Permissões seguras padrão para novos técnicos cadastrados por link (sem acesso ao gestor de equipe, sem exclusão)
           const safeDefaultPerms = {
             addCondo: true,
             editCondo: true,
@@ -1262,7 +1260,7 @@
 
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
-          showMainApp('Gestão de Condomínios', '', companyOwnerEmail);
+          showMainApp('Buscador de Condomínios', '', companyOwnerEmail);
         }
         showToast('Conta criada com sucesso!');
       }).catch(err => alert('Erro ao criar conta: ' + err.message));
@@ -1306,10 +1304,10 @@
         } else {
           ownerEmail = userEmail;
         }
-        showMainApp('Gestão de Condomínios', '', ownerEmail);
+        showMainApp('Buscador de Condomínios', '', ownerEmail);
       }).catch(() => {
         ownerEmail = userEmail;
-        showMainApp('Gestão de Condomínios', '', ownerEmail);
+        showMainApp('Buscador de Condomínios', '', ownerEmail);
       });
     }
 
@@ -1411,7 +1409,7 @@
     }
 
     function updateHeaderBrandDisplay() {
-      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Gestão de Condomínios';
+      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Buscador de Condomínios';
       const logoContainer = document.getElementById('headerBrandLogoContainer');
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
@@ -1952,7 +1950,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Gestao de Condominios", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
       doc.setFontSize(12);
       doc.text(`Escopo Contratual - ${cleanText(c.name)}`, 14, 25);
       doc.setFontSize(9);
@@ -2537,7 +2535,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Gestao de Condominios", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
       doc.setFontSize(12);
       doc.text(`Relatorio de Visita - ${cleanText(condoName)}`, 14, 25);
       doc.setFontSize(9);
@@ -2722,7 +2720,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Gestao de Condominios", 14, 20);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 20);
       doc.setFontSize(12);
       doc.text("Relatorio Geral de Atendimentos Consolidado", 14, 28);
       
