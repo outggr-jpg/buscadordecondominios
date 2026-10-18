@@ -285,7 +285,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.1</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.2</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
@@ -405,7 +405,6 @@
           <div style="display:flex; flex-direction:column; gap:6px;">
             <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe, Permissões e Ranking</button>
             <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
-            <!-- Auditoria reposicionada acima de Instalar Aplicativo conforme solicitado -->
             <button onclick="closeSettingsModal(); openGlobalAuditModal();" class="btn btn-slate" style="justify-content: flex-start;">📜 Auditoria Detalhada de Alterações</button>
             <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
           </div>
@@ -443,9 +442,7 @@
         <h3 style="color:var(--text-main); font-size: 16px;">📜 Auditoria Detalhada de Alterações</h3>
         <button onclick="closeGlobalAuditModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-      <div class="modal-body" id="globalAuditListContainer" style="gap:8px;">
-        <!-- Preenchido dinamicamente -->
-      </div>
+      <div class="modal-body" id="globalAuditListContainer" style="gap:8px;"></div>
       <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
         <button onclick="closeGlobalAuditModal()" class="btn btn-slate">Fechar</button>
       </div>
@@ -793,11 +790,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.1 (Busca por IP em Gerenciar Equipamentos & Auditoria Reposicionada)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.2.2 (Correção de Sintaxe no Login)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Busca por IP reposicionada para dentro de "Gerenciar Equipamentos".</li>
-            <li>Menu de auditoria detalhada reposicionado em Configurações, logo acima de Instalar Aplicativo.</li>
-            <li>Suporte offline mantido com Dexie.js e sincronização automática.</li>
+            <li>Correção do erro de sintaxe que impedia o carregamento do script e a execução do login.</li>
+            <li>Busca por IP em "Gerenciar Equipamentos" e auditoria em Configurações ativas.</li>
           </ul>
         </div>
       </div>
@@ -1595,7 +1591,7 @@
         }
       });
 
-      container.innerHTML = hasAudit ? html : '<div style="color:var('--text-muted'); text-align:center; padding:20px;">Nenhum registro de auditoria encontrado nos condomínios.</div>';
+      container.innerHTML = hasAudit ? html : '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum registro de auditoria encontrado nos condomínios.</div>';
       document.getElementById('globalAuditModal').classList.remove('hidden');
     }
 
