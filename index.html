@@ -256,7 +256,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.7.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.8.0</span>
               </div>
             </div>
           </div>
@@ -710,9 +710,12 @@
 
         <div id="contractCategoriesContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px; flex-shrink:0;">
-          <button type="button" onclick="closeContractScopeModal()" class="btn btn-slate">Cancelar</button>
-          <button type="submit" class="btn btn-emerald">Salvar Escopo Contratual</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px; flex-shrink:0;">
+          <button type="button" onclick="downloadContractScopePDF()" class="btn btn-slate">📄 Exportar Escopo em PDF</button>
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="closeContractScopeModal()" class="btn btn-slate">Cancelar</button>
+            <button type="submit" class="btn btn-emerald">Salvar Escopo Contratual</button>
+          </div>
         </div>
       </form>
     </div>
@@ -727,11 +730,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.7.0 (Sub-blocos Diretos por Categoria)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.8.0 (Correção PDF Relatórios & Exportador de Escopo)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Exibição nativa de todos os tipos de equipamentos dentro da categoria expandida no Escopo Contratual.</li>
-            <li>Botão de adicionar slots específicos diretamente abaixo do tipo correspondente (ex: Câmeras IP, Câmeras Analógicas, Nobreak, etc.).</li>
-            <li>Mantido o controle de quantidade, status, peças, posse e observações para cada item.</li>
+            <li>Corrigido bug na geração do PDF de relatórios devido ao novo checklist de CFTV/Motores.</li>
+            <li>Adicionada funcionalidade de exportar Escopo Contratual do Condomínio em PDF formatado.</li>
+            <li>Melhoria no cálculo visual de quebra de páginas em PDFs no jsPDF.</li>
           </ul>
         </div>
       </div>
@@ -1781,6 +1784,78 @@
       });
     }
 
+    function downloadContractScopePDF() {
+      const id = document.getElementById('contractCondoId').value;
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(currentCompanyName || "Gestão de Condomínios", 14, 18);
+      doc.setFontSize(12);
+      doc.text(`Escopo Contratual - ${c.name}`, 14, 25);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Endereço: ${c.address}, ${c.number} - ${c.neighborhood || ''}`, 14, 31);
+      doc.text(`Data do Relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
+
+      doc.setLineWidth(0.5);
+      doc.line(14, 40, 196, 40);
+
+      let y = 48;
+      const scopeList = c.contractScopeList || [];
+
+      if (scopeList.length === 0) {
+        doc.setFontSize(10);
+        doc.text("Nenhum item cadastrado no escopo deste condomínio.", 14, y);
+      } else {
+        CONTRACT_CATEGORIES.forEach(cat => {
+          const catSlots = scopeList.filter(s => s.catId === cat.catId);
+          if (catSlots.length > 0) {
+            if (y > 260) { doc.addPage(); y = 20; }
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setFillColor(240, 240, 240);
+            doc.rect(14, y - 4, 182, 7, 'F');
+            doc.text(cat.catName, 16, y);
+            y += 8;
+
+            catSlots.forEach(s => {
+              if (y > 265) { doc.addPage(); y = 20; }
+              const typeDef = cat.types.find(t => t.typeId === s.typeId);
+              const label = typeDef ? typeDef.label : s.typeId;
+
+              let statusStr = s.status === 'incluso' ? 'Incluso' : (s.status === 'nao_incluso' ? 'Nao Incluso' : 'Parcial');
+              let pieceStr = s.pieces === 'com_pecas' ? 'Com Pecas' : 'Apenas M.O.';
+              let posseStr = s.posse === 'proprio' ? 'Condominio' : 'Comodato';
+
+              doc.setFont("helvetica", "bold");
+              doc.setFontSize(9);
+              doc.text(`• ${label} (Qtd: ${s.qty})`, 16, y);
+              
+              doc.setFont("helvetica", "normal");
+              doc.text(`Local: ${s.location || 'N/A'} | Status: ${statusStr} | Pecas: ${pieceStr} | Posse: ${posseStr}`, 20, y + 4);
+              
+              if (s.note) {
+                doc.setFont("helvetica", "italic");
+                doc.text(`Obs: ${s.note}`, 20, y + 8);
+                y += 4;
+              }
+
+              y += 10;
+            });
+            y += 4;
+          }
+        });
+      }
+
+      doc.save(`escopo_${c.name.toLowerCase().replace(/\s+/g, '_')}.pdf`);
+      showToast('Escopo contratual exportado em PDF!');
+    }
+
     function captureCurrentGPS() {
       if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
       showToast('Capturando GPS...');
@@ -2367,37 +2442,57 @@
       if (allReports.length === 0) { alert('Nenhum relatório para exportar com os filtros atuais.'); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
+
+      // Sanitizador seguro para o jsPDF
+      const cleanText = (str) => {
+        if (!str) return '';
+        return String(str)
+          .replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '')
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      };
+
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(currentCompanyName || "Gestão de Condomínios", 14, 20);
+      doc.text(cleanText(currentCompanyName) || "Gestao de Condominios", 14, 20);
       doc.setFontSize(12);
-      doc.text("Relatório Geral de Atendimentos Consolidado", 14, 28);
+      doc.text("Relatorio Geral de Atendimentos Consolidado", 14, 28);
       
-      let filterDesc = 'Filtros: ';
       let uFilter = document.getElementById('filterUserSelect').value;
       let cFilter = document.getElementById('filterCondoSelect').value;
       let sDate = document.getElementById('filterStartDate').value;
       let eDate = document.getElementById('filterEndDate').value;
-      filterDesc += `Técnico: ${uFilter || 'Todos'} | Condomínio: ${cFilter || 'Todos'} | Período: ${sDate || 'Início'} até ${eDate || 'Hoje'}`;
+      let filterDesc = `Filtros: Tecnico: ${uFilter || 'Todos'} | Condominio: ${cFilter || 'Todos'} | Periodo: ${sDate || 'Inicio'} ate ${eDate || 'Hoje'}`;
+      
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.text(filterDesc, 14, 34);
+      doc.text(cleanText(filterDesc), 14, 34);
+      doc.setLineWidth(0.5);
+      doc.line(14, 38, 196, 38);
 
-      let y = 44;
+      let y = 46;
       for (let i = 0; i < allReports.length; i++) {
         let r = allReports[i];
         if (y > 250) { doc.addPage(); y = 20; }
+        
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
-        doc.text(`${r.condoName} - ${r.date} (${r.checkInTime} às ${r.checkOutTime})`, 14, y);
+        doc.text(`${cleanText(r.condoName)} - ${r.date} (${r.checkInTime} as ${r.checkOutTime})`, 14, y);
         y += 6;
+
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text(`Técnico: ${r.userEmail} | Tempo: ${r.duration || '--'}`, 14, y);
+        doc.text(`Tecnico: ${r.userEmail} | Tempo: ${r.duration || '--'}`, 14, y);
         y += 6;
-        let split = doc.splitTextToSize(`Serviço: ${r.text}`, 180);
-        doc.text(split, 14, y);
-        y += (split.length * 6) + 4;
+
+        let sanitizedReport = cleanText(r.text);
+        let splitLines = doc.splitTextToSize(`Servico: ${sanitizedReport}`, 180);
+        
+        for (let l = 0; l < splitLines.length; l++) {
+          if (y > 270) { doc.addPage(); y = 20; }
+          doc.text(splitLines[l], 14, y);
+          y += 5;
+        }
+        
         y += 6;
       }
       doc.save(`relatorio_geral_filtrado.pdf`);
