@@ -88,7 +88,7 @@
     
     .media-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; max-height: 260px; overflow-y: auto; padding: 4px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; min-height: 120px; }
     .media-preview-item { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: #0f172a; }
-    .media-preview-item img, .media-preview-item video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .media-preview-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .media-preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(225, 29, 72, 0.95); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
     .report-card { background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
@@ -98,10 +98,9 @@
     .report-media-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
     .report-media-thumb:hover { transform: scale(1.05); }
 
-    /* LIGHTBOX TELA CHEIA */
     .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .lightbox-modal.hidden { display: none; }
-    .lightbox-img, .lightbox-video { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+    .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
     .version-item { border-left: 2px solid #0284c7; padding-left: 10px; margin-bottom: 12px; }
@@ -129,7 +128,6 @@
 
     .user-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 16px; }
     
-    /* PALETA DE CORES EM TEMPO REAL */
     .color-picker-box { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
     .color-picker-input { -webkit-appearance: none; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; background: none; padding: 0; }
     .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
@@ -141,7 +139,6 @@
     .toast { position: fixed; bottom: 20px; right: 20px; background-color: var(--bg-card); border: 1px solid #0284c7; color: var(--text-main); padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 100; }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    /* ESTILOS DOS CARDS DE GPS */
     .gps-buttons-container { display: flex; gap: 12px; margin-bottom: 15px; width: 100%; }
     .gps-card { flex: 1; padding: 14px 16px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: opacity 0.2s, transform 0.1s; cursor: pointer; font-size: 15px; }
     .gps-card:hover { opacity: 0.9; transform: translateY(-1px); }
@@ -155,7 +152,7 @@
 
   <div id="toast" class="toast">Ação realizada com sucesso!</div>
 
-  <!-- LIGHTBOX TELA CHEIA PARA FOTOS E VÍDEOS -->
+  <!-- LIGHTBOX TELA CHEIA PARA FOTOS -->
   <div id="lightboxModal" class="lightbox-modal hidden">
     <button class="lightbox-close" onclick="closeLightbox()">✕</button>
     <div id="lightboxContentContainer" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;"></div>
@@ -234,7 +231,6 @@
   <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     <header>
       <div class="header-container">
-        <!-- LINHA 1: MARCA À ESQUERDA | UTILIZADOR À DIREITA -->
         <div class="header-top-row">
           <div class="brand">
             <div id="headerBrandLogoContainer">
@@ -244,7 +240,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.4</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.1.5</span>
               </div>
             </div>
           </div>
@@ -262,7 +258,6 @@
           </div>
         </div>
 
-        <!-- LINHA 2: BOTÕES DE AÇÃO À ESQUERDA -->
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
@@ -298,12 +293,10 @@
       </div>
       <div class="modal-body" style="padding-top: 10px;">
         <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por qual aplicativo deseja iniciar a rota:</p>
-        
         <div class="gps-buttons-container">
           <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">🗺️ Maps</a>
           <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">🚗 Waze</a>
         </div>
-        
         <button type="button" onclick="closeGpsModal()" class="gps-cancel-btn">Cancelar</button>
       </div>
     </div>
@@ -383,7 +376,6 @@
           </div>
         </div>
 
-        <!-- BOTÃO SAIR -->
         <div style="border-top:1px solid var(--border-color); padding-top:12px; margin-top:8px;">
           <button onclick="closeSettingsModal(); handleLogout();" class="btn btn-rose" style="width: 100%; justify-content: center; padding: 10px;">🚪 Sair da Conta</button>
         </div>
@@ -472,7 +464,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM SALVAMENTO DIRETO SEGURO) -->
+  <!-- MODAL DE RELATÓRIO / CHECK-OUT (COM ENVIO PARA GOOGLE DRIVE) -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -482,7 +474,12 @@
       <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
         <input type="hidden" id="reportCondoId">
         <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
-        <div class="form-group"><label>Fotos com Marca d'Água:</label><input type="file" id="reportMediaInput" accept="image/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;"><div id="mediaPreviewContainer" class="media-preview-container"></div></div>
+        <div class="form-group">
+          <label>Fotos com Marca d'Água:</label>
+          <input type="file" id="reportMediaInput" accept="image/*" multiple onchange="handleMediaSelection(event)" class="form-control" style="padding: 6px;">
+          <div id="mediaPreviewContainer" class="media-preview-container"></div>
+          <div id="uploadProgressInfo" style="font-size:11px; color:#38bdf8; margin-top:4px; display:none;">Enviando fotos para o Google Drive... <span id="uploadProgressCount"></span></div>
+        </div>
         
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border-color);">
           <button type="button" onclick="closeReportModal()" class="btn btn-slate">Cancelar</button>
@@ -543,11 +540,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.1.4</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.1.5</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Sistema de Check-out e relatórios otimizado para salvamento direto e instantâneo.</li>
-            <li>Fotos com marca d'água embutida salvas com segurança.</li>
-            <li>Rotas otimizadas por proximidade com desmarcação padrão.</li>
+            <li>Integração direta com o Google Drive via Google Apps Script configurada para a pasta "Buscador de condominios".</li>
+            <li>Upload automático de fotos com marca d'água embutida direto para o Drive da empresa.</li>
           </ul>
         </div>
       </div>
@@ -565,6 +561,9 @@
       appId: "1:843028696668:web:b3ed59764b1891a291e099",
       measurementId: "G-BQ1ECYGF8T"
     };
+
+    // URL DO SEU GOOGLE APPS SCRIPT PARA O GOOGLE DRIVE
+    const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
     try { firebase.initializeApp(firebaseConfig); } catch(err) {}
     const db = firebase.firestore();
@@ -839,7 +838,7 @@
             <span style="font-size:10px; color:#38bdf8;">${data.role === 'owner' ? 'Proprietário' : 'Técnico'}</span>
           </div>`;
         });
-        document.getElementById('teamMemberListContainer').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum membro cadastrado.</div>';
+        document.getElementById('teamMemberListContainer').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum outro membro cadastrado.</div>';
       });
       document.getElementById('teamModal').classList.remove('hidden');
     }
@@ -968,7 +967,7 @@
         if (f.type.startsWith('image')) {
           const dataUrl = await readFileAsDataURL(f);
           const watermarked = await applyWatermarkAsync(dataUrl, currentCompanyName, currentUser.email.split('@')[0]);
-          selectedMediaFiles.push({ type: 'image', previewUrl: watermarked });
+          selectedMediaFiles.push({ fileObj: f, previewUrl: watermarked });
         }
       }
       renderMediaPreviews();
@@ -984,17 +983,17 @@
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height;
-          if (w > 800) { h = Math.round((h * 800) / w); w = 800; }
+          if (w > 1000) { h = Math.round((h * 1000) / w); w = 1000; }
           canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          const bh = Math.max(26, h * 0.08);
+          const bh = Math.max(28, h * 0.08);
           ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, h - bh, w, bh);
-          ctx.font = `bold ${Math.max(11, Math.floor(bh * 0.36))}px sans-serif`; ctx.fillStyle = '#ffffff';
+          ctx.font = `bold ${Math.max(12, Math.floor(bh * 0.38))}px sans-serif`; ctx.fillStyle = '#ffffff';
           ctx.fillText(`📍 ${condoName} | 👤 ${techName}`, 12, h - (bh * 0.52));
           ctx.fillStyle = '#38bdf8';
           ctx.fillText(`📅 ${new Date().toLocaleString('pt-BR')}`, 12, h - (bh * 0.18));
-          res(canvas.toDataURL('image/jpeg', 0.7)); // Otimizado e comprimido para caber no banco sem travar
+          res(canvas.toDataURL('image/jpeg', 0.8));
         };
         img.src = dataUrl;
       });
@@ -1010,14 +1009,50 @@
         `).join('');
     }
 
-    // SALVAMENTO ROBUSTO DIRETO NO BANCO DE DADOS (SEM DEPENDÊNCIA DE API EXTERNA)
+    // ENVIO PARA O GOOGLE DRIVE VIA GOOGLE APPS SCRIPT
     async function saveReportAndCheckOut(e) {
       e.preventDefault();
       const id = document.getElementById('reportCondoId').value;
       const c = condos.find(x => x.id === id);
+      const submitBtn = document.getElementById('checkoutSubmitBtn');
+      const progressInfo = document.getElementById('uploadProgressInfo');
+      const progressCount = document.getElementById('uploadProgressCount');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
 
       try {
-        let uploadedMedia = selectedMediaFiles.map(m => ({ type: 'image', url: m.previewUrl }));
+        let uploadedMedia = [];
+        const totalFiles = selectedMediaFiles.length;
+
+        if (totalFiles > 0) {
+          progressInfo.style.display = 'block';
+        }
+
+        for (let i = 0; i < totalFiles; i++) {
+          progressCount.textContent = `(${i + 1}/${totalFiles})`;
+          const item = selectedMediaFiles[i];
+          
+          // Extrair base64 limpo
+          const base64Content = item.previewUrl.split(',')[1];
+          const payload = {
+            fileName: `foto_${Date.now()}_${i+1}.jpg`,
+            mimeType: 'image/jpeg',
+            base64Data: base64Content
+          };
+
+          const response = await fetch(GOOGLE_DRIVE_WEBAPP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          const resJson = await response.json();
+          if (resJson.status === 'success') {
+            uploadedMedia.push({ type: 'image', url: resJson.url });
+          } else {
+            throw new Error(resJson.message || 'Erro no upload para o Google Drive');
+          }
+        }
 
         const now = new Date();
         const checkOutTimestamp = now.getTime();
@@ -1043,15 +1078,18 @@
         let reps = c.reports || []; reps.unshift(newRep);
         await db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps });
         
-        showToast('Check-out realizado com sucesso!');
+        showToast('Check-out realizado e fotos salvas no Google Drive!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
       } catch (err) {
         alert('Erro ao finalizar check-out: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Finalizar e Check-out';
+        progressInfo.style.display = 'none';
       }
     }
 
-    // ROTAS: TODOS DESMARCADOS POR PADRÃO COM MEMÓRIA DE SELEÇÃO NA BUSCA
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -1146,7 +1184,6 @@
       }, { enableHighAccuracy: true });
     }
 
-    // RELATÓRIOS GERAIS
     function openGlobalReportModal() {
       const now = new Date();
       const year = now.getFullYear();
@@ -1255,7 +1292,7 @@
       showToast('PDF gerado com sucesso!');
     }
 
-    function openLightbox(url, type) {
+    function openLightbox(url) {
       const container = document.getElementById('lightboxContentContainer');
       container.innerHTML = `<img src="${url}" class="lightbox-img" alt="Mídia ampliada">`;
       document.getElementById('lightboxModal').classList.remove('hidden');
@@ -1328,7 +1365,7 @@
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
               <div class="report-media-grid">
-                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}', 'image')">`).join('')}
+                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}')">`).join('')}
               </div>
             ` : ''}
           </div>
