@@ -256,7 +256,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Gestão de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.8.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v7.9.0</span>
               </div>
             </div>
           </div>
@@ -730,11 +730,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 7.8.0 (Correção PDF Relatórios & Exportador de Escopo)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 7.9.0 (Subcoleção de Relatórios & PDF Individual)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Corrigido bug na geração do PDF de relatórios devido ao novo checklist de CFTV/Motores.</li>
-            <li>Adicionada funcionalidade de exportar Escopo Contratual do Condomínio em PDF formatado.</li>
-            <li>Melhoria no cálculo visual de quebra de páginas em PDFs no jsPDF.</li>
+            <li>Migração do histórico de visitas para subcoleção no Firestore para eliminar o limite de tamanho do documento do condomínio.</li>
+            <li>Adicionado botão para exportar o PDF de um atendimento individual direto no histórico.</li>
+            <li>Sanitização completa de ícones e caracteres especiais em todas as exportações PDF.</li>
           </ul>
         </div>
       </div>
@@ -755,7 +755,6 @@
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
 
-    // Estrutura Categorizada com Subtipos Expostos
     const CONTRACT_CATEGORIES = [
       {
         catId: "cftv",
@@ -900,7 +899,6 @@
       }
     }
 
-    // Slots Múltiplos da Ficha Técnica
     function addModemSlot(data = {}) {
       const container = document.getElementById('modemContainer');
       const index = container.children.length;
@@ -1279,12 +1277,17 @@
       loadCondosForOwner(rootOwnerEmail);
     }
 
-    function loadCondosForOwner(rootOwnerEmail) {
-      db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get().then((snapshot) => {
-        condos = [];
-        snapshot.forEach(doc => condos.push({ id: doc.id, ...doc.data() }));
-        renderCondos();
-      });
+    async function loadCondosForOwner(rootOwnerEmail) {
+      const snapshot = await db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get();
+      condos = [];
+      for (let docSnap of snapshot.docs) {
+        let condoData = { id: docSnap.id, ...docSnap.data() };
+        // Carregar relatórios da subcoleção para economizar espaço no documento principal
+        const reportsSnap = await db.collection("condominios").doc(docSnap.id).collection("reports").orderBy("timestamp", "desc").get();
+        condoData.reports = reportsSnap.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
+        condos.push(condoData);
+      }
+      renderCondos();
     }
 
     function openSettingsModal() {
@@ -1526,7 +1529,6 @@
       if (id) {
         db.collection("condominios").doc(id).update(data).then(() => { showToast('Endereço atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
       } else {
-        data.reports = [];
         data.modems = [];
         data.mikrotiks = [];
         data.dvrs = [];
@@ -1655,7 +1657,6 @@
       });
     }
 
-    /* ESCOPO CONTRATUAL COM SUB-BLOCOS FIXOS DIRETO NA CATEGORIA */
     function openContractScopeModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
@@ -1690,7 +1691,6 @@
         `;
         container.appendChild(catBox);
 
-        // Renderizar slots salvos no container específico do seu tipo
         cat.types.forEach(t => {
           const matchingSlots = scopeList.filter(s => s.catId === cat.catId && s.typeId === t.typeId);
           matchingSlots.forEach(slotData => {
@@ -1791,16 +1791,20 @@
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
+      const cleanText = (str) => {
+        if (!str) return '';
+        return String(str).replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      };
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(currentCompanyName || "Gestão de Condomínios", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Gestao de Condominios", 14, 18);
       doc.setFontSize(12);
-      doc.text(`Escopo Contratual - ${c.name}`, 14, 25);
+      doc.text(`Escopo Contratual - ${cleanText(c.name)}`, 14, 25);
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.text(`Endereço: ${c.address}, ${c.number} - ${c.neighborhood || ''}`, 14, 31);
-      doc.text(`Data do Relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
+      doc.text(`Endereco: ${cleanText(c.address)}, ${c.number} - ${cleanText(c.neighborhood || '')}`, 14, 31);
+      doc.text(`Data do Relatorio: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
 
       doc.setLineWidth(0.5);
       doc.line(14, 40, 196, 40);
@@ -1810,7 +1814,7 @@
 
       if (scopeList.length === 0) {
         doc.setFontSize(10);
-        doc.text("Nenhum item cadastrado no escopo deste condomínio.", 14, y);
+        doc.text("Nenhum item cadastrado no escopo deste condominio.", 14, y);
       } else {
         CONTRACT_CATEGORIES.forEach(cat => {
           const catSlots = scopeList.filter(s => s.catId === cat.catId);
@@ -1820,7 +1824,7 @@
             doc.setFontSize(11);
             doc.setFillColor(240, 240, 240);
             doc.rect(14, y - 4, 182, 7, 'F');
-            doc.text(cat.catName, 16, y);
+            doc.text(cleanText(cat.catName), 16, y);
             y += 8;
 
             catSlots.forEach(s => {
@@ -1834,14 +1838,14 @@
 
               doc.setFont("helvetica", "bold");
               doc.setFontSize(9);
-              doc.text(`• ${label} (Qtd: ${s.qty})`, 16, y);
+              doc.text(`• ${cleanText(label)} (Qtd: ${s.qty})`, 16, y);
               
               doc.setFont("helvetica", "normal");
-              doc.text(`Local: ${s.location || 'N/A'} | Status: ${statusStr} | Pecas: ${pieceStr} | Posse: ${posseStr}`, 20, y + 4);
+              doc.text(`Local: ${cleanText(s.location || 'N/A')} | Status: ${statusStr} | Pecas: ${pieceStr} | Posse: ${posseStr}`, 20, y + 4);
               
               if (s.note) {
                 doc.setFont("helvetica", "italic");
-                doc.text(`Obs: ${s.note}`, 20, y + 8);
+                doc.text(`Obs: ${cleanText(s.note)}`, 20, y + 8);
                 y += 4;
               }
 
@@ -2144,11 +2148,13 @@
           duration: durationText,
           userEmail: currentUser.email,
           text: `${checklistText}\n\n${userText}`,
-          media: uploadedMedia
+          media: uploadedMedia,
+          timestamp: checkOutTimestamp
         };
 
-        let reps = c.reports || []; reps.unshift(newRep);
-        await db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps });
+        // Salvar na subcoleção 'reports' do condomínio para evitar estouro de 1MB do documento principal
+        await db.collection("condominios").doc(id).collection("reports").add(newRep);
+        await db.collection("condominios").doc(id).update({ checkedIn: false });
         
         showToast('Check-out realizado com sucesso!');
         closeReportModal();
@@ -2308,6 +2314,7 @@
           <div class="report-card">
             <div class="report-header">
               <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime}) | ⏱️ ${r.duration || '--'}</span>
+              <button onclick="downloadSingleReportPDF('${c.name}', ${JSON.stringify(r).replace(/"/g, '&quot;')})" class="btn btn-slate" style="font-size:10px; padding:2px 6px;">📄 PDF</button>
             </div>
             <div class="report-text">${escapeHtml(r.text)}</div>
             ${r.media && r.media.length > 0 ? `
@@ -2320,6 +2327,39 @@
       document.getElementById('historyModal').classList.remove('hidden');
     }
     function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
+
+    function downloadSingleReportPDF(condoName, r) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const cleanText = (str) => {
+        if (!str) return '';
+        return String(str).replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      };
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(cleanText(currentCompanyName) || "Gestao de Condominios", 14, 18);
+      doc.setFontSize(12);
+      doc.text(`Relatorio de Visita - ${cleanText(condoName)}`, 14, 25);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Data: ${r.date} | Horario: ${r.checkInTime} as ${r.checkOutTime} | Tempo: ${r.duration || '--'}`, 14, 31);
+      doc.text(`Tecnico: ${r.userEmail}`, 14, 36);
+
+      doc.setLineWidth(0.5);
+      doc.line(14, 40, 196, 40);
+
+      let y = 48;
+      let splitLines = doc.splitTextToSize(cleanText(r.text), 180);
+      for (let l = 0; l < splitLines.length; l++) {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.text(splitLines[l], 14, y);
+        y += 6;
+      }
+
+      doc.save(`relatorio_${condoName.toLowerCase().replace(/\s+/g, '_')}_${r.date.replace(/\//g, '-')}.pdf`);
+      showToast('Relatório individual exportado em PDF!');
+    }
 
     function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
     function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
@@ -2443,11 +2483,10 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Sanitizador seguro para o jsPDF
       const cleanText = (str) => {
         if (!str) return '';
         return String(str)
-          .replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐📍👤📅⏱️📊📥]/g, '')
+          .replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐🌐📍👤📅⏱️📊📥]/g, '')
           .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       };
 
