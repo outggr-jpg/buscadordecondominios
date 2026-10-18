@@ -166,6 +166,8 @@
     
     .masked-pwd { cursor: pointer; background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1px 6px; border-radius: 6px; color: #38bdf8; font-family: monospace; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; user-select: none; }
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
+    
+    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 10px; color: var(--text-muted); margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -271,7 +273,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.4.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.5.0</span>
               </div>
             </div>
           </div>
@@ -631,15 +633,18 @@
 
   <!-- MODAL DE VISUALIZAÇÃO COMPLETA DA FICHA TÉCNICA -->
   <div id="techSheetModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 600px;">
+    <div class="modal" style="max-width: 650px;">
       <div class="modal-header">
         <h3 id="techSheetTitle" style="color:var(--text-main); font-size: 16px;">🛠️ Ficha Técnica</h3>
         <button onclick="closeTechSheetModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body" id="techSheetContent" style="gap:10px;"></div>
-      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0;">
-        <button onclick="openConfigEquipmentModalFromTechSheet()" class="btn btn-emerald">⚙️ Gerenciar / Adicionar Equipamentos</button>
-        <button onclick="closeTechSheetModal()" class="btn btn-slate">Fechar</button>
+      <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0; flex-wrap:wrap; gap:8px;">
+        <button onclick="downloadTechSheetPDF()" class="btn btn-slate">📄 Exportar Ficha em PDF</button>
+        <div style="display:flex; gap:8px;">
+          <button onclick="openConfigEquipmentModalFromTechSheet()" class="btn btn-emerald">⚙️ Gerenciar Equipamentos</button>
+          <button onclick="closeTechSheetModal()" class="btn btn-slate">Fechar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -750,11 +755,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.4.0 (Segurança Visual e Busca por IP)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 8.5.0 (Exportação da Ficha em PDF & Log de Auditoria)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Mascaramento de senhas na Ficha Técnica com exibição individual via clique (👁️) para segurança em campo.</li>
-            <li>Busca global expandida: pesquisa de condomínios por IPs, modelo de DVR, operadora e senhas de Wi-Fi.</li>
-            <li>Criptografia AES-256 no banco mantida para total privacidade.</li>
+            <li>Exportação completa da Ficha Técnica do Condomínio em PDF formatado.</li>
+            <li>Log de Auditoria automático: rastreamento de quem alterou a ficha técnica e a data/hora exata.</li>
+            <li>Mascaramento inteligente de senhas com alternância em um clique.</li>
+            <li>Criptografia de ponta a ponta AES-256 no banco de dados mantida.</li>
           </ul>
         </div>
       </div>
@@ -1823,6 +1829,9 @@
         });
       });
 
+      const now = new Date();
+      const currentUserName = localStorage.getItem('protech_user_name_' + currentUser.email) || currentUser.email;
+
       const eqData = {
         encryptedModems: encModemsList,
         encryptedMikrotiks: encMikrotiksList,
@@ -1831,7 +1840,10 @@
         encryptedControladoras: encControladorasList,
         encryptedModulosRf: encModulosRfList,
         encryptedModulosPorta: encModulosPortaList,
-        encryptedFaciais: encFaciaisList
+        encryptedFaciais: encFaciaisList,
+        lastModifiedBy: currentUser.email,
+        lastModifiedByName: currentUserName,
+        lastModifiedAt: `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
       };
 
       db.collection("condominios").doc(id).update(eqData).then(() => {
@@ -2063,6 +2075,80 @@
       showToast('Escopo contratual exportado em PDF!');
     }
 
+    async function downloadTechSheetPDF() {
+      const allowed = await checkUserPermission('downloadPdf');
+      if (!allowed) {
+        alert('Você não possui permissão para baixar documentos em PDF.');
+        return;
+      }
+
+      if (!currentActiveTechSheetId) return;
+      const c = condos.find(x => x.id === currentActiveTechSheetId);
+      if (!c) return;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const cleanText = (str) => {
+        if (!str) return '';
+        return String(str).replace(/[🟢🔴⚠️🔧🛠️🏢📦📷📹🎥🔌🗿🔋⚡🚪🔑🔐📡🛡️📞🌐🌐📍👤📅⏱️📊📥]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      };
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
+      doc.setFontSize(12);
+      doc.text(`Ficha Tecnica - ${cleanText(c.name)}`, 14, 25);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Endereco: ${cleanText(c.address)}, ${c.number} - ${cleanText(c.neighborhood || '')}`, 14, 31);
+      doc.text(`Data da Exportacao: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
+
+      doc.setLineWidth(0.5);
+      doc.line(14, 40, 196, 40);
+
+      let y = 48;
+
+      const printSection = (title, items, formatFn) => {
+        if (!items || items.length === 0) return;
+        if (y > 250) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setFillColor(240, 240, 240);
+        doc.rect(14, y - 4, 182, 7, 'F');
+        doc.text(cleanText(title), 16, y);
+        y += 8;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        items.forEach((item, idx) => {
+          if (y > 265) { doc.addPage(); y = 20; }
+          const txt = formatFn(item, idx);
+          doc.text(cleanText(txt), 18, y);
+          y += 6;
+        });
+        y += 4;
+      };
+
+      printSection("🌐 Modems / Roteadores", c.modems, (m, i) => `• #${i+1} ${m.operadora||'Modem'} | IP: ${m.ip||'--'} | User: ${m.user||'--'} | Pass: ${m.pass||'--'} | Wi-Fi 2.4G: ${m.wifi2gSsid||'--'} | Wi-Fi 5G: ${m.wifi5gSsid||'--'}`);
+      printSection("📡 Mikrotiks", c.mikrotiks, (mk, i) => `• #${i+1} IP: ${mk.ip||'--'} | HTTP: ${mk.http||'--'} | User: ${mk.user||'--'} | Pass: ${mk.pass||'--'}`);
+      printSection("🎥 Gravadores (DVR/NVR)", c.dvrs, (d, i) => `• #${i+1} ${d.name||'DVR'} | IP: ${d.ip||'--'} | HTTP: ${d.http||'--'} | Servico: ${d.servicePort||'--'} | RTSP: ${d.rtsp||'--'} | User: ${d.user||'--'} | Pass: ${d.pass||'--'}`);
+      printSection("📷 Câmeras IP", c.cameras, (cm, i) => `• #${i+1} ${cm.desc||'Camera'} | IP: ${cm.ip||'--'} | HTTP: ${cm.http||'--'} | RTSP: ${cm.port||'--'} | User: ${cm.user||'--'} | Pass: ${cm.pass||'--'}`);
+      printSection("🔐 Controladoras de Acesso", c.controladoras, (ct, i) => `• #${i+1} ${ct.name||'Controladora'} | IP: ${ct.ip||'--'} | Com: ${ct.port||'--'} | Auto: ${ct.autoPort||'--'}`);
+      printSection("📡 Módulos RF IP", c.modulosRf, (rf, i) => `• #${i+1} ${rf.desc||'Modulo RF'} | IP: ${rf.ip||'--'} | Serial: ${rf.serial||'--'}`);
+      printSection("🚪 Módulos Porta IP", c.modulosPorta, (p, i) => `• #${i+1} ${p.desc||'Modulo Porta'} | IP: ${p.ip||'--'} | Serial: ${p.serial||'--'}`);
+      printSection("👤 Terminais Faciais", c.faciais, (f, i) => `• #${i+1} ${f.desc||'Facial'} | IP: ${f.ip||'--'} | HTTP: ${f.http||'--'} | RTSP: ${f.rtsp||'--'} | User: ${f.user||'--'} | Pass: ${f.pass||'--'}`);
+
+      if (c.lastModifiedAt) {
+        if (y > 260) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text(`Ultima alteracao na ficha tecnica feita por ${cleanText(c.lastModifiedByName || c.lastModifiedBy)} em ${c.lastModifiedAt}`, 14, y + 4);
+      }
+
+      doc.save(`ficha_tecnica_${c.name.toLowerCase().replace(/\s+/g, '_')}.pdf`);
+      showToast('Ficha Técnica exportada em PDF!');
+    }
+
     function captureCurrentGPS() {
       if (!navigator.geolocation) { alert('GPS não suportado.'); return; }
       showToast('Capturando GPS...');
@@ -2168,6 +2254,14 @@
           html += `<br>• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Senha: ${renderMaskedPassword(f.pass, `facial_${i}`)}`;
         });
         html += `</div>`;
+      }
+
+      if (c.lastModifiedAt) {
+        html += `
+          <div class="audit-log-box">
+            <b>📜 Log de Auditoria:</b> Última alteração realizada por <b style="color:#38bdf8;">${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</b> em <b>${escapeHtml(c.lastModifiedAt)}</b>.
+          </div>
+        `;
       }
 
       document.getElementById('techSheetContent').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum equipamento configurado ainda.<br>Clique em "Gerenciar / Adicionar Equipamentos" abaixo.</div>';
