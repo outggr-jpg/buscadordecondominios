@@ -157,7 +157,7 @@
     .accordion-body { display: none; background: var(--bg-main); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 10px; margin-bottom: 6px; flex-direction: column; gap: 8px; }
     .accordion-body.show { display: flex !important; }
 
-    /* ESTILOS PARA SLOTS MÚLTIPLOS (FASE 2) */
+    /* ESTILOS PARA SLOTS MÚLTIPLOS */
     .dynamic-item-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-bottom: 6px; position: relative; display: flex; flex-direction: column; gap: 6px; }
   </style>
 </head>
@@ -254,7 +254,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.5.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.5.1</span>
               </div>
             </div>
           </div>
@@ -556,7 +556,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CADASTRO DE CONDOMÍNIO + FICHA TÉCNICA (FASE 1 + FASE 2) -->
+  <!-- MODAL DE CADASTRO DE CONDOMÍNIO + FICHA TÉCNICA -->
   <div id="condoModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -584,7 +584,7 @@
         <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px;">
           <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica (Fase 1 & 2):</label>
           
-          <!-- ACORDEÃO MODEM / ROTEADOR COM OPERADORA -->
+          <!-- ACORDEÃO MODEM / ROTEADOR -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accModem')">🌐 Modem / Roteador <span>▼</span></button>
           <div id="accModem" class="accordion-body">
             <div class="form-group"><label>Operadora</label><input type="text" id="modemOperadora" placeholder="Ex: Vivo Fibra, Claro, Oi" class="form-control"></div>
@@ -619,14 +619,14 @@
             </div>
           </div>
 
-          <!-- ACORDEÃO DVR / NVR (MÚLTIPLOS SLOTS) -->
+          <!-- ACORDEÃO DVR / NVR (MÚLTIPLOS SLOTS COM PORTA RTSP E PORTA DE SERVIÇO) -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accDvr')">🎥 DVRs / NVRs <span>▼</span></button>
           <div id="accDvr" class="accordion-body">
             <div id="dvrContainer"></div>
             <button type="button" onclick="addDvrSlot()" class="btn btn-slate" style="justify-content:center; width:100%; font-size:11px; margin-top:4px;">+ Adicionar Gravador (DVR/NVR)</button>
           </div>
 
-          <!-- ACORDEÃO CÂMERAS IP (MÚLTIPLOS SLOTS) -->
+          <!-- ACORDEÃO CÂMERAS IP (MÚLTIPLOS SLOTS COM PORTA HTTP) -->
           <button type="button" class="accordion-btn" onclick="toggleAccordion('accCameras')">📷 Câmeras IP / Dispositivos <span>▼</span></button>
           <div id="accCameras" class="accordion-body">
             <div id="cameraContainer"></div>
@@ -665,12 +665,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.5.0 (Fase 2)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.5.1 (Ajustes Fase 2)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Adicionado campo "Operadora" no Modem / Roteador.</li>
-            <li>Implementados slots múltiplos para DVRs / NVRs com IP, portas, usuário e senha.</li>
-            <li>Implementados slots múltiplos para Câmeras IP com IP, porta, credenciais e descrição.</li>
-            <li>Ficha técnica rápida atualizada para exibir todos os novos equipamentos cadastrados.</li>
+            <li>Adicionada "Porta RTSP" e renomeada "Porta Data" para "Porta de Serviço" nos DVRs/NVRs.</li>
+            <li>Adicionado o campo "Porta HTTP" nas Câmeras IP.</li>
+            <li>Ficha técnica rápida atualizada para refletir os novos campos.</li>
           </ul>
         </div>
       </div>
@@ -756,7 +755,7 @@
       }
     }
 
-    // Funções para gerenciar slots múltiplos de DVRs e Câmeras IP (Fase 2)
+    // Slots múltiplos de DVRs (com Porta RTSP e Porta de Serviço)
     function addDvrSlot(data = {}) {
       const container = document.getElementById('dvrContainer');
       const index = container.children.length;
@@ -773,16 +772,18 @@
         </div>
         <div class="form-row">
           <div class="form-group"><label>Porta HTTP</label><input type="text" class="form-control dvr-http" value="${escapeHtml(data.http || '')}" placeholder="80"></div>
-          <div class="form-group"><label>Porta Data</label><input type="text" class="form-control dvr-data" value="${escapeHtml(data.dataPort || '')}" placeholder="37777"></div>
+          <div class="form-group"><label>Porta de Serviço</label><input type="text" class="form-control dvr-servico" value="${escapeHtml(data.servicePort || '')}" placeholder="37777"></div>
         </div>
         <div class="form-row">
+          <div class="form-group"><label>Porta RTSP</label><input type="text" class="form-control dvr-rtsp" value="${escapeHtml(data.rtsp || '')}" placeholder="554"></div>
           <div class="form-group"><label>Usuário</label><input type="text" class="form-control dvr-user" value="${escapeHtml(data.user || '')}" placeholder="admin"></div>
-          <div class="form-group"><label>Senha</label><input type="text" class="form-control dvr-pass" value="${escapeHtml(data.pass || '')}" placeholder="senha"></div>
         </div>
+        <div class="form-group"><label>Senha</label><input type="text" class="form-control dvr-pass" value="${escapeHtml(data.pass || '')}" placeholder="senha"></div>
       `;
       container.appendChild(div);
     }
 
+    // Slots múltiplos de Câmeras IP (com Porta HTTP)
     function addCameraSlot(data = {}) {
       const container = document.getElementById('cameraContainer');
       const index = container.children.length;
@@ -798,10 +799,13 @@
           <div class="form-group"><label>IP da Câmera</label><input type="text" class="form-control cam-ip" value="${escapeHtml(data.ip || '')}" placeholder="Ex: 192.168.1.50"></div>
         </div>
         <div class="form-row">
+          <div class="form-group"><label>Porta HTTP</label><input type="text" class="form-control cam-http" value="${escapeHtml(data.http || '')}" placeholder="80"></div>
           <div class="form-group"><label>Porta ONVIF/RTSP</label><input type="text" class="form-control cam-port" value="${escapeHtml(data.port || '')}" placeholder="554"></div>
-          <div class="form-group"><label>Usuário</label><input type="text" class="form-control cam-user" value="${escapeHtml(data.user || '')}" placeholder="admin"></div>
         </div>
-        <div class="form-group"><label>Senha</label><input type="text" class="form-control cam-pass" value="${escapeHtml(data.pass || '')}" placeholder="senha"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Usuário</label><input type="text" class="form-control cam-user" value="${escapeHtml(data.user || '')}" placeholder="admin"></div>
+          <div class="form-group"><label>Senha</label><input type="text" class="form-control cam-pass" value="${escapeHtml(data.pass || '')}" placeholder="senha"></div>
+        </div>
       `;
       container.appendChild(div);
     }
@@ -1162,7 +1166,7 @@
       });
     }
 
-    /* SALVAR CONDOMÍNIO COM DADOS DE MODEM, MIKROTIK, DVRS E CÂMERAS */
+    /* SALVAR CONDOMÍNIO */
     function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
@@ -1193,7 +1197,8 @@
           name: box.querySelector('.dvr-name').value.trim(),
           ip: box.querySelector('.dvr-ip').value.trim(),
           http: box.querySelector('.dvr-http').value.trim(),
-          dataPort: box.querySelector('.dvr-data').value.trim(),
+          servicePort: box.querySelector('.dvr-servico').value.trim(),
+          rtsp: box.querySelector('.dvr-rtsp').value.trim(),
           user: box.querySelector('.dvr-user').value.trim(),
           pass: box.querySelector('.dvr-pass').value.trim()
         });
@@ -1205,6 +1210,7 @@
         camerasList.push({
           desc: box.querySelector('.cam-desc').value.trim(),
           ip: box.querySelector('.cam-ip').value.trim(),
+          http: box.querySelector('.cam-http').value.trim(),
           port: box.querySelector('.cam-port').value.trim(),
           user: box.querySelector('.cam-user').value.trim(),
           pass: box.querySelector('.cam-pass').value.trim()
@@ -1261,7 +1267,7 @@
       if (c) openModal(c);
     }
 
-    /* MODAL FICHA TÉCNICA LEITURA RÁPIDA (FASE 1 & 2) */
+    /* FICHA TÉCNICA LEITURA RÁPIDA */
     function openTechSheetModal(id) {
       const c = condos.find(x => x.id === id);
       if (!c) return;
@@ -1291,7 +1297,7 @@
       if (dvrs.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs (${dvrs.length}):</b>`;
         dvrs.forEach((d, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Data: ${escapeHtml(d.dataPort || '--')} | User: ${escapeHtml(d.user || '--')} | Pass: ${escapeHtml(d.pass || '--')}`;
+          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Pass: ${escapeHtml(d.pass || '--')}`;
         });
         html += `</div>`;
       }
@@ -1299,7 +1305,7 @@
       if (cams.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP (${cams.length}):</b>`;
         cams.forEach((cm, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | Porta: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Pass: ${escapeHtml(cm.pass || '--')}`;
+          html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Pass: ${escapeHtml(cm.pass || '--')}`;
         });
         html += `</div>`;
       }
@@ -1584,7 +1590,6 @@
       document.getElementById('condoId').value = c ? c.id : '';
       document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
       
-      // Recolher acordeões ao abrir o modal
       document.getElementById('accModem').classList.remove('show');
       document.getElementById('accMikrotik').classList.remove('show');
       document.getElementById('accDvr').classList.remove('show');
