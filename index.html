@@ -98,6 +98,10 @@
     .report-media-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
     .report-media-thumb:hover { transform: scale(1.05); }
 
+    .checklist-box { background: var(--bg-main); padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 10px; }
+    .checklist-title { font-size: 11px; font-weight: bold; color: #38bdf8; margin-bottom: 8px; }
+    .checklist-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+
     .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .lightbox-modal.hidden { display: none; }
     .lightbox-img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
@@ -241,7 +245,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.2.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v6.3.0</span>
               </div>
             </div>
           </div>
@@ -388,7 +392,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE GESTÃO DE EQUIPE -->
+  <!-- MODAL DE GESTÃO DE EQUIPE COM PERMISSÕES GRANULARES -->
   <div id="teamModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 600px;">
       <div class="modal-header">
@@ -406,7 +410,7 @@
         </div>
 
         <div style="margin-top:10px;">
-          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe e Níveis de Acesso:</label>
+          <label style="font-weight:bold; color:var(--text-main); font-size:12px; margin-bottom:6px; display:block;">Membros da Equipe e Permissões:</label>
           <div id="teamMemberListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;">
             <div style="color:var(--text-muted); text-align:center; padding:10px;">Carregando membros...</div>
           </div>
@@ -455,7 +459,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE ROTAS -->
+  <!-- MODAL DE ROTAS (SELEÇÃO POR ID ÚNICO) -->
   <div id="routeModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 550px;">
       <div class="modal-header">
@@ -480,15 +484,42 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHECK-OUT -->
+  <!-- MODAL DE CHECK-OUT COM MINI-CHECKLIST -->
   <div id="reportModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="reportModalTitle" style="color:var(--text-main); font-size: 16px;">📝 Relatório de Visita</h3>
+        <h3 id="reportModalTitle" style="color:var(--text-main); font-size: 16px;">📝 Relatório de Visita e Checklist</h3>
         <button onclick="closeReportModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <form id="reportForm" onsubmit="saveReportAndCheckOut(event)" class="modal-body">
         <input type="hidden" id="reportCondoId">
+        
+        <!-- MINI-CHECKLIST DE MANUTENÇÃO -->
+        <div class="checklist-box">
+          <div class="checklist-title">📋 Checklist de Manutenção Preventiva:</div>
+          <div class="checklist-item">
+            <span>📷 Câmeras / CFTV</span>
+            <select id="checkCameras" class="form-control" style="width:140px; padding:4px;">
+              <option value="OK">🟢 OK</option>
+              <option value="Requer Manutenção">🔴 Manutenção</option>
+            </select>
+          </div>
+          <div class="checklist-item">
+            <span>🚪 Portões / Motores</span>
+            <select id="checkPortoes" class="form-control" style="width:140px; padding:4px;">
+              <option value="OK">🟢 OK</option>
+              <option value="Requer Manutenção">🔴 Manutenção</option>
+            </select>
+          </div>
+          <div class="checklist-item">
+            <span>🔑 Portas / Fechaduras</span>
+            <select id="checkPortas" class="form-control" style="width:140px; padding:4px;">
+              <option value="OK">🟢 OK</option>
+              <option value="Requer Manutenção">🔴 Manutenção</option>
+            </select>
+          </div>
+        </div>
+
         <div class="form-group"><label>Serviço Realizado *</label><textarea id="reportText" rows="3" required class="form-control" style="resize:none;"></textarea></div>
         <div class="form-group">
           <label>Fotos com Marca d'Água:</label>
@@ -516,6 +547,7 @@
     </div>
   </div>
 
+  <!-- MODAL DE CADASTRO DE CONDOMÍNIO + FICHA TÉCNICA -->
   <div id="condoModal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
@@ -538,12 +570,41 @@
           <div class="form-group"><label>Longitude *</label><input type="text" id="condoLng" required class="form-control"></div>
         </div>
         <button type="button" onclick="captureCurrentGPS()" class="btn btn-slate" style="width: 100%; justify-content: center; margin-bottom: 12px;">📍 Capturar Coordenadas GPS</button>
+        
+        <!-- FICHA TÉCNICA DE EQUIPAMENTOS -->
+        <div style="background:var(--bg-main); padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px;">
+          <label style="font-weight:bold; color:#38bdf8; font-size:12px; margin-bottom:6px; display:block;">🛠️ Ficha Técnica de Equipamentos:</label>
+          <div class="form-row">
+            <div class="form-group"><label>DVR / Gravadores</label><input type="text" id="equipDvr" placeholder="Ex: DVR 1 - IP 192.168.1.100 (admin/123)" class="form-control"></div>
+            <div class="form-group"><label>Modem / Roteador</label><input type="text" id="equipModem" placeholder="Ex: Modem IP 192.168.1.1" class="form-control"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Travas / Fechaduras</label><input type="text" id="equipTravas" placeholder="Ex: Eletroímã FE 20120" class="form-control"></div>
+            <div class="form-group"><label>Reconhecimento Facial</label><input type="text" id="equipFaciais" placeholder="Ex: Facial Control iD" class="form-control"></div>
+          </div>
+          <div class="form-group"><label>Câmeras LPR (Leitura de Placas)</label><input type="text" id="equipLpr" placeholder="Ex: LPR Entrada - IP 192.168.1.105" class="form-control"></div>
+        </div>
+
         <div class="form-group"><label>Observações</label><textarea id="condoNotes" rows="2" class="form-control" style="resize:none;"></textarea></div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
           <button type="button" onclick="closeModal()" class="btn btn-slate">Cancelar</button>
           <button type="submit" class="btn btn-slate">Salvar</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE VISUALIZAÇÃO RÁPIDA DA FICHA TÉCNICA -->
+  <div id="techSheetModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="techSheetTitle" style="color:var(--text-main); font-size: 16px;">🛠️ Ficha Técnica</h3>
+        <button onclick="closeTechSheetModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" id="techSheetContent" style="gap:8px;"></div>
+      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button onclick="closeTechSheetModal()" class="btn btn-slate">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -555,12 +616,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 6.2.0</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 6.3.0</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Implementação de 3 níveis de acesso: Proprietário, Administrador e Técnico.</li>
-            <li>Restrição de exclusão de locais para técnicos e restrição de alteração de nome/logo da empresa para administradores.</li>
-            <li>Controle dinâmico de cargos diretamente na Gestão de Equipe.</li>
-            <li>Correção nos checkboxes do modal de rotas durante buscas.</li>
+            <li>Seleção de rotas fixa por ID único (marcações preservadas ao pesquisar).</li>
+            <li>Ficha técnica completa de equipamentos por condomínio (DVR, modem, travas, faciais e LPR).</li>
+            <li>Mini-checklist de manutenção preventiva no check-out (câmeras, portões e portas).</li>
+            <li>Gestão de equipe com permissões granulares por caixas (*checkboxes*).</li>
           </ul>
         </div>
       </div>
@@ -599,6 +660,7 @@
     let selectedMediaFiles = [];
     let currentCompanyName = '';
     let currentCompanyLogo = '';
+    let selectedRouteIds = new Set(); // ID único para salvar as rotas sem perder na busca
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
@@ -843,7 +905,6 @@
       else if (userRole === 'user') roleDesc = 'Técnico';
       document.getElementById('settingsUserRole').textContent = `Cargo: ${roleDesc}`;
 
-      // Apenas o Proprietário pode alterar nome e logo da empresa matriz
       if (userRole !== 'owner') {
         document.getElementById('companySettingsSection').style.display = 'none';
       } else {
@@ -912,6 +973,7 @@
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
 
+    /* GESTÃO DE EQUIPE COM PERMISSÕES GRANULARES POR CAIXAS */
     function openTeamModal() {
       document.getElementById('inviteLinkResult').style.display = 'none';
       db.collection("usuarios").where("companyOwnerEmail", "==", ownerEmail).get().then(snapshot => {
@@ -921,6 +983,7 @@
           const docEmail = doc.id;
           const isOwner = data.role === 'owner';
           const roleVal = data.role || 'user';
+          const perms = data.permissions || { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true };
 
           html += `
             <div style="background:var(--bg-card); padding:10px; border-radius:10px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
@@ -931,14 +994,22 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
                   ${!isOwner ? `
-                    <select onchange="updateMemberRole('${docEmail}', this.value)" class="form-control" style="font-size:11px; padding:2px 6px; width:120px;">
-                      <option value="admin" ${roleVal === 'admin' ? 'selected' : ''}>🛡️ Administrador</option>
+                    <select onchange="updateMemberRole('${docEmail}', this.value)" class="form-control" style="font-size:11px; padding:2px 6px; width:110px;">
+                      <option value="admin" ${roleVal === 'admin' ? 'selected' : ''}>🛡️ Admin</option>
                       <option value="user" ${roleVal === 'user' ? 'selected' : ''}>👤 Técnico</option>
                     </select>
-                    <button onclick="removeTeamMember('${docEmail}')" class="btn btn-rose" style="padding:4px 6px; font-size:10px;" title="Remover da Equipe">🗑️</button>
+                    <button onclick="removeTeamMember('${docEmail}')" class="btn btn-rose" style="padding:4px 6px; font-size:10px;" title="Remover">🗑️</button>
                   ` : `<span style="font-size:11px; color:#38bdf8; font-weight:bold;">👑 Proprietário</span>`}
                 </div>
               </div>
+              ${!isOwner ? `
+                <div style="display:flex; gap:10px; font-size:10px; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:6px; flex-wrap:wrap;">
+                  <label><input type="checkbox" ${perms.addCondo ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'addCondo', this.checked)"> Adicionar Local</label>
+                  <label><input type="checkbox" ${perms.editCondo ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'editCondo', this.checked)"> Editar Local</label>
+                  <label><input type="checkbox" ${perms.deleteCondo ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'deleteCondo', this.checked)"> Excluir Local</label>
+                  <label><input type="checkbox" ${perms.requireGps ? 'checked' : ''} onchange="updateMemberPerm('${docEmail}', 'requireGps', this.checked)"> Raio GPS 500m</label>
+                </div>
+              ` : ''}
             </div>
           `;
         });
@@ -959,27 +1030,30 @@
     }
 
     function updateMemberRole(memberEmail, newRole) {
-      if (userRole !== 'owner' && userRole !== 'admin') {
-        alert('Você não tem permissão para alterar cargos.');
-        return;
-      }
       db.collection("usuarios").doc(memberEmail).update({ role: newRole }).then(() => {
-        showToast('Cargo atualizado com sucesso!');
-      }).catch(err => alert('Erro ao atualizar cargo: ' + err.message));
+        showToast('Cargo atualizado!');
+      });
+    }
+
+    function updateMemberPerm(memberEmail, permKey, value) {
+      db.collection("usuarios").doc(memberEmail).get().then(doc => {
+        let perms = doc.exists && doc.data().permissions ? doc.data().permissions : { addCondo: true, editCondo: true, deleteCondo: false, requireGps: true };
+        perms[permKey] = value;
+        db.collection("usuarios").doc(memberEmail).update({ permissions: perms }).then(() => {
+          showToast('Permissão atualizada!');
+        });
+      });
     }
 
     function removeTeamMember(memberEmail) {
-      if (userRole !== 'owner' && userRole !== 'admin') {
-        alert('Você não tem permissão para remover membros.');
-        return;
-      }
       if (!confirm(`Deseja realmente remover ${memberEmail} da equipe?`)) return;
       db.collection("usuarios").doc(memberEmail).delete().then(() => {
-        showToast('Membro removido da equipe.');
+        showToast('Membro removido.');
         openTeamModal();
-      }).catch(err => alert('Erro ao remover: ' + err.message));
+      });
     }
 
+    /* SALVAR CONDOMÍNIO COM FICHA TÉCNICA */
     function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
@@ -991,6 +1065,11 @@
         phone: document.getElementById('condoPhone').value.trim(),
         lat: document.getElementById('condoLat').value.trim(),
         lng: document.getElementById('condoLng').value.trim(),
+        equipDvr: document.getElementById('equipDvr').value.trim(),
+        equipModem: document.getElementById('equipModem').value.trim(),
+        equipTravas: document.getElementById('equipTravas').value.trim(),
+        equipFaciais: document.getElementById('equipFaciais').value.trim(),
+        equipLpr: document.getElementById('equipLpr').value.trim(),
         notes: document.getElementById('condoNotes').value.trim(),
         ownerEmail: ownerEmail
       };
@@ -1014,7 +1093,6 @@
     }
 
     function deleteCondo(id) {
-      // Regra: Técnico não pode excluir locais
       if (userRole === 'user') {
         alert('Técnicos não possuem permissão para excluir condomínios.');
         return;
@@ -1028,6 +1106,22 @@
       const c = condos.find(x => x.id === id);
       if (c) openModal(c);
     }
+
+    /* MODAL FICHA TÉCNICA LEITURA RÁPIDA */
+    function openTechSheetModal(id) {
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
+      document.getElementById('techSheetContent').innerHTML = `
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📹 DVR / Gravadores:</b> ${escapeHtml(c.equipDvr || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modem / Roteador:</b> ${escapeHtml(c.equipModem || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔒 Travas / Eletroímãs:</b> ${escapeHtml(c.equipTravas || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial:</b> ${escapeHtml(c.equipFaciais || 'Não informado')}</div>
+        <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚗 Câmeras LPR:</b> ${escapeHtml(c.equipLpr || 'Não informado')}</div>
+      `;
+      document.getElementById('techSheetModal').classList.remove('hidden');
+    }
+    function closeTechSheetModal() { document.getElementById('techSheetModal').classList.add('hidden'); }
 
     function toggleCheckIn(id) {
       const c = condos.find(x => x.id === id);
@@ -1050,46 +1144,12 @@
       }
     }
 
-    function adminForceCheckout(id) {
-      if (userRole !== 'owner' && userRole !== 'admin') {
-        alert('Apenas Proprietários e Administradores podem encerrar visitas manualmente.');
-        return;
-      }
-      if (!confirm('Deseja encerrar esta visita manualmente?')) return;
-      const c = condos.find(x => x.id === id);
-      if (!c) return;
-
-      const now = new Date();
-      const checkOutTimestamp = now.getTime();
-      let durationText = '--';
-      if (c.checkInTimestamp) {
-        const diffMs = checkOutTimestamp - c.checkInTimestamp;
-        const diffMins = Math.floor(diffMs / 60000);
-        const hours = Math.floor(diffMins / 60);
-        const mins = diffMins % 60;
-        durationText = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
-      }
-
-      const newRep = {
-        date: now.toLocaleDateString('pt-BR'),
-        checkInTime: c.checkInTime || '--:--',
-        checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        duration: durationText,
-        userEmail: currentUser.email,
-        text: '[Fechado Manualmente pela Gestão]',
-        media: []
-      };
-
-      let reps = c.reports || []; reps.unshift(newRep);
-      db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps }).then(() => {
-        showToast('Visita encerrada com sucesso!');
-        loadCondosForOwner(ownerEmail);
-      });
-    }
-
     function openReportModal(id) {
       document.getElementById('reportCondoId').value = id;
       document.getElementById('reportText').value = '';
+      document.getElementById('checkCameras').value = 'OK';
+      document.getElementById('checkPortoes').value = 'OK';
+      document.getElementById('checkPortas').value = 'OK';
       selectedMediaFiles = [];
       renderMediaPreviews();
       document.getElementById('reportModal').classList.remove('hidden');
@@ -1158,31 +1218,20 @@
       try {
         let uploadedMedia = [];
         const totalFiles = selectedMediaFiles.length;
-
-        if (totalFiles > 0) {
-          progressInfo.style.display = 'block';
-        }
+        if (totalFiles > 0) progressInfo.style.display = 'block';
 
         for (let i = 0; i < totalFiles; i++) {
           progressCount.textContent = `(${i + 1}/${totalFiles})`;
           const item = selectedMediaFiles[i];
           const base64Content = item.previewUrl.split(',')[1];
-          const payload = {
-            fileName: `foto_${Date.now()}_${i+1}.jpg`,
-            mimeType: 'image/jpeg',
-            base64Data: base64Content
-          };
+          const payload = { fileName: `foto_${Date.now()}_${i+1}.jpg`, mimeType: 'image/jpeg', base64Data: base64Content };
 
-          const response = await fetch(GOOGLE_DRIVE_WEBAPP_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-
+          const response = await fetch(GOOGLE_DRIVE_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
           const resJson = await response.json();
           if (resJson.status === 'success') {
             uploadedMedia.push({ type: 'image', url: resJson.url });
           } else {
-            throw new Error(resJson.message || 'Erro no upload para o Google Drive');
+            throw new Error(resJson.message || 'Erro no upload');
           }
         }
 
@@ -1197,20 +1246,23 @@
           durationText = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
         }
 
+        const checklistText = `[Checklist] Câmeras: ${document.getElementById('checkCameras').value} | Portões: ${document.getElementById('checkPortoes').value} | Portas: ${document.getElementById('checkPortas').value}`;
+        const userText = document.getElementById('reportText').value.trim();
+
         const newRep = {
           date: now.toLocaleDateString('pt-BR'),
           checkInTime: c.checkInTime || '--:--',
           checkOutTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           duration: durationText,
           userEmail: currentUser.email,
-          text: document.getElementById('reportText').value.trim(),
+          text: `${checklistText}\n\n${userText}`,
           media: uploadedMedia
         };
 
         let reps = c.reports || []; reps.unshift(newRep);
         await db.collection("condominios").doc(id).update({ checkedIn: false, reports: reps });
         
-        showToast('Check-out realizado e fotos salvas no Google Drive!');
+        showToast('Check-out realizado com sucesso!');
         closeReportModal();
         loadCondosForOwner(ownerEmail);
       } catch (err) {
@@ -1222,6 +1274,7 @@
       }
     }
 
+    /* ROTAS COM ID ÚNICO (MANTÉM CHECKBOXES AO PESQUISAR) */
     function openRouteModal() {
       document.getElementById('routeSearchInput').value = '';
       renderRouteCondosList(condos);
@@ -1229,67 +1282,55 @@
     }
     function closeRouteModal() { document.getElementById('routeModal').classList.add('hidden'); }
 
-    function getSelectedAddressesSet() {
-      const checked = document.querySelectorAll('.route-checkbox:checked');
-      return new Set(Array.from(checked).map(cb => cb.value));
-    }
-
     function filterRouteCondos(query) {
-      const previouslyChecked = getSelectedAddressesSet();
       const q = query.toLowerCase();
       const filtered = condos.filter(c => c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q));
-      renderRouteCondosList(filtered, previouslyChecked);
+      renderRouteCondosList(filtered);
     }
 
-    function renderRouteCondosList(list, preservedCheckedSet = null) {
+    function renderRouteCondosList(list) {
       const container = document.getElementById('routeSelectionList');
       if (!container) return;
-      if (list.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Nenhum condomínio encontrado.</div>';
-      } else {
-        container.innerHTML = list.map(c => {
-          const addrVal = `${c.address}, ${c.number}`;
-          const isChecked = preservedCheckedSet ? preservedCheckedSet.has(addrVal) : false;
-          return `
-            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
-              <input type="checkbox" class="route-checkbox" data-lat="${c.lat}" data-lng="${c.lng}" value="${escapeHtml(addrVal)}" ${isChecked ? 'checked' : ''}>
-              <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
-            </label>
-          `;
-        }).join('');
-      }
+      container.innerHTML = list.map(c => `
+        <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-main); background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
+          <input type="checkbox" onchange="toggleRouteSelection('${c.id}', this.checked)" ${selectedRouteIds.has(c.id) ? 'checked' : ''}>
+          <span><b>${escapeHtml(c.name)}</b> - ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</span>
+        </label>
+      `).join('');
+    }
+
+    function toggleRouteSelection(id, isChecked) {
+      if (isChecked) selectedRouteIds.add(id);
+      else selectedRouteIds.delete(id);
     }
 
     function toggleSelectAllRoutes() {
-      const checkboxes = document.querySelectorAll('.route-checkbox');
+      const checkboxes = document.querySelectorAll('#routeSelectionList input[type="checkbox"]');
       const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-      checkboxes.forEach(cb => cb.checked = !allChecked);
+      condos.forEach(c => {
+        if (!allChecked) selectedRouteIds.add(c.id);
+        else selectedRouteIds.delete(c.id);
+      });
+      renderRouteCondosList(condos);
     }
 
     function generateOptimizedRouteByDistance() {
-      const checked = document.querySelectorAll('.route-checkbox:checked');
-      if (checked.length === 0) { alert('Selecione pelo menos um condomínio.'); return; }
+      if (selectedRouteIds.size === 0) { alert('Selecione pelo menos um condomínio.'); return; }
+      const selectedCondos = condos.filter(c => selectedRouteIds.has(c.id));
 
       navigator.geolocation.getCurrentPosition((pos) => {
         let currentLat = pos.coords.latitude;
         let currentLng = pos.coords.longitude;
-        
-        let unvisited = Array.from(checked).map(cb => ({
-          address: cb.value,
-          lat: parseFloat(cb.dataset.lat),
-          lng: parseFloat(cb.dataset.lng)
-        }));
+        let unvisited = selectedCondos.map(c => ({ address: `${c.address}, ${c.number}`, lat: parseFloat(c.lat), lng: parseFloat(c.lng) }));
 
         let orderedAddresses = [];
         while (unvisited.length > 0) {
           let nearestIdx = 0;
           let minDistance = Infinity;
-
           for (let i = 0; i < unvisited.length; i++) {
             let dist = calculateHaversineDistance(currentLat, currentLng, unvisited[i].lat, unvisited[i].lng);
             if (dist < minDistance) { minDistance = dist; nearestIdx = i; }
           }
-
           let nextStop = unvisited.splice(nearestIdx, 1)[0];
           orderedAddresses.push(nextStop.address);
           currentLat = nextStop.lat;
@@ -1305,7 +1346,7 @@
         window.open(url, '_blank');
         closeRouteModal();
       }, () => {
-        let addresses = Array.from(checked).map(cb => cb.value);
+        let addresses = selectedCondos.map(c => `${c.address}, ${c.number}`);
         let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addresses[addresses.length - 1])}`;
         if (addresses.length > 1) {
           let waypoints = addresses.slice(0, addresses.length - 1).map(a => encodeURIComponent(a)).join('|');
@@ -1314,6 +1355,111 @@
         window.open(url, '_blank');
         closeRouteModal();
       }, { enableHighAccuracy: true });
+    }
+
+    function renderCondos() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = condos.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
+      document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length}`;
+      document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
+      
+      document.getElementById('condoGrid').innerHTML = filtered.map(c => `
+        <div class="card ${c.checkedIn ? 'checked-in' : ''}">
+          <div>
+            <div class="card-header">
+              <div class="card-title">${escapeHtml(c.name)}</div>
+              <div>
+                <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>
+                ${userRole !== 'user' ? `<button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>` : ''}
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</div>
+              <button onclick="openTechSheetModal('${c.id}')" class="btn btn-slate" style="font-size:10px; padding:3px 6px; margin-top:4px;">🛠️ Ver Ficha Técnica</button>
+              ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
+              ${c.checkedIn ? `<div style="font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in desde ${c.checkInTime}</div>` : ''}
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="card-footer-row"><button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${(c.reports||[]).length})</button></div>
+            <div class="card-footer-row">
+              <button onclick="abrirOpcoesGps('${escapeHtml(c.address)}, ${escapeHtml(c.number)} - ${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">🗺️ GPS</button>
+              <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openModal(c = null) {
+      document.getElementById('condoForm').reset();
+      document.getElementById('condoId').value = c ? c.id : '';
+      document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
+      if (c) {
+        ['Name', 'Address', 'Number', 'Neighborhood', 'Phone', 'Lat', 'Lng', 'Notes', 'EquipDvr', 'EquipModem', 'EquipTravas', 'EquipFaciais', 'EquipLpr'].forEach(k => {
+          const el = document.getElementById('condo' + k) || document.getElementById('equip' + k.replace('Equip',''));
+          if (el) el.value = c[k.toLowerCase()] || c[k.charAt(0).toLowerCase() + k.slice(1)] || '';
+        });
+      }
+      document.getElementById('condoModal').classList.remove('hidden');
+    }
+    function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
+
+    function openHistoryModal(id) {
+      const c = condos.find(x => x.id === id);
+      document.getElementById('historyModalTitle').textContent = `Histórico: ${c.name}`;
+      document.getElementById('historyListContainer').innerHTML = (c.reports || []).length === 0 ? '<div style="text-align:center; color:#94a3b8; padding:20px;">Nenhum relatório.</div>' :
+        c.reports.map((r, idx) => `
+          <div class="report-card">
+            <div class="report-header">
+              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime}) | ⏱️ ${r.duration || '--'}</span>
+            </div>
+            <div class="report-text">${escapeHtml(r.text)}</div>
+            ${r.media && r.media.length > 0 ? `
+              <div class="report-media-grid">
+                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}')">`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      document.getElementById('historyModal').classList.remove('hidden');
+    }
+    function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
+
+    function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
+    function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
+
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function escapeHtml(str) {
+      return str ? str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]) : '';
+    }
+
+    function abrirOpcoesGps(enderecoCompleto) {
+      const enderecoEncoded = encodeURIComponent(enderecoCompleto);
+      document.getElementById('gpsLinkMaps').href = `https://www.google.com/maps/search/?api=1&query=${enderecoEncoded}`;
+      document.getElementById('gpsLinkWaze').href = `https://waze.com/ul?q=${enderecoEncoded}&navigate=yes`;
+      document.getElementById('gpsModal').classList.remove('hidden');
+    }
+    function closeGpsModal() { document.getElementById('gpsModal').classList.add('hidden'); }
+    function openLightbox(url) {
+      const container = document.getElementById('lightboxContentContainer');
+      container.innerHTML = `<img src="${url}" class="lightbox-img" alt="Mídia ampliada">`;
+      document.getElementById('lightboxModal').classList.remove('hidden');
+    }
+    function closeLightbox() {
+      document.getElementById('lightboxContentContainer').innerHTML = '';
+      document.getElementById('lightboxModal').classList.add('hidden');
     }
 
     function openGlobalReportModal() {
@@ -1330,14 +1476,12 @@
     function populateGlobalFilterDropdowns() {
       const userSelect = document.getElementById('filterUserSelect');
       const condoSelect = document.getElementById('filterCondoSelect');
-      
       let usersSet = new Set();
       condos.forEach(c => {
         if (c.reports) {
           c.reports.forEach(r => { if (r.userEmail) usersSet.add(r.userEmail); });
         }
       });
-
       userSelect.innerHTML = '<option value="">Todos os Técnicos</option>' + Array.from(usersSet).map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
       condoSelect.innerHTML = '<option value="">Todos os Condomínios</option>' + condos.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
     }
@@ -1378,12 +1522,10 @@
     function renderGlobalReports() {
       const allReports = getFilteredGlobalReports();
       const container = document.getElementById('globalReportListContainer');
-
       if (allReports.length === 0) {
         container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px;">Nenhum atendimento encontrado com os filtros selecionados.</div>';
         return;
       }
-
       container.innerHTML = allReports.map(r => `
         <div class="report-card">
           <div class="report-header">
@@ -1403,7 +1545,6 @@
     async function downloadGlobalReportPDF() {
       const allReports = getFilteredGlobalReports();
       if (allReports.length === 0) { alert('Nenhum relatório para exportar com os filtros atuais.'); return; }
-
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFont("helvetica", "bold");
@@ -1437,195 +1578,10 @@
         let split = doc.splitTextToSize(`Serviço: ${r.text}`, 180);
         doc.text(split, 14, y);
         y += (split.length * 6) + 4;
-
-        if (r.media && r.media.length > 0) {
-          for (let mIdx = 0; mIdx < r.media.length; mIdx++) {
-            try {
-              let base64Img = await getBase64ImageFromUrl(r.media[mIdx].url);
-              if (base64Img) {
-                if (y > 220) { doc.addPage(); y = 20; }
-                doc.addImage(base64Img, 'JPEG', 14, y, 35, 35);
-                y += 40;
-              }
-            } catch(e) {}
-          }
-        }
         y += 6;
       }
-
       doc.save(`relatorio_geral_filtrado_protech.pdf`);
       showToast('Relatório geral filtrado em PDF gerado!');
-    }
-
-    async function getBase64ImageFromUrl(url) {
-      try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(blob);
-        });
-      } catch (e) {
-        return null;
-      }
-    }
-
-    async function downloadSingleReportPDF(condoName, report) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.text(currentCompanyName || "Protech Condomínios", 14, 20);
-
-      doc.setFontSize(12);
-      doc.text(`Relatório de Atendimento: ${condoName}`, 14, 28);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`Data: ${report.date} | Horário: ${report.checkInTime} às ${report.checkOutTime}`, 14, 36);
-      doc.text(`Tempo Total da Visita: ${report.duration || '--'} | Técnico: ${report.userEmail}`, 14, 42);
-
-      doc.setFont("helvetica", "bold");
-      doc.text("Serviço Realizado / Observações:", 14, 52);
-      
-      doc.setFont("helvetica", "normal");
-      let splitText = doc.splitTextToSize(report.text || "Nenhuma descrição informada.", 180);
-      doc.text(splitText, 14, 60);
-
-      let yPos = 65 + (splitText.length * 6);
-
-      if (report.media && report.media.length > 0) {
-        doc.setFont("helvetica", "bold");
-        doc.text(`Mídias anexadas (${report.media.length}):`, 14, yPos);
-        yPos += 8;
-
-        for (let i = 0; i < report.media.length; i++) {
-          let mediaItem = report.media[i];
-          try {
-            let base64Img = await getBase64ImageFromUrl(mediaItem.url);
-            if (base64Img) {
-              if (yPos > 220) { doc.addPage(); yPos = 20; }
-              doc.addImage(base64Img, 'JPEG', 14, yPos, 45, 45);
-              yPos += 50;
-            }
-          } catch (err) {}
-        }
-      }
-
-      doc.save(`relatorio_${condoName.replace(/\s+/g, '_')}_${report.date.replace(/\//g, '-')}.pdf`);
-      showToast('PDF gerado com sucesso!');
-    }
-
-    function openLightbox(url) {
-      const container = document.getElementById('lightboxContentContainer');
-      container.innerHTML = `<img src="${url}" class="lightbox-img" alt="Mídia ampliada">`;
-      document.getElementById('lightboxModal').classList.remove('hidden');
-    }
-    function closeLightbox() {
-      document.getElementById('lightboxContentContainer').innerHTML = '';
-      document.getElementById('lightboxModal').classList.add('hidden');
-    }
-
-    function abrirOpcoesGps(enderecoCompleto) {
-      const enderecoEncoded = encodeURIComponent(enderecoCompleto);
-      document.getElementById('gpsLinkMaps').href = `https://www.google.com/maps/search/?api=1&query=${enderecoEncoded}`;
-      document.getElementById('gpsLinkWaze').href = `https://waze.com/ul?q=${enderecoEncoded}&navigate=yes`;
-      document.getElementById('gpsModal').classList.remove('hidden');
-    }
-    function closeGpsModal() { document.getElementById('gpsModal').classList.add('hidden'); }
-
-    function renderCondos() {
-      const search = document.getElementById('searchInput').value.toLowerCase().trim();
-      const filtered = condos.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
-      document.getElementById('resultCount').textContent = `Exibindo ${filtered.length} de ${condos.length}`;
-      document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
-      
-      // Se for técnico, oculta o botão de excluir (lixo) nas cards
-      document.getElementById('condoGrid').innerHTML = filtered.map(c => `
-        <div class="card ${c.checkedIn ? 'checked-in' : ''}">
-          <div>
-            <div class="card-header">
-              <div class="card-title">${escapeHtml(c.name)}</div>
-              <div>
-                <button onclick="editCondo('${c.id}')" class="icon-btn" title="Editar">✏️</button>
-                ${userRole !== 'user' ? `<button onclick="deleteCondo('${c.id}')" class="icon-btn delete" title="Excluir">🗑️</button>` : ''}
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="address-line">📍 ${escapeHtml(c.address)}, ${escapeHtml(c.number)}</div>
-              ${c.lat && c.lng ? '<div style="font-size:10px; color:#10b981;">🌐 GPS Ativo</div>' : '<div style="font-size:10px; color:#f43f5e;">⚠️ Sem GPS</div>'}
-              ${c.notes ? `<div class="notes-box">ℹ️ ${escapeHtml(c.notes)}</div>` : ''}
-              ${c.checkedIn ? `<div style="font-size:11px; color:#10b981; font-weight:bold;">🟢 Check-in desde ${c.checkInTime}</div>` : ''}
-            </div>
-          </div>
-          <div class="card-footer">
-            <div class="card-footer-row"><button onclick="openHistoryModal('${c.id}')" class="btn btn-slate">📋 Relatórios (${(c.reports||[]).length})</button></div>
-            <div class="card-footer-row">
-              <button onclick="abrirOpcoesGps('${escapeHtml(c.address)}, ${escapeHtml(c.number)} - ${escapeHtml(c.neighborhood || '')}')" class="btn btn-slate">🗺️ GPS</button>
-              ${c.checkedIn && (userRole === 'owner' || userRole === 'admin') ? `<button onclick="adminForceCheckout('${c.id}')" class="btn btn-rose" style="font-size:10px;" title="Encerrar visita">🔓 Admin</button>` : ''}
-              <button onclick="toggleCheckIn('${c.id}')" class="btn ${c.checkedIn ? 'btn-rose' : 'btn-emerald'}">${c.checkedIn ? '🔴 Check-out' : '🟢 Check-in'}</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function openModal(c = null) {
-      document.getElementById('condoForm').reset();
-      document.getElementById('condoId').value = c ? c.id : '';
-      document.getElementById('modalTitle').textContent = c ? 'Editar' : 'Cadastrar';
-      if (c) {
-        ['Name', 'Address', 'Number', 'Neighborhood', 'Phone', 'Lat', 'Lng', 'Notes'].forEach(k => {
-          const el = document.getElementById('condo' + k);
-          if (el) el.value = c[k.toLowerCase()] || '';
-        });
-      }
-      document.getElementById('condoModal').classList.remove('hidden');
-    }
-    function closeModal() { document.getElementById('condoModal').classList.add('hidden'); }
-
-    function openHistoryModal(id) {
-      const c = condos.find(x => x.id === id);
-      document.getElementById('historyModalTitle').textContent = `Histórico: ${c.name}`;
-      document.getElementById('historyListContainer').innerHTML = (c.reports || []).length === 0 ? '<div style="text-align:center; color:#94a3b8; padding:20px;">Nenhum relatório.</div>' :
-        c.reports.map((r, idx) => `
-          <div class="report-card">
-            <div class="report-header">
-              <span>📅 ${r.date} (${r.checkInTime} - ${r.checkOutTime}) | ⏱️ ${r.duration || '--'}</span>
-              <button onclick='downloadSingleReportPDF(${JSON.stringify(c.name)}, ${JSON.stringify(r)})' class="btn btn-slate" style="padding:2px 8px; font-size:10px;">📄 PDF</button>
-            </div>
-            <div class="report-text">${escapeHtml(r.text)}</div>
-            ${r.media && r.media.length > 0 ? `
-              <div class="report-media-grid">
-                ${r.media.map(m => `<img src="${m.url}" class="report-media-thumb" onclick="openLightbox('${m.url}')">`).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `).join('');
-      document.getElementById('historyModal').classList.remove('hidden');
-    }
-    function closeHistoryModal() { document.getElementById('historyModal').classList.add('hidden'); }
-
-    function openChangelogModal() { document.getElementById('changelogModal').classList.remove('hidden'); }
-    function closeChangelogModal() { document.getElementById('changelogModal').classList.add('hidden'); }
-
-    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
-    }
-
-    function escapeHtml(str) {
-      return str ? str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]) : '';
     }
   </script>
 </body>
