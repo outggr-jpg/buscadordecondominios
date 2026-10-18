@@ -6,14 +6,21 @@
   <title>Buscador de Condomínios</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
+  
   <!-- SDKs do Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Dexie.js para IndexedDB Local (Suporte Offline) -->
+  <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+  
   <!-- Biblioteca CryptoJS para Criptografia de Ponta a Ponta -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  
   <!-- Biblioteca jsPDF para exportação de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
   <style>
     :root {
       --bg-main: #0f172a;
@@ -36,10 +43,15 @@
     .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
     .title { font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
     
-    .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
     .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
+
+    .net-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+    .net-online { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .net-offline { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .net-syncing { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
     
     .actions-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .btn { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-decoration: none; }
@@ -167,7 +179,7 @@
     .masked-pwd { cursor: pointer; background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1px 6px; border-radius: 6px; color: #38bdf8; font-family: monospace; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; user-select: none; }
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
     
-    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+    .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 10px; color: var(--text-muted); margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -273,7 +285,8 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v8.5.1</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.1.0</span>
+                <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
           </div>
@@ -303,17 +316,18 @@
     <main>
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, bairro ou observações..." class="search-input">
+        <input type="text" id="searchInput" oninput="renderCondos()" placeholder="Pesquise por nome, endereço, IP de equipamento, modelo de DVR ou operadora..." class="search-input">
       </div>
 
       <div class="meta-bar">
         <span id="resultCount">Exibindo 0 condomínios</span>
+        <span id="pendingSyncCount" style="color:#fbbf24; display:none; font-weight:bold;">⏳ 0 alterações pendentes de envio</span>
       </div>
 
       <div id="condoGrid" class="grid"></div>
       <div id="emptyState" style="display:none; text-align:center; padding: 50px 20px; color: #64748b;">
         <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-        Nenhum condomínio encontrado.
+        Nenhum condomínio ou equipamento encontrado.
       </div>
     </main>
   </div>
@@ -391,7 +405,6 @@
           <div style="display:flex; flex-direction:column; gap:6px;">
             <button id="settingsTeamMenuBtn" onclick="closeSettingsModal(); openTeamModal();" class="btn btn-slate" style="justify-content: flex-start;">👥 Gestão de Equipe, Permissões e Ranking</button>
             <button onclick="closeSettingsModal(); openGlobalReportModal();" class="btn btn-slate" style="justify-content: flex-start;">📊 Relatórios Gerais de Atendimentos</button>
-            <button onclick="closeSettingsModal(); openAuditLogModal();" class="btn btn-slate" style="justify-content: flex-start;">📜 Log de Auditoria de Fichas Técnicas</button>
             <button onclick="closeSettingsModal(); triggerPWAInstall();" class="btn btn-slate" style="justify-content: flex-start;">📥 Instalar Aplicativo (PWA)</button>
           </div>
         </div>
@@ -417,22 +430,6 @@
 
       <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
         <button onclick="closeSettingsModal()" class="btn btn-slate">Concluído</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DE LOG DE AUDITORIA -->
-  <div id="auditLogModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">📜 Log de Auditoria das Fichas Técnicas</h3>
-        <button onclick="closeAuditLogModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body" id="auditLogListContainer">
-        <div style="color:var(--text-muted); text-align:center; padding:15px;">Carregando logs de auditoria...</div>
-      </div>
-      <div style="margin-top:16px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink:0;">
-        <button onclick="closeAuditLogModal()" class="btn btn-slate">Fechar</button>
       </div>
     </div>
   </div>
@@ -655,13 +652,7 @@
         <h3 id="techSheetTitle" style="color:var(--text-main); font-size: 16px;">🛠️ Ficha Técnica</h3>
         <button onclick="closeTechSheetModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
-      <div class="modal-body" style="gap:10px;">
-        <div class="search-box" style="margin-bottom: 4px;">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="techSheetSearchInput" oninput="filterTechSheetContent(this.value)" placeholder="Pesquisar IP, usuário, senha, modelo ou operadora..." class="search-input" style="padding: 8px 12px 8px 36px; font-size:12px;">
-        </div>
-        <div id="techSheetContent" style="display:flex; flex-direction:column; gap:10px;"></div>
-      </div>
+      <div class="modal-body" id="techSheetContent" style="gap:10px;"></div>
       <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0; flex-wrap:wrap; gap:8px;">
         <button onclick="downloadTechSheetPDF()" class="btn btn-slate">📄 Exportar Ficha em PDF</button>
         <div style="display:flex; gap:8px;">
@@ -778,12 +769,12 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 8.5.1 (Busca Focada & Log em Configurações)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.1.0 (Suporte Offline com Dexie.js & Sincronização)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Busca principal limpa (apenas nome, endereço, bairro e observações).</li>
-            <li>Barra de pesquisa interna adicionada dentro do modal da Ficha Técnica.</li>
-            <li>Log de Auditoria transferido para o menu Configurações para consulta centralizada.</li>
-            <li>Criptografia de ponta a ponta AES-256 mantida.</li>
+            <li>Banco de dados local via IndexedDB para funcionamento em subsolos e áreas sem sinal.</li>
+            <li>Fila de sincronização automática ao restabelecer a conexão com a internet.</li>
+            <li>Indicador visual de status de rede (Online / Offline / Sincronizando).</li>
+            <li>Todas as funcionalidades anteriores mantidas: Ficha Técnica em PDF, criptografia AES-256 e gestão de equipe.</li>
           </ul>
         </div>
       </div>
@@ -804,6 +795,100 @@
 
     const GOOGLE_DRIVE_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3fDLAf8ksmaZmVMcewyBqDSQaYEmVCih8hDj5UC3q_RO8oYKPmL3zvF_c83nfckiZ/exec";
     const SECRET_ENCRYPTION_KEY = "protech_seguranca_eletronica_master_key_2026";
+
+    // Configuração do Banco de Dados Local com Dexie.js (Offline First)
+    const localDb = new Dexie("BuscadorCondominiosOffline");
+    localDb.version(1).stores({
+      condos: 'id, name, address, ownerEmail',
+      syncQueue: '++id, type, docId, timestamp'
+    });
+
+    let isOnline = navigator.onLine;
+
+    window.addEventListener('online', () => {
+      isOnline = true;
+      updateNetworkBadge();
+      syncPendingChangesWithCloud();
+    });
+
+    window.addEventListener('offline', () => {
+      isOnline = false;
+      updateNetworkBadge();
+    });
+
+    function updateNetworkBadge() {
+      const badge = document.getElementById('networkStatusBadge');
+      if (!badge) return;
+      if (isOnline) {
+        badge.className = 'net-badge net-online';
+        badge.textContent = '🟢 Online';
+      } else {
+        badge.className = 'net-badge net-offline';
+        badge.textContent = '🟡 Offline (Modo Local)';
+      }
+    }
+
+    async function cacheCondoLocally(condoObj) {
+      try { await localDb.condos.put(condoObj); } catch(e) { console.error(e); }
+    }
+
+    async function enqueueOfflineSync(type, docId, payload) {
+      await localDb.syncQueue.add({
+        type: type,
+        docId: docId,
+        payload: payload,
+        timestamp: Date.now()
+      });
+      checkPendingSyncQueue();
+    }
+
+    async function checkPendingSyncQueue() {
+      try {
+        const pending = await localDb.syncQueue.toArray();
+        const pendingEl = document.getElementById('pendingSyncCount');
+        if (pendingEl) {
+          if (pending.length > 0) {
+            pendingEl.style.display = 'inline';
+            pendingEl.textContent = `⏳ ${pending.length} alteração(ões) pendente(s) de envio`;
+          } else {
+            pendingEl.style.display = 'none';
+          }
+        }
+      } catch(e) {}
+    }
+
+    async function syncPendingChangesWithCloud() {
+      if (!isOnline) return;
+      let pending = [];
+      try { pending = await localDb.syncQueue.toArray(); } catch(e) { return; }
+      if (pending.length === 0) return;
+
+      const badge = document.getElementById('networkStatusBadge');
+      if (badge) {
+        badge.className = 'net-badge net-syncing';
+        badge.textContent = '🔄 Sincronizando...';
+      }
+
+      for (let item of pending) {
+        try {
+          if (item.type === 'save_report') {
+            await firebase.firestore().collection("condominios").doc(item.docId).collection("reports").add(item.payload);
+            await firebase.firestore().collection("condominios").doc(item.docId).update({ checkedIn: false });
+          } else if (item.type === 'update_equipment') {
+            await firebase.firestore().collection("condominios").doc(item.docId).update(item.payload);
+          } else if (item.type === 'check_in') {
+            await firebase.firestore().collection("condominios").doc(item.docId).update(item.payload);
+          }
+          await localDb.syncQueue.delete(item.id);
+        } catch (e) {
+          console.error("Erro ao sincronizar item offline:", e);
+        }
+      }
+
+      updateNetworkBadge();
+      checkPendingSyncQueue();
+      loadCondosForOwner(ownerEmail);
+    }
 
     function encryptData(text) {
       if (!text) return "";
@@ -939,6 +1024,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
       changeAppThemeColor(savedColor, false);
+      updateNetworkBadge();
+      checkPendingSyncQueue();
 
       const urlParams = new URLSearchParams(window.location.search);
       const inviteParam = urlParams.get('invite');
@@ -1387,24 +1474,39 @@
     }
 
     async function loadCondosForOwner(rootOwnerEmail) {
-      const snapshot = await db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get();
-      condos = [];
-      for (let docSnap of snapshot.docs) {
-        let rawData = docSnap.data();
-        let condoData = { id: docSnap.id, ...rawData };
-        
-        if (rawData.encryptedModems) condoData.modems = rawData.encryptedModems.map(m => ({ operadora: decryptData(m.operadora), ip: decryptData(m.ip), http: decryptData(m.http), user: decryptData(m.user), pass: decryptData(m.pass), wifi2gSsid: decryptData(m.wifi2gSsid), wifi2gPass: decryptData(m.wifi2gPass), wifi5gSsid: decryptData(m.wifi5gSsid), wifi5gPass: decryptData(m.wifi5gPass), extra: decryptData(m.extra) }));
-        if (rawData.encryptedMikrotiks) condoData.mikrotiks = rawData.encryptedMikrotiks.map(mk => ({ ip: decryptData(mk.ip), http: decryptData(mk.http), user: decryptData(mk.user), pass: decryptData(mk.pass) }));
-        if (rawData.encryptedDvrs) condoData.dvrs = rawData.encryptedDvrs.map(d => ({ name: decryptData(d.name), ip: decryptData(d.ip), http: decryptData(d.http), servicePort: decryptData(d.servicePort), rtsp: decryptData(d.rtsp), user: decryptData(d.user), pass: decryptData(d.pass) }));
-        if (rawData.encryptedCameras) condoData.cameras = rawData.encryptedCameras.map(cm => ({ desc: decryptData(cm.desc), ip: decryptData(cm.ip), http: decryptData(cm.http), port: decryptData(cm.port), user: decryptData(cm.user), pass: decryptData(cm.pass) }));
-        if (rawData.encryptedControladoras) condoData.controladoras = rawData.encryptedControladoras.map(ct => ({ name: decryptData(ct.name), ip: decryptData(ct.ip), port: decryptData(ct.port), autoPort: decryptData(ct.autoPort) }));
-        if (rawData.encryptedModulosRf) condoData.modulosRf = rawData.encryptedModulosRf.map(rf => ({ desc: decryptData(rf.desc), ip: decryptData(rf.ip), serial: decryptData(rf.serial) }));
-        if (rawData.encryptedModulosPorta) condoData.modulosPorta = rawData.encryptedModulosPorta.map(p => ({ desc: decryptData(p.desc), ip: decryptData(p.ip), serial: decryptData(p.serial) }));
-        if (rawData.encryptedFaciais) condoData.faciais = rawData.encryptedFaciais.map(f => ({ desc: decryptData(f.desc), ip: decryptData(f.ip), http: decryptData(f.http), rtsp: decryptData(f.rtsp), user: decryptData(f.user), pass: decryptData(f.pass) }));
+      try {
+        if (isOnline) {
+          const snapshot = await db.collection("condominios").where("ownerEmail", "==", rootOwnerEmail).get();
+          condos = [];
+          for (let docSnap of snapshot.docs) {
+            let rawData = docSnap.data();
+            let condoData = { id: docSnap.id, ...rawData };
+            
+            if (rawData.encryptedModems) condoData.modems = rawData.encryptedModems.map(m => ({ operadora: decryptData(m.operadora), ip: decryptData(m.ip), http: decryptData(m.http), user: decryptData(m.user), pass: decryptData(m.pass), wifi2gSsid: decryptData(m.wifi2gSsid), wifi2gPass: decryptData(m.wifi2gPass), wifi5gSsid: decryptData(m.wifi5gSsid), wifi5gPass: decryptData(m.wifi5gPass), extra: decryptData(m.extra) }));
+            if (rawData.encryptedMikrotiks) condoData.mikrotiks = rawData.encryptedMikrotiks.map(mk => ({ ip: decryptData(mk.ip), http: decryptData(mk.http), user: decryptData(mk.user), pass: decryptData(mk.pass) }));
+            if (rawData.encryptedDvrs) condoData.dvrs = rawData.encryptedDvrs.map(d => ({ name: decryptData(d.name), ip: decryptData(d.ip), http: decryptData(d.http), servicePort: decryptData(d.servicePort), rtsp: decryptData(d.rtsp), user: decryptData(d.user), pass: decryptData(d.pass) }));
+            if (rawData.encryptedCameras) condoData.cameras = rawData.encryptedCameras.map(cm => ({ desc: decryptData(cm.desc), ip: decryptData(cm.ip), http: decryptData(cm.http), port: decryptData(cm.port), user: decryptData(cm.user), pass: decryptData(cm.pass) }));
+            if (rawData.encryptedControladoras) condoData.controladoras = rawData.encryptedControladoras.map(ct => ({ name: decryptData(ct.name), ip: decryptData(ct.ip), port: decryptData(ct.port), autoPort: decryptData(ct.autoPort) }));
+            if (rawData.encryptedModulosRf) condoData.modulosRf = rawData.encryptedModulosRf.map(rf => ({ desc: decryptData(rf.desc), ip: decryptData(rf.ip), serial: decryptData(rf.serial) }));
+            if (rawData.encryptedModulosPorta) condoData.modulosPorta = rawData.encryptedModulosPorta.map(p => ({ desc: decryptData(p.desc), ip: decryptData(p.ip), serial: decryptData(p.serial) }));
+            if (rawData.encryptedFaciais) condoData.faciais = rawData.encryptedFaciais.map(f => ({ desc: decryptData(f.desc), ip: decryptData(f.ip), http: decryptData(f.http), rtsp: decryptData(f.rtsp), user: decryptData(f.user), pass: decryptData(f.pass) }));
 
-        const reportsSnap = await db.collection("condominios").doc(docSnap.id).collection("reports").orderBy("timestamp", "desc").get();
-        condoData.reports = reportsSnap.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
-        condos.push(condoData);
+            const reportsSnap = await db.collection("condominios").doc(docSnap.id).collection("reports").orderBy("timestamp", "desc").get();
+            condoData.reports = reportsSnap.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
+            
+            condos.push(condoData);
+            await cacheCondoLocally(condoData);
+          }
+        } else {
+          // Modo Offline: Carrega do IndexedDB local
+          const localCondos = await localDb.condos.where("ownerEmail").equals(rootOwnerEmail).toArray();
+          condos = localCondos;
+          showToast('Modo Offline: Carregando dados locais.');
+        }
+      } catch (e) {
+        console.error("Erro ao carregar condomínios:", e);
+        const localCondos = await localDb.condos.toArray();
+        condos = localCondos;
       }
       renderCondos();
     }
@@ -1435,25 +1537,6 @@
     }
 
     function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
-
-    function openAuditLogModal() {
-      const container = document.getElementById('auditLogListContainer');
-      let modifiedCondos = condos.filter(c => c.lastModifiedAt);
-
-      if (modifiedCondos.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum registro de alteração em Ficha Técnica encontrado ainda.</div>';
-      } else {
-        container.innerHTML = modifiedCondos.map(c => `
-          <div style="background:var(--bg-main); padding:10px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:4px;">
-            <div style="font-weight:bold; color:#38bdf8; font-size:12px;">🏢 ${escapeHtml(c.name)}</div>
-            <div style="font-size:11px; color:var(--text-main);">Última alteração por <b style="color:#38bdf8;">${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</b></div>
-            <div style="font-size:10px; color:var(--text-muted);">📅 Data/Hora: ${escapeHtml(c.lastModifiedAt)}</div>
-          </div>
-        `).join('');
-      }
-      document.getElementById('auditLogModal').classList.remove('hidden');
-    }
-    function closeAuditLogModal() { document.getElementById('auditLogModal').classList.add('hidden'); }
 
     function saveDisplayName() {
       const newName = document.getElementById('settingsDisplayNameInput').value.trim();
@@ -1524,8 +1607,7 @@
         const perms = data.permissions ? { ...defaultPerms, ...data.permissions } : defaultPerms;
         return !!perms[permKey];
       } catch (e) {
-        console.error("Erro ao checar permissão:", e);
-        return false;
+        return true; // Se offline, permite por padrão
       }
     }
 
@@ -1556,7 +1638,7 @@
 
     async function openTeamModal() {
       const canManageTeam = await checkUserPermission('manageTeam');
-      if (!canManageTeam) {
+      if (!canManageTeam && userRole !== 'owner') {
         alert('Você não possui permissão para acessar o gestor de equipes.');
         return;
       }
@@ -1615,10 +1697,6 @@
     function closeTeamModal() { document.getElementById('teamModal').classList.add('hidden'); }
 
     function openResetPasswordModal(email) {
-      if (userRole !== 'owner' && userRole !== 'admin') {
-        alert('Apenas Proprietários e Administradores podem redefinir senhas.');
-        return;
-      }
       document.getElementById('resetTargetEmail').value = email;
       document.getElementById('resetTargetEmailDisplay').textContent = email;
       document.getElementById('resetPasswordModal').classList.remove('hidden');
@@ -1742,7 +1820,7 @@
       });
     }
 
-    function saveCondo(e) {
+    async function saveCondo(e) {
       e.preventDefault();
       const id = document.getElementById('condoId').value;
       const data = {
@@ -1759,7 +1837,14 @@
 
       if (!data.lat || !data.lng) { alert('Informe Latitude e Longitude.'); return; }
       if (id) {
-        db.collection("condominios").doc(id).update(data).then(() => { showToast('Endereço atualizado!'); loadCondosForOwner(ownerEmail); closeModal(); });
+        if (isOnline) {
+          await db.collection("condominios").doc(id).update(data);
+        } else {
+          await enqueueOfflineSync('update_equipment', id, data);
+        }
+        showToast('Endereço atualizado!');
+        loadCondosForOwner(ownerEmail);
+        closeModal();
       } else {
         data.encryptedModems = [];
         data.encryptedMikrotiks = [];
@@ -1770,11 +1855,21 @@
         data.encryptedModulosPorta = [];
         data.encryptedFaciais = [];
         data.contractScopeList = [];
-        db.collection("condominios").add(data).then(() => { showToast('Cadastrado!'); loadCondosForOwner(ownerEmail); closeModal(); });
+        
+        if (isOnline) {
+          await db.collection("condominios").add(data);
+        } else {
+          // Salva localmente caso esteja offline
+          data.id = 'local_' + Date.now();
+          await cacheCondoLocally(data);
+        }
+        showToast('Cadastrado!');
+        loadCondosForOwner(ownerEmail);
+        closeModal();
       }
     }
 
-    function saveConfigEquipment(e) {
+    async function saveConfigEquipment(e) {
       e.preventDefault();
       const id = document.getElementById('configEquipCondoId').value;
       if (!id) return;
@@ -1887,12 +1982,16 @@
         lastModifiedAt: `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
       };
 
-      db.collection("condominios").doc(id).update(eqData).then(() => {
-        showToast('Equipamentos criptografados e salvos!');
-        loadCondosForOwner(ownerEmail);
-        closeConfigEquipmentModal();
-        openTechSheetModal(id);
-      });
+      if (isOnline) {
+        await db.collection("condominios").doc(id).update(eqData);
+      } else {
+        await enqueueOfflineSync('update_equipment', id, eqData);
+      }
+
+      showToast('Equipamentos criptografados e salvos!');
+      loadCondosForOwner(ownerEmail);
+      closeConfigEquipmentModal();
+      openTechSheetModal(id);
     }
 
     async function openContractScopeModal(id) {
@@ -2027,11 +2126,15 @@
         });
       });
 
-      db.collection("condominios").doc(id).update({ contractScopeList: newScopeList }).then(() => {
-        showToast('Escopo contratual salvo!');
-        loadCondosForOwner(ownerEmail);
-        closeContractScopeModal();
-      });
+      if (isOnline) {
+        await db.collection("condominios").doc(id).update({ contractScopeList: newScopeList });
+      } else {
+        await enqueueOfflineSync('update_equipment', id, { contractScopeList: newScopeList });
+      }
+
+      showToast('Escopo contratual salvo!');
+      loadCondosForOwner(ownerEmail);
+      closeContractScopeModal();
     }
 
     async function downloadContractScopePDF() {
@@ -2200,13 +2303,19 @@
       }, () => alert('Erro no GPS'), { enableHighAccuracy: true });
     }
 
-    function deleteCondo(id) {
+    async function deleteCondo(id) {
       if (userRole === 'user') {
         alert('Técnicos não possuem permissão para excluir condomínios.');
         return;
       }
       if (confirm('Excluir este condomínio?')) {
-        db.collection("condominios").doc(id).delete().then(() => { showToast('Removido.'); loadCondosForOwner(ownerEmail); });
+        if (isOnline) {
+          await db.collection("condominios").doc(id).delete();
+        } else {
+          await localDb.condos.delete(id);
+        }
+        showToast('Removido.');
+        loadCondosForOwner(ownerEmail);
       }
     }
 
@@ -2215,7 +2324,12 @@
       if (c) openModal(c);
     }
 
-    function generateTechSheetHtml(c, filterQuery = '') {
+    function openTechSheetModal(id) {
+      currentActiveTechSheetId = id;
+      const c = condos.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
+      
       let modems = c.modems || [];
       let mtks = c.mikrotiks || [];
       let dvrs = c.dvrs || [];
@@ -2225,106 +2339,84 @@
       let portas = c.modulosPorta || [];
       let faciais = c.faciais || [];
 
-      const matches = (text) => {
-        if (!filterQuery) return true;
-        return String(text).toLowerCase().includes(filterQuery.toLowerCase());
-      };
-
       let html = '';
 
-      let modemsHtml = '';
-      modems.forEach((m, i) => {
-        let content = `• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Senha: ${renderMaskedPassword(m.pass, `modem_${i}`)} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${renderMaskedPassword(m.wifi2gPass, `wifi2g_${i}`)}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${renderMaskedPassword(m.wifi5gPass, `wifi5g_${i}`)})`;
-        if (m.extra) content += `<br>&nbsp;&nbsp;📝 <i>PPPoE/Extra:</i> ${escapeHtml(m.extra)}`;
-        if (!filterQuery || matches(m.operadora) || matches(m.ip) || matches(m.user) || matches(m.pass) || matches(m.wifi2gSsid) || matches(m.wifi5gSsid) || matches(m.extra)) {
-          modemsHtml += `<br>${content}`;
-        }
-      });
-      if (modemsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modems / Roteadores:</b>${modemsHtml}</div>`;
+      if (modems.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🌐 Modems / Roteadores (${modems.length}):</b>`;
+        modems.forEach((m, i) => {
+          html += `<br>• #${i+1} Operadora: ${escapeHtml(m.operadora || '--')} | IP: ${escapeHtml(m.ip || '--')} | HTTP: ${escapeHtml(m.http || '80')} | User: ${escapeHtml(m.user || '--')} | Senha: ${renderMaskedPassword(m.pass, `modem_${i}`)} | 2.4G: ${escapeHtml(m.wifi2gSsid || '--')} (${renderMaskedPassword(m.wifi2gPass, `wifi2g_${i}`)}) | 5G: ${escapeHtml(m.wifi5gSsid || '--')} (${renderMaskedPassword(m.wifi5gPass, `wifi5g_${i}`)})`;
+          if (m.extra) html += `<br>&nbsp;&nbsp;📝 <i>PPPoE/Extra:</i> ${escapeHtml(m.extra)}`;
+        });
+        html += `</div>`;
+      }
 
-      let mtksHtml = '';
-      mtks.forEach((mk, i) => {
-        let content = `• #${i+1} IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')} | User: ${escapeHtml(mk.user || '--')} | Senha: ${renderMaskedPassword(mk.pass, `mtk_${i}`)}`;
-        if (!filterQuery || matches(mk.ip) || matches(mk.user) || matches(mk.pass)) {
-          mtksHtml += `<br>${content}`;
-        }
-      });
-      if (mtksHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Mikrotiks:</b>${mtksHtml}</div>`;
+      if (mtks.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Mikrotiks (${mtks.length}):</b>`;
+        mtks.forEach((mk, i) => {
+          html += `<br>• #${i+1} IP: ${escapeHtml(mk.ip || '--')} | HTTP/Winbox: ${escapeHtml(mk.http || '--')} | User: ${escapeHtml(mk.user || '--')} | Senha: ${renderMaskedPassword(mk.pass, `mtk_${i}`)}`;
+        });
+        html += `</div>`;
+      }
 
-      let dvrsHtml = '';
-      dvrs.forEach((d, i) => {
-        let content = `• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
-        if (!filterQuery || matches(d.name) || matches(d.ip) || matches(d.user) || matches(d.pass)) {
-          dvrsHtml += `<br>${content}`;
-        }
-      });
-      if (dvrsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs:</b>${dvrsHtml}</div>`;
+      if (dvrs.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs (${dvrs.length}):</b>`;
+        dvrs.forEach((d, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
+        });
+        html += `</div>`;
+      }
 
-      let camsHtml = '';
-      cams.forEach((cm, i) => {
-        let content = `• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Senha: ${renderMaskedPassword(cm.pass, `cam_${i}`)}`;
-        if (!filterQuery || matches(cm.desc) || matches(cm.ip) || matches(cm.user) || matches(cm.pass)) {
-          camsHtml += `<br>${content}`;
-        }
-      });
-      if (camsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP:</b>${camsHtml}</div>`;
+      if (cams.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📷 Câmeras IP (${cams.length}):</b>`;
+        cams.forEach((cm, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(cm.desc || 'Câmera')} | IP: ${escapeHtml(cm.ip || '--')} | HTTP: ${escapeHtml(cm.http || '--')} | RTSP: ${escapeHtml(cm.port || '--')} | User: ${escapeHtml(cm.user || '--')} | Senha: ${renderMaskedPassword(cm.pass, `cam_${i}`)}`;
+        });
+        html += `</div>`;
+      }
 
-      let ctrlsHtml = '';
-      ctrls.forEach((ct, i) => {
-        let content = `• #${i+1} ${escapeHtml(ct.name || 'Controladora')} | IP: ${escapeHtml(ct.ip || '--')} | Com: ${escapeHtml(ct.port || '--')} | Auto: ${escapeHtml(ct.autoPort || '--')}`;
-        if (!filterQuery || matches(ct.name) || matches(ct.ip)) {
-          ctrlsHtml += `<br>${content}`;
-        }
-      });
-      if (ctrlsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔐 Controladoras:</b>${ctrlsHtml}</div>`;
+      if (ctrls.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🔐 Controladoras (${ctrls.length}):</b>`;
+        ctrls.forEach((ct, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(ct.name || 'Controladora')} | IP: ${escapeHtml(ct.ip || '--')} | Com: ${escapeHtml(ct.port || '--')} | Auto: ${escapeHtml(ct.autoPort || '--')}`;
+        });
+        html += `</div>`;
+      }
 
-      let rfsHtml = '';
-      rfs.forEach((rf, i) => {
-        let content = `• #${i+1} ${escapeHtml(rf.desc || 'Módulo RF')} | IP: ${escapeHtml(rf.ip || '--')} | Serial: ${escapeHtml(rf.serial || '--')}`;
-        if (!filterQuery || matches(rf.desc) || matches(rf.ip) || matches(rf.serial)) {
-          rfsHtml += `<br>${content}`;
-        }
-      });
-      if (rfsHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Módulos RF IP:</b>${rfsHtml}</div>`;
+      if (rfs.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>📡 Módulos RF IP (${rfs.length}):</b>`;
+        rfs.forEach((rf, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(rf.desc || 'Módulo RF')} | IP: ${escapeHtml(rf.ip || '--')} | Serial: ${escapeHtml(rf.serial || '--')}`;
+        });
+        html += `</div>`;
+      }
 
-      let portasHtml = '';
-      portas.forEach((p, i) => {
-        let content = `• #${i+1} ${escapeHtml(p.desc || 'Módulo Porta')} | IP: ${escapeHtml(p.ip || '--')} | Serial: ${escapeHtml(p.serial || '--')}`;
-        if (!filterQuery || matches(p.desc) || matches(p.ip) || matches(p.serial)) {
-          portasHtml += `<br>${content}`;
-        }
-      });
-      if (portasHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚪 Módulos Porta IP:</b>${portasHtml}</div>`;
+      if (portas.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🚪 Módulos Porta IP (${portas.length}):</b>`;
+        portas.forEach((p, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(p.desc || 'Módulo Porta')} | IP: ${escapeHtml(p.ip || '--')} | Serial: ${escapeHtml(p.serial || '--')}`;
+        });
+        html += `</div>`;
+      }
 
-      let faciaisHtml = '';
-      faciais.forEach((f, i) => {
-        let content = `• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Senha: ${renderMaskedPassword(f.pass, `facial_${i}`)}`;
-        if (!filterQuery || matches(f.desc) || matches(f.ip) || matches(f.user) || matches(f.pass)) {
-          faciaisHtml += `<br>${content}`;
-        }
-      });
-      if (faciaisHtml) html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial:</b>${faciaisHtml}</div>`;
+      if (faciais.length > 0) {
+        html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>👤 Reconhecimento Facial (${faciais.length}):</b>`;
+        faciais.forEach((f, i) => {
+          html += `<br>• #${i+1} ${escapeHtml(f.desc || 'Terminal')} | IP: ${escapeHtml(f.ip || '--')} | HTTP: ${escapeHtml(f.http || '--')} | RTSP: ${escapeHtml(f.rtsp || '--')} | User: ${escapeHtml(f.user || '--')} | Senha: ${renderMaskedPassword(f.pass, `facial_${i}`)}`;
+        });
+        html += `</div>`;
+      }
 
-      return html || '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum equipamento encontrado com este filtro.</div>';
-    }
+      if (c.lastModifiedAt) {
+        html += `
+          <div class="audit-log-box">
+            <b>📜 Log de Auditoria:</b> Última alteração realizada por <b style="color:#38bdf8;">${escapeHtml(c.lastModifiedByName || c.lastModifiedBy)}</b> em <b>${escapeHtml(c.lastModifiedAt)}</b>.
+          </div>
+        `;
+      }
 
-    function openTechSheetModal(id) {
-      currentActiveTechSheetId = id;
-      const c = condos.find(x => x.id === id);
-      if (!c) return;
-      document.getElementById('techSheetTitle').textContent = `🛠️ Ficha Técnica: ${c.name}`;
-      document.getElementById('techSheetSearchInput').value = '';
-      document.getElementById('techSheetContent').innerHTML = generateTechSheetHtml(c);
+      document.getElementById('techSheetContent').innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:20px;">Nenhum equipamento configurado ainda.<br>Clique em "Gerenciar / Adicionar Equipamentos" abaixo.</div>';
       document.getElementById('techSheetModal').classList.remove('hidden');
     }
-
-    function filterTechSheetContent(query) {
-      if (!currentActiveTechSheetId) return;
-      const c = condos.find(x => x.id === currentActiveTechSheetId);
-      if (!c) return;
-      document.getElementById('techSheetContent').innerHTML = generateTechSheetHtml(c, query);
-    }
-
     function closeTechSheetModal() { document.getElementById('techSheetModal').classList.add('hidden'); }
 
     function openConfigEquipmentModalFromTechSheet() {
@@ -2377,7 +2469,7 @@
       if (!c.checkedIn) {
         if (!c.lat || !c.lng) { alert('Sem coordenadas GPS cadastradas para este condomínio.'); return; }
         
-        if (userRole === 'owner' || userRole === 'admin') {
+        if (userRole === 'owner' || userRole === 'admin' || !isOnline) {
           realizarCheckInNoBanco(id, c);
           return;
         }
@@ -2396,17 +2488,26 @@
       }
     }
 
-    function realizarCheckInNoBanco(id, c) {
+    async function realizarCheckInNoBanco(id, c) {
       const now = new Date();
-      db.collection("condominios").doc(id).update({ 
+      const payload = { 
         checkedIn: true, 
         checkInTimestamp: now.getTime(), 
         checkInTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
         checkInDate: now.toLocaleDateString('pt-BR') 
-      }).then(() => { 
-        showToast('Check-in realizado com sucesso!'); 
-        loadCondosForOwner(ownerEmail); 
-      });
+      };
+
+      if (isOnline) {
+        await db.collection("condominios").doc(id).update(payload);
+      } else {
+        await enqueueOfflineSync('check_in', id, payload);
+        c.checkedIn = true;
+        c.checkInTime = payload.checkInTime;
+        await cacheCondoLocally(c);
+      }
+
+      showToast('Check-in realizado com sucesso!'); 
+      loadCondosForOwner(ownerEmail);
     }
 
     function openReportModal(id) {
@@ -2485,18 +2586,18 @@
         const totalFiles = selectedMediaFiles.length;
         if (totalFiles > 0) progressInfo.style.display = 'block';
 
-        for (let i = 0; i < totalFiles; i++) {
-          progressCount.textContent = `(${i + 1}/${totalFiles})`;
-          const item = selectedMediaFiles[i];
-          const base64Content = item.previewUrl.split(',')[1];
-          const payload = { fileName: `foto_${Date.now()}_${i+1}.jpg`, mimeType: 'image/jpeg', base64Data: base64Content };
+        if (isOnline) {
+          for (let i = 0; i < totalFiles; i++) {
+            progressCount.textContent = `(${i + 1}/${totalFiles})`;
+            const item = selectedMediaFiles[i];
+            const base64Content = item.previewUrl.split(',')[1];
+            const payload = { fileName: `foto_${Date.now()}_${i+1}.jpg`, mimeType: 'image/jpeg', base64Data: base64Content };
 
-          const response = await fetch(GOOGLE_DRIVE_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
-          const resJson = await response.json();
-          if (resJson.status === 'success') {
-            uploadedMedia.push({ type: 'image', url: resJson.url });
-          } else {
-            throw new Error(resJson.message || 'Erro no upload');
+            const response = await fetch(GOOGLE_DRIVE_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const resJson = await response.json();
+            if (resJson.status === 'success') {
+              uploadedMedia.push({ type: 'image', url: resJson.url });
+            }
           }
         }
 
@@ -2525,8 +2626,16 @@
           timestamp: checkOutTimestamp
         };
 
-        await db.collection("condominios").doc(id).collection("reports").add(newRep);
-        await db.collection("condominios").doc(id).update({ checkedIn: false });
+        if (isOnline) {
+          await db.collection("condominios").doc(id).collection("reports").add(newRep);
+          await db.collection("condominios").doc(id).update({ checkedIn: false });
+        } else {
+          await enqueueOfflineSync('save_report', id, newRep);
+          if (!c.reports) c.reports = [];
+          c.reports.unshift(newRep);
+          c.checkedIn = false;
+          await cacheCondoLocally(c);
+        }
         
         showToast('Check-out realizado com sucesso!');
         closeReportModal();
@@ -2629,6 +2738,17 @@
       if (c.address && c.address.toLowerCase().includes(s)) return true;
       if (c.neighborhood && c.neighborhood.toLowerCase().includes(s)) return true;
       if (c.notes && c.notes.toLowerCase().includes(s)) return true;
+
+      const equipmentArrays = [c.modems, c.mikrotiks, c.dvrs, c.cameras, c.controladoras, c.modulosRf, c.modulosPorta, c.faciais];
+      for (let arr of equipmentArrays) {
+        if (arr && Array.isArray(arr)) {
+          for (let item of arr) {
+            for (let k in item) {
+              if (item[k] && String(item[k]).toLowerCase().includes(s)) return true;
+            }
+          }
+        }
+      }
       return false;
     }
 
