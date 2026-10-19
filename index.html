@@ -35,13 +35,45 @@
     
     header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 12px 16px; position: sticky; top: 0; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .header-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-    .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; position: relative; }
     .header-bottom-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+
+    /* TÍTULO CENTRALIZADO E ESTILIZADO */
+    .app-center-title {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(56, 189, 248, 0.25);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .app-center-title {
+        position: static;
+        transform: none;
+        font-size: 16px;
+        text-align: center;
+        margin: 4px 0;
+      }
+      .header-top-row {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+      }
+    }
 
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand-logo-img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; background: #334155; }
     .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
-    .title { font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
+    .title { font-size: 15px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
     
     .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
     .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
@@ -282,14 +314,17 @@
               <div class="brand-icon">🏢</div>
             </div>
             <div>
-              <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
+              <h1 id="headerCompanyNameTitle" class="title">Protech</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.2</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.3</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
           </div>
+
+          <!-- NOME DO APP NO CENTRO -->
+          <div class="app-center-title">Buscador de Condomínios</div>
 
           <div onclick="openSettingsModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px 4px; border-radius: 10px; transition: 0.2s;" title="Configurações e Perfil">
             <div style="text-align: right; line-height: 1.2;">
@@ -790,10 +825,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.2 (Correção de Sintaxe no Login)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.2.3 (Título Centralizado & Ordem Alfabética)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Correção do erro de sintaxe que impedia o carregamento do script e a execução do login.</li>
-            <li>Busca por IP em "Gerenciar Equipamentos" e auditoria em Configurações ativas.</li>
+            <li>Título "Buscador de Condomínios" centralizado com degradê azul moderno no cabeçalho.</li>
+            <li>Ordenação automática dos condomínios em ordem alfabética (A-Z).</li>
           </ul>
         </div>
       </div>
@@ -1302,7 +1337,7 @@
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail) {
-            currentCompanyName = data.companyName || 'Buscador de Condomínios';
+            currentCompanyName = data.companyName || 'Protech';
             currentCompanyLogo = data.companyLogo || '';
             updateHeaderBrandDisplay();
           }
@@ -1446,7 +1481,7 @@
 
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
-          showMainApp('Buscador de Condomínios', '', companyOwnerEmail);
+          showMainApp('Protech', '', companyOwnerEmail);
         }
         showToast('Conta criada com sucesso!');
       }).catch(err => alert('Erro ao criar conta: ' + err.message));
@@ -1490,10 +1525,10 @@
         } else {
           ownerEmail = userEmail;
         }
-        showMainApp('Buscador de Condomínios', '', ownerEmail);
+        showMainApp('Protech', '', ownerEmail);
       }).catch(() => {
         ownerEmail = userEmail;
-        showMainApp('Buscador de Condomínios', '', ownerEmail);
+        showMainApp('Protech', '', ownerEmail);
       });
     }
 
@@ -1538,6 +1573,14 @@
         const localCondos = await localDb.condos.toArray();
         condos = localCondos;
       }
+
+      // Ordenar alfabeticamente pelo nome do condomínio
+      condos.sort((a, b) => {
+        let nameA = (a.name || '').toLowerCase();
+        let nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+
       renderCondos();
     }
 
@@ -1651,7 +1694,7 @@
     }
 
     function updateHeaderBrandDisplay() {
-      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Buscador de Condomínios';
+      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Protech';
       const logoContainer = document.getElementById('headerBrandLogoContainer');
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
@@ -2232,7 +2275,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Protech", 14, 18);
       doc.setFontSize(12);
       doc.text(`Escopo Contratual - ${cleanText(c.name)}`, 14, 25);
       doc.setFontSize(9);
@@ -2314,7 +2357,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Protech", 14, 18);
       doc.setFontSize(12);
       doc.text(`Ficha Tecnica - ${cleanText(c.name)}`, 14, 25);
       doc.setFontSize(9);
@@ -2936,7 +2979,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Protech", 14, 18);
       doc.setFontSize(12);
       doc.text(`Relatorio de Visita - ${cleanText(condoName)}`, 14, 25);
       doc.setFontSize(9);
@@ -3121,7 +3164,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 20);
+      doc.text(cleanText(currentCompanyName) || "Protech", 14, 20);
       doc.setFontSize(12);
       doc.text("Relatorio Geral de Atendimentos Consolidado", 14, 28);
       
