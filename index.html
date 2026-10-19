@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador de Condomínios</title>
+  <title>Buscador de Condomínios — Protech</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   
@@ -34,34 +34,26 @@
     body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; transition: background-color 0.3s, color 0.3s; }
     
     header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 12px 16px; position: sticky; top: 0; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .header-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-    
-    /* CORREÇÃO DO CABEÇALHO PARA CELULAR E COMPUTADOR */
-    .header-main-row { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
-    .header-left-group { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
-    .header-right-group { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 8px; border-radius: 10px; transition: 0.2s; flex-shrink: 0; }
-    .header-right-group:hover { background: rgba(255,255,255,0.05); }
+    .header-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .header-bottom-row { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 8px; }
 
-    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .brand-logo-img { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; background: #334155; flex-shrink: 0; }
-    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo-img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; background: #334155; }
+    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
+    .title { font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
     
-    .brand-text-box { display: flex; flex-direction: column; min-width: 0; }
-    .title { font-size: 15px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .company-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
-    .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
+    .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
 
-    .net-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+    .net-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
     .net-online { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
     .net-offline { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
     .net-syncing { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
     
-    .header-bottom-row { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid var(--border-color); padding-top: 8px; }
     .actions-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    
     .btn { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-decoration: none; }
     .btn:active { transform: scale(0.97); }
     .btn-emerald { background-color: #059669; color: white; }
@@ -152,7 +144,7 @@
     .role-btn { flex: 1; text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .role-btn.active { background: #0284c7; color: white; }
 
-    .user-avatar { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; flex-shrink: 0; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 16px; }
     
     .color-picker-box { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
     .color-picker-input { -webkit-appearance: none; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; background: none; padding: 0; }
@@ -284,29 +276,26 @@
   <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     <header>
       <div class="header-container">
-        <!-- LINHA SUPERIOR DO CABEÇALHO (RESPONSIVA) -->
-        <div class="header-main-row">
-          <div class="header-left-group">
-            <div class="brand">
-              <div id="headerBrandLogoContainer">
-                <div class="brand-icon">🏢</div>
-              </div>
-              <div class="brand-text-box">
-                <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
-                <div class="company-row">
-                  <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                  <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.3</span>
-                  <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
-                </div>
+        <div class="header-top-row">
+          <div class="brand">
+            <div id="headerBrandLogoContainer">
+              <div class="brand-icon">🏢</div>
+            </div>
+            <div>
+              <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
+              <div class="company-row">
+                <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.3.0</span>
+                <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
           </div>
 
-          <div class="header-right-group" onclick="openSettingsModal()" title="Configurações e Perfil">
+          <div onclick="openSettingsModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px 4px; border-radius: 10px; transition: 0.2s;" title="Configurações e Perfil">
             <div style="text-align: right; line-height: 1.2;">
-              <h1 id="headerUserNameDisplay" class="title" style="font-size: 13px;">Usuário</h1>
+              <h1 id="headerUserNameDisplay" class="title">Usuário</h1>
               <div class="company-row" style="justify-content: flex-end;">
-                <span id="headerUserRoleBadge" class="subtitle" style="font-size: 10px;">Perfil</span>
+                <span id="headerUserRoleBadge" class="subtitle">Perfil Operacional</span>
               </div>
             </div>
             <div id="headerUserAvatarContainer">
@@ -315,10 +304,10 @@
           </div>
         </div>
 
-        <!-- LINHA INFERIOR DO CABEÇALHO (BOTÕES DE AÇÃO) -->
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
+            <button onclick="openVoiceModal()" class="btn btn-sky" title="Adicionar por Voz / Texto com I.A.">🎤 I.A. por Voz</button>
             <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate" style="display:inline-flex;">+ Novo</button>
           </div>
         </div>
@@ -342,6 +331,38 @@
         Nenhum condomínio encontrado.
       </div>
     </main>
+  </div>
+
+  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A.) -->
+  <div id="voiceAssistantModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="color:var(--text-main); font-size: 16px;">🎤 Assistente de Cadastro por Voz (I.A.)</h3>
+        <button onclick="closeVoiceModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body" style="gap:12px;">
+        <p style="font-size: 11px; color: var(--text-muted);">
+          Fale ou digite livremente os dados do condomínio (Ex: <i>"Cadastrar Condomínio Solar dos Pinheiros na Rua Bento Gonçalves 1200, modem IP 192.168.1.1 senha admin..."</i>).
+        </p>
+        <div class="form-group" style="position:relative; margin-bottom:0;">
+          <textarea id="voiceInputText" rows="5" class="form-control" placeholder="Clique em 'Iniciar Escuta' e fale os dados..."></textarea>
+          <div id="recordingStatus" style="font-size:11px; color:#f43f5e; font-weight:bold; margin-top:6px; display:none; align-items:center; gap:4px;">
+            🔴 Escutando áudio... Fale agora.
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <button type="button" id="btnMicToggle" onclick="toggleSpeechRecognition()" class="btn btn-rose">
+            🎤 Iniciar Escuta
+          </button>
+          <button type="button" onclick="executeVoiceParsing()" class="btn btn-emerald">
+            ⚡ Processar e Cadastrar
+          </button>
+        </div>
+      </div>
+      <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
+        <button onclick="closeVoiceModal()" class="btn btn-slate">Fechar</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL DE SELEÇÃO DE GPS -->
@@ -802,10 +823,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.3 (Correção do Layout do Cabeçalho Mobile)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.3.0 (Assistente de Voz com I.A.)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Reestruturação do cabeçalho para garantir que o nome e perfil do usuário permaneçam alinhados no celular sem quebrar para baixo.</li>
-            <li>Organização dos botões de ação e status de rede em uma barra limpa e fluida.</li>
+            <li>Integração da API nativa de Reconhecimento de Voz (`webkitSpeechRecognition`) para cadastro em campo.</li>
+            <li>Parser automático via RegEx para extração de nomes, endereços e IPs/senhas de modems e DVRs.</li>
+            <li>Sincronização offline e criptografia automática dos dados capturados por voz.</li>
           </ul>
         </div>
       </div>
@@ -854,7 +876,7 @@
         badge.textContent = '🟢 Online';
       } else {
         badge.className = 'net-badge net-offline';
-        badge.textContent = '🟡 Offline';
+        badge.textContent = '🟡 Offline (Modo Local)';
       }
     }
 
@@ -1050,6 +1072,8 @@
     let currentCompanyLogo = '';
     let selectedRouteIds = new Set();
     let currentActiveTechSheetId = null;
+    let recognition = null;
+    let isListening = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
@@ -1101,6 +1125,145 @@
           el.classList.add('show');
         }
       }
+    }
+
+    // --- MOTOR DE RECONHECIMENTO DE VOZ E IA (PARSER) ---
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast("Reconhecimento de voz não suportado neste navegador. Digite ou cole o texto.");
+        return null;
+      }
+
+      const rec = new SpeechRecognition();
+      rec.lang = 'pt-BR';
+      rec.continuous = true;
+      rec.interimResults = true;
+
+      rec.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        document.getElementById('voiceInputText').value = transcript;
+      };
+
+      rec.onerror = (event) => {
+        console.error("Erro no reconhecimento de voz:", event.error);
+        stopListeningUI();
+      };
+
+      rec.onend = () => {
+        stopListeningUI();
+      };
+
+      return rec;
+    }
+
+    function openVoiceModal() {
+      document.getElementById('voiceInputText').value = '';
+      document.getElementById('voiceAssistantModal').classList.remove('hidden');
+    }
+
+    function closeVoiceModal() {
+      if (isListening && recognition) {
+        recognition.stop();
+        stopListeningUI();
+      }
+      document.getElementById('voiceAssistantModal').classList.add('hidden');
+    }
+
+    function toggleSpeechRecognition() {
+      if (!recognition) recognition = initSpeechRecognition();
+      if (!recognition) return;
+
+      if (isListening) {
+        recognition.stop();
+        stopListeningUI();
+      } else {
+        try {
+          recognition.start();
+          isListening = true;
+          const btn = document.getElementById('btnMicToggle');
+          btn.className = 'btn btn-slate';
+          btn.innerHTML = '⏹️ Parar Escuta';
+          document.getElementById('recordingStatus').style.display = 'flex';
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    function stopListeningUI() {
+      isListening = false;
+      const btn = document.getElementById('btnMicToggle');
+      if (btn) {
+        btn.className = 'btn btn-rose';
+        btn.innerHTML = '🎤 Iniciar Escuta';
+      }
+      const status = document.getElementById('recordingStatus');
+      if (status) status.style.display = 'none';
+    }
+
+    async function executeVoiceParsing() {
+      const rawText = document.getElementById('voiceInputText').value.trim();
+      if (!rawText) {
+        showToast('Por favor, fale ou digite as informações do condomínio.');
+        return;
+      }
+
+      if (isListening && recognition) {
+        recognition.stop();
+        stopListeningUI();
+      }
+
+      showToast('Processando dados com I.A...');
+
+      const extracted = {
+        name: extractPattern(rawText, /(?:condomínio|condominio|nome)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9]+?)(?=\s+(?:rua|avenida|av|alameda|modem|dvr|ip|senha|$))/i) || 'Novo Condomínio',
+        address: extractPattern(rawText, /(?:rua|avenida|av\.|alameda|endereço|endereco)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9,]+?)(?=\s+(?:modem|dvr|ip|senha|$))/i) || '',
+        number: extractPattern(rawText, /(?:número|numero|nº|n°|,)\s*([0-9]+)/i) || 'S/N',
+        modemIp: extractPattern(rawText, /(?:modem|roteador).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i) || extractPattern(rawText, /ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i) || '',
+        modemPass: extractPattern(rawText, /(?:senha|pass).*?\s+([a-zA-Z0-9@#$_.-]+)/i) || '',
+        dvrPort: extractPattern(rawText, /(?:dvr|câmera|camera).*?porta\s*([0-9]+)/i) || ''
+      };
+
+      const newCondoData = {
+        name: extracted.name.trim(),
+        address: extracted.address.trim(),
+        number: extracted.number.trim(),
+        neighborhood: '',
+        phone: '',
+        lat: '0',
+        lng: '0',
+        notes: 'Cadastrado via Assistente de Voz I.A.',
+        ownerEmail: ownerEmail,
+        encryptedModems: extracted.modemIp ? [{ operadora: encryptData('Padrão'), ip: encryptData(extracted.modemIp), http: encryptData('80'), user: encryptData('admin'), pass: encryptData(extracted.modemPass), wifi2gSsid: encryptData(''), wifi2gPass: encryptData(''), wifi5gSsid: encryptData(''), wifi5gPass: encryptData(''), extra: encryptData('') }] : [],
+        encryptedMikrotiks: [],
+        encryptedDvrs: extracted.dvrPort ? [{ name: encryptData('DVR Principal'), ip: encryptData(''), http: encryptData(extracted.dvrPort), servicePort: encryptData('37777'), rtsp: encryptData('554'), user: encryptData('admin'), pass: encryptData(extracted.modemPass) }] : [],
+        encryptedCameras: [],
+        encryptedControladoras: [],
+        encryptedModulosRf: [],
+        encryptedModulosPorta: [],
+        encryptedFaciais: [],
+        contractScopeList: []
+      };
+
+      if (isOnline) {
+        await db.collection("condominios").add(newCondoData);
+      } else {
+        newCondoData.id = 'local_' + Date.now();
+        await cacheCondoLocally(newCondoData);
+      }
+
+      closeVoiceModal();
+      showToast(`Condomínio "${newCondoData.name}" cadastrado via I.A.!`);
+      loadCondosForOwner(ownerEmail);
+    }
+
+    function extractPattern(text, regex) {
+      const match = text.match(regex);
+      return match && match[1] ? match[1].trim() : null;
     }
 
     function addModemSlot(data = {}) {
