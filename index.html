@@ -212,11 +212,46 @@
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
     
     .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-size: 11px; color: var(--text-muted); margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+
+    /* ESTILOS DO PLAYER DE CÂMERA AO VIVO */
+    .camera-stream-box { width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; position: relative; }
+    .camera-stream-img { width: 100%; max-height: 380px; object-fit: contain; }
   </style>
 </head>
 <body>
 
   <div id="toast" class="toast">Ação realizada com sucesso!</div>
+
+  <!-- MODAL DE PLAYER DE CÂMERA AO VIVO -->
+  <div id="cameraPlayerModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="cameraPlayerTitle" style="color:var(--text-main); font-size: 16px;">🎥 Transmissão ao Vivo do DVR</h3>
+        <button onclick="closeCameraPlayerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="camera-stream-box">
+          <img id="cameraLiveFeedImg" class="camera-stream-img" src="" alt="Aguardando sinal da câmera..." onerror="handleCameraStreamError()">
+          <div id="cameraStatusText" style="position:absolute; bottom:8px; left:12px; font-size:11px; background:rgba(0,0,0,0.7); padding:4px 8px; border-radius:6px; color:#38bdf8;">🔴 Conectando ao DVR...</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label style="font-size:11px; color:var(--text-muted);">Canal:</label>
+            <select id="cameraChannelSelect" onchange="switchCameraChannel(this.value)" class="form-control" style="width:100px; padding:4px;">
+              <option value="1">Canal 1</option>
+              <option value="2">Canal 2</option>
+              <option value="3">Canal 3</option>
+              <option value="4">Canal 4</option>
+            </select>
+          </div>
+          <button onclick="reloadCameraFeed()" class="btn btn-slate" style="font-size:11px;">🔄 Recarregar Sinal</button>
+        </div>
+      </div>
+      <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
+        <button onclick="closeCameraPlayerModal()" class="btn btn-slate">Fechar Player</button>
+      </div>
+    </div>
+  </div>
 
   <!-- LIGHTBOX TELA CHEIA PARA FOTOS -->
   <div id="lightboxModal" class="lightbox-modal hidden">
@@ -317,7 +352,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Protech</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.3</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.4</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
@@ -825,7 +860,14 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.3 (Título Centralizado & Ordem Alfabética)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.2.4 (Player de Câmera ao Vivo Integrado)</span><span class="version-date">Atual</span></div>
+          <ul class="version-list">
+            <li>Adicionado botão de transmissão ao vivo de DVR/NVR direto na Ficha Técnica.</li>
+            <li>Player nativo embutido com suporte a troca de canais e atualização HTTP/MJPEG em tempo real.</li>
+          </ul>
+        </div>
+        <div class="version-item">
+          <div class="version-title"><span>Versão 9.2.3 (Título Centralizado & Ordem Alfabética)</span><span class="version-date">Anterior</span></div>
           <ul class="version-list">
             <li>Título "Buscador de Condomínios" centralizado com degradê azul moderno no cabeçalho.</li>
             <li>Ordenação automática dos condomínios em ordem alfabética (A-Z).</li>
@@ -973,6 +1015,62 @@
         el.innerHTML = `${realPass} 🙈`;
         el.setAttribute('data-shown', 'true');
       }
+    }
+
+    /* --- LÓGICA DE TRANSMISSÃO E PLAYER DE CÂMERA AO VIVO --- */
+    let activeCameraStreamTimer = null;
+    let currentCameraConfig = null;
+
+    function openCameraLivePlayer(ipOrDdns, portHttp, user, pass, channel = 1) {
+      currentCameraConfig = { ipOrDdns, portHttp: portHttp || '80', user, pass, channel };
+      document.getElementById('cameraPlayerTitle').textContent = `🎥 Transmissão ao Vivo - Canal ${channel}`;
+      document.getElementById('cameraChannelSelect').value = channel;
+      document.getElementById('cameraPlayerModal').classList.remove('hidden');
+      
+      startCameraStreamLoop();
+    }
+
+    function closeCameraPlayerModal() {
+      if (activeCameraStreamTimer) clearInterval(activeCameraStreamTimer);
+      document.getElementById('cameraLiveFeedImg').src = '';
+      document.getElementById('cameraPlayerModal').classList.add('hidden');
+    }
+
+    function switchCameraChannel(ch) {
+      if (!currentCameraConfig) return;
+      currentCameraConfig.channel = ch;
+      document.getElementById('cameraPlayerTitle').textContent = `🎥 Transmissão ao Vivo - Canal ${ch}`;
+      startCameraStreamLoop();
+    }
+
+    function startCameraStreamLoop() {
+      if (activeCameraStreamTimer) clearInterval(activeCameraStreamTimer);
+      
+      const { ipOrDdns, portHttp, user, pass, channel } = currentCameraConfig;
+      const statusEl = document.getElementById('cameraStatusText');
+      statusEl.textContent = '🟢 Transmitindo ao Vivo (Snapshot HTTP)';
+
+      const updateFrame = () => {
+        const timestamp = Date.now();
+        let streamUrl = `http://${ipOrDdns}:${portHttp}/cgi-bin/snapshot.cgi?channel=${channel}&_t=${timestamp}`;
+        if (user && pass) {
+          streamUrl = `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${ipOrDdns}:${portHttp}/cgi-bin/snapshot.cgi?channel=${channel}&_t=${timestamp}`;
+        }
+        document.getElementById('cameraLiveFeedImg').src = streamUrl;
+      };
+
+      updateFrame();
+      activeCameraStreamTimer = setInterval(updateFrame, 1000);
+    }
+
+    function reloadCameraFeed() {
+      startCameraStreamLoop();
+      showToast('Sinal reconectado!');
+    }
+
+    function handleCameraStreamError() {
+      const statusEl = document.getElementById('cameraStatusText');
+      statusEl.textContent = '⚠️ Erro ao conectar ao DVR. Verifique se o IP/DDNS e a porta HTTP estão acessíveis.';
     }
 
     const CONTRACT_CATEGORIES = [
@@ -1532,13 +1630,6 @@
       });
     }
 
-    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'flex';
-      updateHeaderBrandDisplay();
-      loadCondosForOwner(rootOwnerEmail);
-    }
-
     async function loadCondosForOwner(rootOwnerEmail) {
       try {
         if (isOnline) {
@@ -1574,7 +1665,6 @@
         condos = localCondos;
       }
 
-      // Ordenar alfabeticamente pelo nome do condomínio
       condos.sort((a, b) => {
         let nameA = (a.name || '').toLowerCase();
         let nameB = (b.name || '').toLowerCase();
@@ -1582,6 +1672,13 @@
       });
 
       renderCondos();
+    }
+
+    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      updateHeaderBrandDisplay();
+      loadCondosForOwner(rootOwnerEmail);
     }
 
     function openSettingsModal() {
@@ -2479,7 +2576,17 @@
       if (dvrs.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs (${dvrs.length}):</b>`;
         dvrs.forEach((d, i) => {
-          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
+          const hasConnection = (d.ip || d.name) ? true : false;
+          html += `
+            <div style="margin-top:4px; padding-top:4px; border-top:1px dashed var(--border-color);">
+              • #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '80')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}
+              ${hasConnection ? `
+                <div style="margin-top:4px;">
+                  <button onclick="openCameraLivePlayer('${escapeHtml(d.ip)}', '${escapeHtml(d.http || '80')}', '${escapeHtml(d.user)}', '${escapeHtml(d.pass)}', 1)" class="btn btn-sky" style="font-size:10px; padding:3px 8px;">🎥 Transmissão ao Vivo</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
         });
         html += `</div>`;
       }
