@@ -34,58 +34,34 @@
     body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; transition: background-color 0.3s, color 0.3s; }
     
     header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 12px 16px; position: sticky; top: 0; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .header-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-    .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; position: relative; }
-    .header-bottom-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-
-    /* TÍTULO CENTRALIZADO E ESTILIZADO */
-    .app-center-title {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(56, 189, 248, 0.25);
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    @media (max-width: 768px) {
-      .app-center-title {
-        position: static;
-        transform: none;
-        font-size: 16px;
-        text-align: center;
-        margin: 4px 0;
-      }
-      .header-top-row {
-        flex-direction: column;
-        gap: 8px;
-        align-items: center;
-      }
-    }
-
-    .brand { display: flex; align-items: center; gap: 10px; }
-    .brand-logo-img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; background: #334155; }
-    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
-    .title { font-size: 15px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
+    .header-container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
     
-    .company-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
-    .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    /* CORREÇÃO DO CABEÇALHO PARA CELULAR E COMPUTADOR */
+    .header-main-row { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
+    .header-left-group { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+    .header-right-group { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 8px; border-radius: 10px; transition: 0.2s; flex-shrink: 0; }
+    .header-right-group:hover { background: rgba(255,255,255,0.05); }
+
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-logo-img { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; background: #334155; flex-shrink: 0; }
+    .brand-icon { background: linear-gradient(135deg, #0284c7, #06b6d4); color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); flex-shrink: 0; }
+    
+    .brand-text-box { display: flex; flex-direction: column; min-width: 0; }
+    .title { font-size: 15px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .company-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
+    .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
     .badge { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 1px 6px; border-radius: 10px; font-family: monospace; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .badge:hover { background: rgba(2, 132, 199, 0.4); }
 
-    .net-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+    .net-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
     .net-online { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
     .net-offline { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
     .net-syncing { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
     
+    .header-bottom-row { display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid var(--border-color); padding-top: 8px; }
     .actions-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    
     .btn { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-decoration: none; }
     .btn:active { transform: scale(0.97); }
     .btn-emerald { background-color: #059669; color: white; }
@@ -176,7 +152,7 @@
     .role-btn { flex: 1; text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-radius: 7px; transition: 0.2s; }
     .role-btn.active { background: #0284c7; color: white; }
 
-    .user-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 16px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; border: 2px solid #0284c7; cursor: pointer; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; flex-shrink: 0; }
     
     .color-picker-box { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
     .color-picker-input { -webkit-appearance: none; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; background: none; padding: 0; }
@@ -212,46 +188,11 @@
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
     
     .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-size: 11px; color: var(--text-muted); margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
-
-    /* ESTILOS DO PLAYER DE CÂMERA AO VIVO */
-    .camera-stream-box { width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; position: relative; }
-    .camera-stream-img { width: 100%; max-height: 380px; object-fit: contain; }
   </style>
 </head>
 <body>
 
   <div id="toast" class="toast">Ação realizada com sucesso!</div>
-
-  <!-- MODAL DE PLAYER DE CÂMERA AO VIVO -->
-  <div id="cameraPlayerModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 650px;">
-      <div class="modal-header">
-        <h3 id="cameraPlayerTitle" style="color:var(--text-main); font-size: 16px;">🎥 Transmissão ao Vivo do DVR</h3>
-        <button onclick="closeCameraPlayerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="camera-stream-box">
-          <img id="cameraLiveFeedImg" class="camera-stream-img" src="" alt="Aguardando sinal da câmera..." onerror="handleCameraStreamError()">
-          <div id="cameraStatusText" style="position:absolute; bottom:8px; left:12px; font-size:11px; background:rgba(0,0,0,0.7); padding:4px 8px; border-radius:6px; color:#38bdf8;">🔴 Conectando ao DVR...</div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-          <div style="display:flex; gap:6px; align-items:center;">
-            <label style="font-size:11px; color:var(--text-muted);">Canal:</label>
-            <select id="cameraChannelSelect" onchange="switchCameraChannel(this.value)" class="form-control" style="width:100px; padding:4px;">
-              <option value="1">Canal 1</option>
-              <option value="2">Canal 2</option>
-              <option value="3">Canal 3</option>
-              <option value="4">Canal 4</option>
-            </select>
-          </div>
-          <button onclick="reloadCameraFeed()" class="btn btn-slate" style="font-size:11px;">🔄 Recarregar Sinal</button>
-        </div>
-      </div>
-      <div style="margin-top:14px; text-align:right; border-top: 1px solid var(--border-color); padding-top: 10px;">
-        <button onclick="closeCameraPlayerModal()" class="btn btn-slate">Fechar Player</button>
-      </div>
-    </div>
-  </div>
 
   <!-- LIGHTBOX TELA CHEIA PARA FOTOS -->
   <div id="lightboxModal" class="lightbox-modal hidden">
@@ -343,29 +284,29 @@
   <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     <header>
       <div class="header-container">
-        <div class="header-top-row">
-          <div class="brand">
-            <div id="headerBrandLogoContainer">
-              <div class="brand-icon">🏢</div>
-            </div>
-            <div>
-              <h1 id="headerCompanyNameTitle" class="title">Protech</h1>
-              <div class="company-row">
-                <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.4</span>
-                <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
+        <!-- LINHA SUPERIOR DO CABEÇALHO (RESPONSIVA) -->
+        <div class="header-main-row">
+          <div class="header-left-group">
+            <div class="brand">
+              <div id="headerBrandLogoContainer">
+                <div class="brand-icon">🏢</div>
+              </div>
+              <div class="brand-text-box">
+                <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
+                <div class="company-row">
+                  <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
+                  <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.2.3</span>
+                  <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- NOME DO APP NO CENTRO -->
-          <div class="app-center-title">Buscador de Condomínios</div>
-
-          <div onclick="openSettingsModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px 4px; border-radius: 10px; transition: 0.2s;" title="Configurações e Perfil">
+          <div class="header-right-group" onclick="openSettingsModal()" title="Configurações e Perfil">
             <div style="text-align: right; line-height: 1.2;">
-              <h1 id="headerUserNameDisplay" class="title">Usuário</h1>
+              <h1 id="headerUserNameDisplay" class="title" style="font-size: 13px;">Usuário</h1>
               <div class="company-row" style="justify-content: flex-end;">
-                <span id="headerUserRoleBadge" class="subtitle">Perfil Operacional</span>
+                <span id="headerUserRoleBadge" class="subtitle" style="font-size: 10px;">Perfil</span>
               </div>
             </div>
             <div id="headerUserAvatarContainer">
@@ -374,6 +315,7 @@
           </div>
         </div>
 
+        <!-- LINHA INFERIOR DO CABEÇALHO (BOTÕES DE AÇÃO) -->
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
@@ -860,17 +802,10 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.4 (Player de Câmera ao Vivo Integrado)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.2.3 (Correção do Layout do Cabeçalho Mobile)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Adicionado botão de transmissão ao vivo de DVR/NVR direto na Ficha Técnica.</li>
-            <li>Player nativo embutido com suporte a troca de canais e atualização HTTP/MJPEG em tempo real.</li>
-          </ul>
-        </div>
-        <div class="version-item">
-          <div class="version-title"><span>Versão 9.2.3 (Título Centralizado & Ordem Alfabética)</span><span class="version-date">Anterior</span></div>
-          <ul class="version-list">
-            <li>Título "Buscador de Condomínios" centralizado com degradê azul moderno no cabeçalho.</li>
-            <li>Ordenação automática dos condomínios em ordem alfabética (A-Z).</li>
+            <li>Reestruturação do cabeçalho para garantir que o nome e perfil do usuário permaneçam alinhados no celular sem quebrar para baixo.</li>
+            <li>Organização dos botões de ação e status de rede em uma barra limpa e fluida.</li>
           </ul>
         </div>
       </div>
@@ -919,7 +854,7 @@
         badge.textContent = '🟢 Online';
       } else {
         badge.className = 'net-badge net-offline';
-        badge.textContent = '🟡 Offline (Modo Local)';
+        badge.textContent = '🟡 Offline';
       }
     }
 
@@ -1015,62 +950,6 @@
         el.innerHTML = `${realPass} 🙈`;
         el.setAttribute('data-shown', 'true');
       }
-    }
-
-    /* --- LÓGICA DE TRANSMISSÃO E PLAYER DE CÂMERA AO VIVO --- */
-    let activeCameraStreamTimer = null;
-    let currentCameraConfig = null;
-
-    function openCameraLivePlayer(ipOrDdns, portHttp, user, pass, channel = 1) {
-      currentCameraConfig = { ipOrDdns, portHttp: portHttp || '80', user, pass, channel };
-      document.getElementById('cameraPlayerTitle').textContent = `🎥 Transmissão ao Vivo - Canal ${channel}`;
-      document.getElementById('cameraChannelSelect').value = channel;
-      document.getElementById('cameraPlayerModal').classList.remove('hidden');
-      
-      startCameraStreamLoop();
-    }
-
-    function closeCameraPlayerModal() {
-      if (activeCameraStreamTimer) clearInterval(activeCameraStreamTimer);
-      document.getElementById('cameraLiveFeedImg').src = '';
-      document.getElementById('cameraPlayerModal').classList.add('hidden');
-    }
-
-    function switchCameraChannel(ch) {
-      if (!currentCameraConfig) return;
-      currentCameraConfig.channel = ch;
-      document.getElementById('cameraPlayerTitle').textContent = `🎥 Transmissão ao Vivo - Canal ${ch}`;
-      startCameraStreamLoop();
-    }
-
-    function startCameraStreamLoop() {
-      if (activeCameraStreamTimer) clearInterval(activeCameraStreamTimer);
-      
-      const { ipOrDdns, portHttp, user, pass, channel } = currentCameraConfig;
-      const statusEl = document.getElementById('cameraStatusText');
-      statusEl.textContent = '🟢 Transmitindo ao Vivo (Snapshot HTTP)';
-
-      const updateFrame = () => {
-        const timestamp = Date.now();
-        let streamUrl = `http://${ipOrDdns}:${portHttp}/cgi-bin/snapshot.cgi?channel=${channel}&_t=${timestamp}`;
-        if (user && pass) {
-          streamUrl = `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${ipOrDdns}:${portHttp}/cgi-bin/snapshot.cgi?channel=${channel}&_t=${timestamp}`;
-        }
-        document.getElementById('cameraLiveFeedImg').src = streamUrl;
-      };
-
-      updateFrame();
-      activeCameraStreamTimer = setInterval(updateFrame, 1000);
-    }
-
-    function reloadCameraFeed() {
-      startCameraStreamLoop();
-      showToast('Sinal reconectado!');
-    }
-
-    function handleCameraStreamError() {
-      const statusEl = document.getElementById('cameraStatusText');
-      statusEl.textContent = '⚠️ Erro ao conectar ao DVR. Verifique se o IP/DDNS e a porta HTTP estão acessíveis.';
     }
 
     const CONTRACT_CATEGORIES = [
@@ -1435,7 +1314,7 @@
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (docSnap.id === ownerEmail || data.ownerEmail === ownerEmail) {
-            currentCompanyName = data.companyName || 'Protech';
+            currentCompanyName = data.companyName || 'Buscador de Condomínios';
             currentCompanyLogo = data.companyLogo || '';
             updateHeaderBrandDisplay();
           }
@@ -1579,7 +1458,7 @@
 
           ownerEmail = companyOwnerEmail;
           localStorage.setItem('protech_user_name_' + email, userName);
-          showMainApp('Protech', '', companyOwnerEmail);
+          showMainApp('Buscador de Condomínios', '', companyOwnerEmail);
         }
         showToast('Conta criada com sucesso!');
       }).catch(err => alert('Erro ao criar conta: ' + err.message));
@@ -1623,11 +1502,18 @@
         } else {
           ownerEmail = userEmail;
         }
-        showMainApp('Protech', '', ownerEmail);
+        showMainApp('Buscador de Condomínios', '', ownerEmail);
       }).catch(() => {
         ownerEmail = userEmail;
-        showMainApp('Protech', '', ownerEmail);
+        showMainApp('Buscador de Condomínios', '', ownerEmail);
       });
+    }
+
+    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      updateHeaderBrandDisplay();
+      loadCondosForOwner(rootOwnerEmail);
     }
 
     async function loadCondosForOwner(rootOwnerEmail) {
@@ -1664,21 +1550,7 @@
         const localCondos = await localDb.condos.toArray();
         condos = localCondos;
       }
-
-      condos.sort((a, b) => {
-        let nameA = (a.name || '').toLowerCase();
-        let nameB = (b.name || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-
       renderCondos();
-    }
-
-    function showMainApp(companyName, companyLogo, rootOwnerEmail) {
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'flex';
-      updateHeaderBrandDisplay();
-      loadCondosForOwner(rootOwnerEmail);
     }
 
     function openSettingsModal() {
@@ -1791,7 +1663,7 @@
     }
 
     function updateHeaderBrandDisplay() {
-      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Protech';
+      document.getElementById('headerCompanyNameTitle').textContent = currentCompanyName || 'Buscador de Condomínios';
       const logoContainer = document.getElementById('headerBrandLogoContainer');
       logoContainer.innerHTML = currentCompanyLogo ? `<img src="${currentCompanyLogo}" class="brand-logo-img" alt="Logo">` : `<div class="brand-icon">🏢</div>`;
     }
@@ -2372,7 +2244,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Protech", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
       doc.setFontSize(12);
       doc.text(`Escopo Contratual - ${cleanText(c.name)}`, 14, 25);
       doc.setFontSize(9);
@@ -2454,7 +2326,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Protech", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
       doc.setFontSize(12);
       doc.text(`Ficha Tecnica - ${cleanText(c.name)}`, 14, 25);
       doc.setFontSize(9);
@@ -2576,17 +2448,7 @@
       if (dvrs.length > 0) {
         html += `<div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color);"><b>🎥 DVRs / NVRs (${dvrs.length}):</b>`;
         dvrs.forEach((d, i) => {
-          const hasConnection = (d.ip || d.name) ? true : false;
-          html += `
-            <div style="margin-top:4px; padding-top:4px; border-top:1px dashed var(--border-color);">
-              • #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '80')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}
-              ${hasConnection ? `
-                <div style="margin-top:4px;">
-                  <button onclick="openCameraLivePlayer('${escapeHtml(d.ip)}', '${escapeHtml(d.http || '80')}', '${escapeHtml(d.user)}', '${escapeHtml(d.pass)}', 1)" class="btn btn-sky" style="font-size:10px; padding:3px 8px;">🎥 Transmissão ao Vivo</button>
-                </div>
-              ` : ''}
-            </div>
-          `;
+          html += `<br>• #${i+1} ${escapeHtml(d.name || 'Gravador')} | IP: ${escapeHtml(d.ip || '--')} | HTTP: ${escapeHtml(d.http || '--')} | Serviço: ${escapeHtml(d.servicePort || '--')} | RTSP: ${escapeHtml(d.rtsp || '--')} | User: ${escapeHtml(d.user || '--')} | Senha: ${renderMaskedPassword(d.pass, `dvr_${i}`)}`;
         });
         html += `</div>`;
       }
@@ -3086,7 +2948,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Protech", 14, 18);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 18);
       doc.setFontSize(12);
       doc.text(`Relatorio de Visita - ${cleanText(condoName)}`, 14, 25);
       doc.setFontSize(9);
@@ -3271,7 +3133,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(cleanText(currentCompanyName) || "Protech", 14, 20);
+      doc.text(cleanText(currentCompanyName) || "Buscador de Condominios", 14, 20);
       doc.setFontSize(12);
       doc.text("Relatorio Geral de Atendimentos Consolidado", 14, 28);
       
