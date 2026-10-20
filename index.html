@@ -285,7 +285,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.4.0</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.5.0</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
@@ -307,7 +307,7 @@
         <div class="header-bottom-row">
           <div class="actions-left">
             <button onclick="openRouteModal()" class="btn btn-slate">🚗 Fazer Rota</button>
-            <button onclick="openVoiceModal()" class="btn btn-sky" title="Adicionar por Voz / Ficha Completa com I.A.">🎤 I.A. por Voz Avançada</button>
+            <button onclick="openVoiceModal()" class="btn btn-sky" title="Adicionar por Voz / Ficha Completa com I.A.">🎤 I.A. por Voz Inteligente</button>
             <button id="newCondoBtn" onclick="openModal()" class="btn btn-slate" style="display:inline-flex;">+ Novo</button>
           </div>
         </div>
@@ -333,29 +333,33 @@
     </main>
   </div>
 
-  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A. AVANÇADA) -->
+  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A. INTELIGENTE) -->
   <div id="voiceAssistantModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width: 550px;">
+    <div class="modal" style="max-width: 580px;">
       <div class="modal-header">
-        <h3 style="color:var(--text-main); font-size: 16px;">🎤 I.A. por Voz Avançada (Ficha Completa)</h3>
+        <h3 style="color:var(--text-main); font-size: 16px;">🎤 I.A. por Voz Inteligente (Ficha Completa)</h3>
         <button onclick="closeVoiceModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
       </div>
       <div class="modal-body" style="gap:12px;">
         <p style="font-size: 11px; color: var(--text-muted);">
-          Fale ou digite livremente os dados do condomínio e da rede (Ex: <i>"Cadastrar Condomínio Solar dos Pinheiros na Rua Bento Gonçalves 1200, modem IP 192.168.1.1 senha admin, Wi-Fi Protech senha 1234, DVR IP 192.168.1.100 porta 37777 senha root"</i>). A escuta agora é contínua e não fecha sozinha!
+          Clique em <b>Gravar Áudio</b> e dite os dados livremente. Você também pode digitar ou colar diretamente na caixa abaixo. Exemplo de formato completo:
         </p>
+        <div style="background:var(--bg-main); padding:8px; border-radius:6px; font-size:10px; color:#38bdf8; font-family:monospace;">
+          Condomínio Solar das Flores, Rua Bento Gonçalves 1200, Modem IP 192.168.1.1 usuário admin senha secreta Wi-Fi BlocoA senha 1234, DVR IP 192.168.1.100 porta 37777 senha root
+        </div>
         <div class="form-group" style="position:relative; margin-bottom:0;">
-          <textarea id="voiceInputText" rows="6" class="form-control" placeholder="Clique em 'Iniciar Escuta Contínua' e dite toda a ficha técnica..."></textarea>
+          <textarea id="voiceInputText" rows="6" class="form-control" placeholder="O texto ditado ou colado aparecerá aqui..."></textarea>
           <div id="recordingStatus" style="font-size:11px; color:#10b981; font-weight:bold; margin-top:6px; display:none; align-items:center; gap:4px;">
-            🔴 Escutando áudio continuamente... Fale à vontade.
+            🔴 Ouvindo... Pode falar. Clique em Parar assim que terminar.
           </div>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:6px;">
           <button type="button" id="btnMicToggle" onclick="toggleSpeechRecognition()" class="btn btn-rose">
-            🎤 Iniciar Escuta Contínua
+            🎙️ Gravar Áudio
           </button>
-          <button type="button" onclick="executeAdvancedVoiceParsing()" class="btn btn-emerald">
-            ⚡ Processar e Criar Ficha Completa
+          <button type="button" onclick="clearVoiceText()" class="btn btn-slate" style="font-size:11px;">Limpar Texto</button>
+          <button type="button" onclick="executeSmartVoiceParsing()" class="btn btn-emerald">
+            ⚡ Processar Ficha e Criar Condomínio
           </button>
         </div>
       </div>
@@ -823,11 +827,11 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.4.0 (I.A. Avançada por Voz Contínua)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.5.0 (I.A. Inteligente por Voz & Texto)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Escuta contínua com auto-reconexão para evitar timeout no microfone durante falas longas.</li>
-            <li>Parser expandido para preenchimento simultâneo de dados básicos, modems com Wi-Fi e gravadores (DVRs/NVRs).</li>
-            <li>Sincronização offline e criptografia automática de todo o conteúdo gerado por voz.</li>
+            <li>Acumulador inteligente de fala: o texto ditado permanece visível e editável para ajustes antes de criar o registro.</li>
+            <li>Parser avançado com extração automatizada de nome, endereço, número, IP de modem, senha, Wi-Fi e DVR/NVR direto para a ficha técnica.</li>
+            <li>Sincronização offline e criptografia automática de ponta a ponta preservadas.</li>
           </ul>
         </div>
       </div>
@@ -1074,7 +1078,7 @@
     let currentActiveTechSheetId = null;
     let recognition = null;
     let isListening = false;
-    let manualStopRequested = false;
+    let accumulatedTranscript = "";
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedColor = localStorage.getItem('protech_custom_theme_color') || '#0f172a';
@@ -1128,7 +1132,7 @@
       }
     }
 
-    // --- MOTOR DE RECONHECIMENTO DE VOZ CONTÍNUO E AVANÇADO (IA) ---
+    // --- MOTOR DE VOZ INTELIGENTE E ACUMULATIVO ---
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -1142,40 +1146,36 @@
       rec.interimResults = true;
 
       rec.onresult = (event) => {
-        let transcript = '';
-        for (let i = 0; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript + ' ';
+        let currentInterim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            accumulatedTranscript += event.results[i][0].transcript + ' ';
+          } else {
+            currentInterim += event.results[i][0].transcript;
+          }
         }
-        document.getElementById('voiceInputText').value = transcript.trim();
+        document.getElementById('voiceInputText').value = (accumulatedTranscript + currentInterim).trim();
       };
 
       rec.onerror = (event) => {
-        console.error("Erro no reconhecimento de voz:", event.error);
+        console.error("Erro no microfone:", event.error);
+        stopListeningUI();
       };
 
       rec.onend = () => {
-        if (isListening && !manualStopRequested) {
-          try {
-            rec.start();
-          } catch(e) {
-            console.error("Reinício automático da escuta falhou:", e);
-            stopListeningUI();
-          }
-        } else {
-          stopListeningUI();
-        }
+        stopListeningUI();
       };
 
       return rec;
     }
 
     function openVoiceModal() {
+      accumulatedTranscript = "";
       document.getElementById('voiceInputText').value = '';
       document.getElementById('voiceAssistantModal').classList.remove('hidden');
     }
 
     function closeVoiceModal() {
-      manualStopRequested = true;
       if (isListening && recognition) {
         recognition.stop();
         stopListeningUI();
@@ -1183,22 +1183,26 @@
       document.getElementById('voiceAssistantModal').classList.add('hidden');
     }
 
+    function clearVoiceText() {
+      accumulatedTranscript = "";
+      document.getElementById('voiceInputText').value = '';
+    }
+
     function toggleSpeechRecognition() {
       if (!recognition) recognition = initSpeechRecognition();
       if (!recognition) return;
 
       if (isListening) {
-        manualStopRequested = true;
         recognition.stop();
         stopListeningUI();
       } else {
-        manualStopRequested = false;
         try {
+          accumulatedTranscript = document.getElementById('voiceInputText').value ? document.getElementById('voiceInputText').value + ' ' : '';
           recognition.start();
           isListening = true;
           const btn = document.getElementById('btnMicToggle');
           btn.className = 'btn btn-slate';
-          btn.innerHTML = '⏹️ Parar Escuta Contínua';
+          btn.innerHTML = '⏹️ Parar Gravação';
           document.getElementById('recordingStatus').style.display = 'flex';
         } catch (e) {
           console.error(e);
@@ -1211,33 +1215,32 @@
       const btn = document.getElementById('btnMicToggle');
       if (btn) {
         btn.className = 'btn btn-rose';
-        btn.innerHTML = '🎤 Iniciar Escuta Contínua';
+        btn.innerHTML = '🎙️ Gravar Áudio';
       }
       const status = document.getElementById('recordingStatus');
       if (status) status.style.display = 'none';
     }
 
-    async function executeAdvancedVoiceParsing() {
+    async function executeSmartVoiceParsing() {
       const rawText = document.getElementById('voiceInputText').value.trim();
       if (!rawText) {
-        showToast('Por favor, fale ou digite as informações completas do condomínio.');
+        showToast('Por favor, fale ou digite as informações do condomínio.');
         return;
       }
 
       if (isListening && recognition) {
-        manualStopRequested = true;
         recognition.stop();
         stopListeningUI();
       }
 
-      showToast('Processando ficha completa com I.A...');
+      showToast('Processando ficha técnica com I.A...');
 
-      // Extração de Campos Básicos
+      // Extração de Nome, Endereço e Número por Regex inteligente
       const nameMatch = extractPattern(rawText, /(?:condomínio|condominio|nome)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9]+?)(?=\s+(?:rua|avenida|av|alameda|modem|dvr|ip|senha|wi-fi|$))/i);
       const addressMatch = extractPattern(rawText, /(?:rua|avenida|av\.|alameda|endereço|endereco)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9,]+?)(?=\s+(?:número|numero|nº|n°|modem|dvr|ip|senha|wi-fi|$))/i);
-      const numberMatch = extractPattern(rawText, /(?:número|numero|nº|n°)\s*([0-9]+)/i);
+      const numberMatch = extractPattern(rawText, /(?:número|numero|nº|n°|,)\s*([0-9]+)/i);
 
-      // Extração de Dados de Modem / Roteador
+      // Extração de Modem / Roteador e Wi-Fi
       const modemIpMatch = extractPattern(rawText, /(?:modem|roteador).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i) || extractPattern(rawText, /ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
       const modemUserMatch = extractPattern(rawText, /(?:usuário|usuario|user).*?\s+([a-zA-Z0-9_.-]+)/i);
       const modemPassMatch = extractPattern(rawText, /(?:senha|pass|password).*?\s+([a-zA-Z0-9@#$_.-]+)/i);
@@ -1247,7 +1250,7 @@
       const dvrIpMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
       const dvrPortMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?porta\s*([0-9]+)/i);
 
-      const condoName = nameMatch ? nameMatch.trim() : 'Novo Condomínio por Voz';
+      const condoName = nameMatch ? nameMatch.trim() : 'Condomínio por Voz';
       const condoAddress = addressMatch ? addressMatch.trim() : 'Endereço não especificado';
       const condoNumber = numberMatch ? numberMatch.trim() : 'S/N';
 
@@ -1259,7 +1262,7 @@
         phone: '',
         lat: '0',
         lng: '0',
-        notes: 'Cadastrado e preenchido via Assistente de Voz I.A. Avançado.',
+        notes: 'Cadastrado e preenchido via I.A. Inteligente.',
         ownerEmail: ownerEmail,
         encryptedModems: modemIpMatch ? [{
           operadora: encryptData('Principal'),
@@ -1299,7 +1302,7 @@
       }
 
       closeVoiceModal();
-      showToast(`Ficha completa do condomínio "${newCondoName}" gerada com sucesso!`);
+      showToast(`Condomínio "${condoName}" e ficha técnica criados com sucesso!`);
       loadCondosForOwner(ownerEmail);
     }
 
