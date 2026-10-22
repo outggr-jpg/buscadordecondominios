@@ -285,7 +285,7 @@
               <h1 id="headerCompanyNameTitle" class="title">Buscador de Condomínios</h1>
               <div class="company-row">
                 <span id="companySubtitleDisplay" class="subtitle">Gestão Operacional</span>
-                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.5.1</span>
+                <span class="badge" onclick="openChangelogModal()" title="Histórico de Versões">v9.6.0</span>
                 <span id="networkStatusBadge" class="net-badge net-online">🟢 Online</span>
               </div>
             </div>
@@ -333,7 +333,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A. INTELIGENTE) -->
+  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A. LOCAL) -->
   <div id="voiceAssistantModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 580px;">
       <div class="modal-header">
@@ -342,10 +342,10 @@
       </div>
       <div class="modal-body" style="gap:12px;">
         <p style="font-size: 11px; color: var(--text-muted);">
-          Clique em <b>Gravar Áudio</b> e dite os dados livremente. Você também pode digitar ou colar diretamente na caixa abaixo. Exemplo de formato completo:
+          Clique em <b>Gravar Áudio</b> e dite os dados livremente. Você também pode digitar ou colar diretamente na caixa abaixo.
         </p>
         <div style="background:var(--bg-main); padding:8px; border-radius:6px; font-size:10px; color:#38bdf8; font-family:monospace;">
-          Condomínio Solar das Flores, Rua Bento Gonçalves 1200, Modem IP 192.168.1.1 usuário admin senha secreta Wi-Fi BlocoA senha 1234, DVR IP 192.168.1.100 porta 37777 senha root
+          Ex: Condomínio Bella Vista na Rua das Flores 123, modem da Vivo com IP 192.168.1.1 senha admin123, DVR Hikvision IP 192.168.1.100 porta 8000
         </div>
         <div class="form-group" style="position:relative; margin-bottom:0;">
           <textarea id="voiceInputText" rows="6" class="form-control" placeholder="O texto ditado ou colado aparecerá aqui..."></textarea>
@@ -358,8 +358,8 @@
             🎙️ Gravar Áudio
           </button>
           <button type="button" onclick="clearVoiceText()" class="btn btn-slate" style="font-size:11px;">Limpar Texto</button>
-          <button type="button" onclick="executeSmartVoiceParsing()" class="btn btn-emerald">
-            ⚡ Processar Ficha e Criar Condomínio
+          <button type="button" id="btnProcessVoice" onclick="executeSmartVoiceParsing()" class="btn btn-emerald">
+            ⚡ Processar Ficha com I.A.
           </button>
         </div>
       </div>
@@ -827,11 +827,18 @@
       </div>
       <div class="modal-body">
         <div class="version-item">
-          <div class="version-title"><span>Versão 9.5.1 (Filtro Anti-Gagueira de Voz)</span><span class="version-date">Atual</span></div>
+          <div class="version-title"><span>Versão 9.6.0 (Integração Total com I.A. Local Ollama)</span><span class="version-date">Atual</span></div>
+          <ul class="version-list">
+            <li>Integração direta do PWA com a API FastAPI local (`http://192.168.1.25:8000/api/parse-condominium`).</li>
+            <li>Extração automatizada via Llama 3 de nomes, endereços, modems, DVRs e credenciais.</li>
+            <li>Preenchimento automático e criptografia dos slots na ficha técnica do condomínio.</li>
+          </ul>
+        </div>
+        <div class="version-item">
+          <div class="version-title"><span>Versão 9.5.1 (Filtro Anti-Gagueira de Voz)</span><span class="version-date">Anterior</span></div>
           <ul class="version-list">
             <li>Adicionado filtro inteligente de repetição de palavras e blocos no reconhecimento de voz (`webkitSpeechRecognition`).</li>
             <li>Elimina loops automáticos de transcrição em campo.</li>
-            <li>Mantém o parser automático completo para condomínios, endereços e fichas técnicas criptografadas.</li>
           </ul>
         </div>
       </div>
@@ -840,6 +847,9 @@
   </div>
 
   <script>
+    // URL da sua API Python FastAPI local que conversa com o Ollama / Llama 3
+    const AI_API_URL = "http://192.168.1.25:8000/api/parse-condominium";
+
     const firebaseConfig = {
       apiKey: "AIzaSyARDZDxNAPu86dpcwj148-CRDXYvIKN-o0",
       authDomain: "buscador-de-condominios.firebaseapp.com",
@@ -1132,7 +1142,7 @@
       }
     }
 
-    // --- MOTOR DE VOZ INTELIGENTE COM FILTRO ANTI-REPETIÇÃO (v9.5.1) ---
+    // --- MOTOR DE VOZ INTELIGENTE COM FILTRO ANTI-REPETIÇÃO ---
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -1161,7 +1171,6 @@
           accumulatedTranscript += finalChunk;
         }
 
-        // Aplica o filtro anti-gagueira/repetição no texto acumulado
         const rawCombined = accumulatedTranscript + interimChunk;
         const cleanedText = removeSpeechRepetitions(rawCombined);
 
@@ -1180,7 +1189,6 @@
       return rec;
     }
 
-    // Função de limpeza que remove palavras/frases repetidas em looping pelo navegador
     function removeSpeechRepetitions(text) {
       if (!text) return "";
       
@@ -1268,6 +1276,7 @@
       if (status) status.style.display = 'none';
     }
 
+    // --- EXECUÇÃO COM INTEGRAÇÃO DA API DA I.A. LOCAL (FastAPI / Ollama) ---
     async function executeSmartVoiceParsing() {
       const rawText = document.getElementById('voiceInputText').value.trim();
       if (!rawText) {
@@ -1280,56 +1289,111 @@
         stopListeningUI();
       }
 
-      showToast('Processando ficha técnica com I.A...');
+      const btnProcess = document.getElementById('btnProcessVoice');
+      btnProcess.disabled = true;
+      btnProcess.innerText = '⏳ Processando com I.A. Local...';
+      showToast('Ollama/Llama 3 processando a anotação...');
 
-      const nameMatch = extractPattern(rawText, /(?:condomínio|condominio|nome)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9]+?)(?=\s+(?:rua|avenida|av|alameda|modem|dvr|ip|senha|wi-fi|$))/i);
-      const addressMatch = extractPattern(rawText, /(?:rua|avenida|av\.|alameda|endereço|endereco)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9,]+?)(?=\s+(?:número|numero|nº|n°|modem|dvr|ip|senha|wi-fi|$))/i);
-      const numberMatch = extractPattern(rawText, /(?:número|numero|nº|n°|,)\s*([0-9]+)/i);
+      let parsedData = null;
 
-      const modemIpMatch = extractPattern(rawText, /(?:modem|roteador).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i) || extractPattern(rawText, /ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
-      const modemUserMatch = extractPattern(rawText, /(?:usuário|usuario|user).*?\s+([a-zA-Z0-9_.-]+)/i);
-      const modemPassMatch = extractPattern(rawText, /(?:senha|pass|password).*?\s+([a-zA-Z0-9@#$_.-]+)/i);
-      const wifiSsidMatch = extractPattern(rawText, /(?:wi-fi|wifi|rede)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9]+?)(?=\s+senha|$)/i);
+      try {
+        // Chamada POST para a sua API FastAPI
+        const response = await fetch(AI_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: rawText })
+        });
 
-      const dvrIpMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
-      const dvrPortMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?porta\s*([0-9]+)/i);
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson.status === "success" && resJson.data) {
+            parsedData = resJson.data;
+          }
+        }
+      } catch (err) {
+        console.warn("Aviso: Não foi possível conectar ao servidor Python local. Usando fallback Regex local.", err);
+      }
 
-      const condoName = nameMatch ? nameMatch.trim() : 'Condomínio por Voz';
-      const condoAddress = addressMatch ? addressMatch.trim() : 'Endereço não especificado';
-      const condoNumber = numberMatch ? numberMatch.trim() : 'S/N';
+      // Prepara os dados extraídos (ou usa fallback se a API não estiver ligada)
+      const condoName = (parsedData && parsedData.name) ? parsedData.name : (extractPattern(rawText, /(?:condomínio|condominio|nome)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9]+?)(?=\s+(?:rua|avenida|av|alameda|modem|dvr|ip|senha|wi-fi|$))/i) || 'Condomínio via Voz');
+      const condoAddress = (parsedData && parsedData.address) ? parsedData.address : (extractPattern(rawText, /(?:rua|avenida|av\.|alameda|endereço|endereco)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9,]+?)(?=\s+(?:número|numero|nº|n°|modem|dvr|ip|senha|wi-fi|$))/i) || 'Endereço não especificado');
+      const condoNumber = (parsedData && parsedData.number) ? parsedData.number : (extractPattern(rawText, /(?:número|numero|nº|n°|,)\s*([0-9]+)/i) || 'S/N');
+      const condoNotes = (parsedData && parsedData.notes) ? parsedData.notes : 'Cadastrado e preenchido via I.A. Inteligente.';
+
+      // Mapeia os modems retornados pela I.A. e criptografa para salvar no banco
+      let encModems = [];
+      if (parsedData && parsedData.modems && parsedData.modems.length > 0) {
+        encModems = parsedData.modems.map(m => ({
+          operadora: encryptData(m.operadora || 'Principal'),
+          ip: encryptData(m.ip || ''),
+          http: encryptData(m.http || '80'),
+          user: encryptData(m.user || 'admin'),
+          pass: encryptData(m.pass || ''),
+          wifi2gSsid: encryptData(m.wifi2gSsid || ''),
+          wifi2gPass: encryptData(m.wifi2gPass || ''),
+          wifi5gSsid: encryptData(m.wifi5gSsid || ''),
+          wifi5gPass: encryptData(m.wifi5gPass || ''),
+          extra: encryptData(m.extra || rawText)
+        }));
+      } else {
+        const modemIpMatch = extractPattern(rawText, /(?:modem|roteador).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i) || extractPattern(rawText, /ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
+        if (modemIpMatch) {
+          encModems.push({
+            operadora: encryptData('Principal'),
+            ip: encryptData(modemIpMatch),
+            http: encryptData('80'),
+            user: encryptData(extractPattern(rawText, /(?:usuário|usuario|user).*?\s+([a-zA-Z0-9_.-]+)/i) || 'admin'),
+            pass: encryptData(extractPattern(rawText, /(?:senha|pass|password).*?\s+([a-zA-Z0-9@#$_.-]+)/i) || ''),
+            wifi2gSsid: encryptData(''),
+            wifi2gPass: encryptData(''),
+            wifi5gSsid: encryptData(''),
+            wifi5gPass: encryptData(''),
+            extra: encryptData(rawText)
+          });
+        }
+      }
+
+      // Mapeia os DVRs retornados pela I.A. e criptografa para salvar no banco
+      let encDvrs = [];
+      if (parsedData && parsedData.dvrs && parsedData.dvrs.length > 0) {
+        encDvrs = parsedData.dvrs.map(d => ({
+          name: encryptData(d.name || 'DVR Principal'),
+          ip: encryptData(d.ip || ''),
+          http: encryptData(d.http || '80'),
+          servicePort: encryptData(d.servicePort || '37777'),
+          rtsp: encryptData('554'),
+          user: encryptData(d.user || 'admin'),
+          pass: encryptData(d.pass || '')
+        }));
+      } else {
+        const dvrIpMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
+        const dvrPortMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?porta\s*([0-9]+)/i);
+        if (dvrIpMatch || dvrPortMatch) {
+          encDvrs.push({
+            name: encryptData('DVR Principal'),
+            ip: encryptData(dvrIpMatch || ''),
+            http: encryptData(dvrPortMatch || '80'),
+            servicePort: encryptData('37777'),
+            rtsp: encryptData('554'),
+            user: encryptData('admin'),
+            pass: encryptData('')
+          });
+        }
+      }
 
       const newCondoData = {
         name: condoName,
         address: condoAddress,
         number: condoNumber,
-        neighborhood: '',
-        phone: '',
+        neighborhood: parsedData ? (parsedData.neighborhood || '') : '',
+        phone: parsedData ? (parsedData.phone || '') : '',
         lat: '0',
         lng: '0',
-        notes: 'Cadastrado e preenchido via I.A. Inteligente.',
+        notes: condoNotes,
         ownerEmail: ownerEmail,
-        encryptedModems: modemIpMatch ? [{
-          operadora: encryptData('Principal'),
-          ip: encryptData(modemIpMatch),
-          http: encryptData('80'),
-          user: encryptData(modemUserMatch || 'admin'),
-          pass: encryptData(modemPassMatch || ''),
-          wifi2gSsid: encryptData(wifiSsidMatch || ''),
-          wifi2gPass: encryptData(modemPassMatch || ''),
-          wifi5gSsid: encryptData(''),
-          wifi5gPass: encryptData(''),
-          extra: encryptData(rawText)
-        }] : [],
+        encryptedModems: encModems,
         encryptedMikrotiks: [],
-        encryptedDvrs: dvrIpMatch || dvrPortMatch ? [{
-          name: encryptData('DVR Principal'),
-          ip: encryptData(dvrIpMatch || ''),
-          http: encryptData(dvrPortMatch || '80'),
-          servicePort: encryptData('37777'),
-          rtsp: encryptData('554'),
-          user: encryptData('admin'),
-          pass: encryptData(modemPassMatch || '')
-        }] : [],
+        encryptedDvrs: encDvrs,
         encryptedCameras: [],
         encryptedControladoras: [],
         encryptedModulosRf: [],
@@ -1338,16 +1402,24 @@
         contractScopeList: []
       };
 
-      if (isOnline) {
-        await db.collection("condominios").add(newCondoData);
-      } else {
-        newCondoData.id = 'local_' + Date.now();
-        await cacheCondoLocally(newCondoData);
-      }
+      try {
+        if (isOnline) {
+          await db.collection("condominios").add(newCondoData);
+        } else {
+          newCondoData.id = 'local_' + Date.now();
+          await cacheCondoLocally(newCondoData);
+        }
 
-      closeVoiceModal();
-      showToast(`Condomínio "${condoName}" e ficha técnica criados com sucesso!`);
-      loadCondosForOwner(ownerEmail);
+        closeVoiceModal();
+        showToast(`Condomínio "${condoName}" e ficha técnica criados via I.A.!`);
+        loadCondosForOwner(ownerEmail);
+      } catch (e) {
+        console.error("Erro ao salvar novo condomínio via I.A.:", e);
+        alert("Erro ao salvar o condomínio extraído pela I.A.");
+      } finally {
+        btnProcess.disabled = false;
+        btnProcess.innerText = '⚡ Processar Ficha com I.A.';
+      }
     }
 
     function extractPattern(text, regex) {
