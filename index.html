@@ -180,17 +180,6 @@
     .masked-pwd:hover { background: rgba(2, 132, 199, 0.3); }
     
     .audit-log-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-size: 11px; color: var(--text-muted); margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
-    
-    .btn-mic-recording {
-      animation: pulse-red 1.5s infinite;
-      background-color: #e11d48 !important;
-      color: white !important;
-    }
-    @keyframes pulse-red {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7); }
-      70% { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(225, 29, 72, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
-    }
   </style>
 </head>
 <body>
@@ -344,7 +333,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A. LOCAL OLLAMA) -->
+  <!-- MODAL DE ASSISTENTE DE VOZ / TEXTO INTELIGENTE (I.A. LOCAL) -->
   <div id="voiceAssistantModal" class="modal-overlay hidden">
     <div class="modal" style="max-width: 580px;">
       <div class="modal-header">
@@ -353,7 +342,7 @@
       </div>
       <div class="modal-body" style="gap:12px;">
         <p style="font-size: 11px; color: var(--text-muted);">
-          Clique em <b>Gravar Áudio</b> e dite os dados livremente. O sistema manterá a escuta ativa continuamente até você parar.
+          Clique em <b>Gravar Áudio</b> e dite os dados livremente. Você também pode digitar ou colar diretamente na caixa abaixo.
         </p>
         <div style="background:var(--bg-main); padding:8px; border-radius:6px; font-size:10px; color:#38bdf8; font-family:monospace;">
           Ex: Condomínio Bella Vista na Rua das Flores 123, modem da Vivo com IP 192.168.1.1 senha admin123, DVR Hikvision IP 192.168.1.100 porta 8000
@@ -361,7 +350,7 @@
         <div class="form-group" style="position:relative; margin-bottom:0;">
           <textarea id="voiceInputText" rows="6" class="form-control" placeholder="O texto ditado ou colado aparecerá aqui..."></textarea>
           <div id="recordingStatus" style="font-size:11px; color:#10b981; font-weight:bold; margin-top:6px; display:none; align-items:center; gap:4px;">
-            🔴 Ouvindo em modo contínuo... Clique em Parar assim que terminar de falar.
+            🔴 Ouvindo... Pode falar. Clique em Parar assim que terminar.
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:6px;">
@@ -387,7 +376,7 @@
         <h3 style="color:var(--text-main); font-size: 16px;">🗺️ Selecione o Navegador</h3>
       </div>
       <div class="modal-body" style="padding-top: 10px;">
-        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por qual aplicativo deseja iniciar a rota:</p>
+        <p style="margin-bottom: 15px; font-weight: 500; color: var(--text-muted); text-align: center; font-size: 13px;">Escolha por cuál aplicativo deseja iniciar a rota:</p>
         <div class="gps-buttons-container">
           <a id="gpsLinkMaps" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card maps">🗺️ Maps</a>
           <a id="gpsLinkWaze" href="#" target="_blank" onclick="closeGpsModal()" class="gps-card waze">🚗 Waze</a>
@@ -434,6 +423,14 @@
             <div style="display:flex; gap:6px;">
               <input type="text" id="settingsCompanyNameInput" class="form-control" placeholder="Nome da sua empresa">
               <button onclick="saveCompanyName()" class="btn btn-slate" style="padding:4px 10px;">Salvar</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:6px;">
+            <label>Número do WhatsApp do Bot (ex: 5551999999999):</label>
+            <div style="display:flex; gap:6px;">
+              <input type="text" id="settingsWhatsappInput" class="form-control" placeholder="5551999999999">
+              <button onclick="saveCompanyWhatsapp()" class="btn btn-slate" style="padding:4px 10px;">Salvar</button>
             </div>
           </div>
 
@@ -840,10 +837,10 @@
         <div class="version-item">
           <div class="version-title"><span>Versão 9.6.0 (Integração Total com I.A. Local Ollama)</span><span class="version-date">Atual</span></div>
           <ul class="version-list">
-            <li>Integração direta do PWA com a API FastAPI local (`http://192.168.1.25:8000/api/parse-condominium`).</li>
+            <li>Integração direta do PWA com a API FastAPI local (`http://127.0.0.1:8000/api/parse-condominium`).</li>
             <li>Extração automatizada via Llama 3 de nomes, endereços, modems, DVRs e credenciais.</li>
-            <li>Reconhecimento de voz contínuo com religamento automático e filtro de repetição.</li>
             <li>Preenchimento automático e criptografia dos slots na ficha técnica do condomínio.</li>
+            <li>Suporte Multi-Empresa com cadastro dinâmico do celular/bot do WhatsApp nas configurações.</li>
           </ul>
         </div>
         <div class="version-item">
@@ -860,7 +857,7 @@
 
   <script>
     // URL da sua API Python FastAPI local que conversa com o Ollama / Llama 3
-    const AI_API_URL = "http://192.168.1.25:8000/api/parse-condominium";
+    const AI_API_URL = "http://127.0.0.1:8000/api/parse-condominium";
 
     const firebaseConfig = {
       apiKey: "AIzaSyARDZDxNAPu86dpcwj148-CRDXYvIKN-o0",
@@ -1154,7 +1151,7 @@
       }
     }
 
-    // --- MOTOR DE VOZ INTELIGENTE COM REINÍCIO AUTOMÁTICO E FILTRO ANTI-REPETIÇÃO ---
+    // --- MOTOR DE VOZ INTELIGENTE COM FILTRO ANTI-REPETIÇÃO ---
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -1166,16 +1163,6 @@
       rec.lang = 'pt-BR';
       rec.continuous = true;
       rec.interimResults = true;
-
-      rec.onend = () => {
-        if (isListening) {
-          try {
-            rec.start();
-          } catch (e) {
-            console.log("Reinício de voz automático ignorado.");
-          }
-        }
-      };
 
       rec.onresult = (event) => {
         let finalChunk = '';
@@ -1201,9 +1188,11 @@
 
       rec.onerror = (event) => {
         console.error("Erro no microfone:", event.error);
-        if (event.error !== 'no-speech') {
-          stopListeningUI();
-        }
+        stopListeningUI();
+      };
+
+      rec.onend = () => {
+        stopListeningUI();
       };
 
       return rec;
@@ -1267,31 +1256,25 @@
       if (!recognition) recognition = initSpeechRecognition();
       if (!recognition) return;
 
-      if (!isListening) {
+      if (isListening) {
+        recognition.stop();
+        stopListeningUI();
+      } else {
         try {
-          accumulatedTranscript = document.getElementById('voiceInputText').value;
-          if (accumulatedTranscript && !accumulatedTranscript.endsWith(' ')) {
-            accumulatedTranscript += ' ';
-          }
+          accumulatedTranscript = document.getElementById('voiceInputText').value ? document.getElementById('voiceInputText').value + ' ' : '';
           recognition.start();
           isListening = true;
           const btn = document.getElementById('btnMicToggle');
-          btn.className = 'btn btn-rose btn-mic-recording';
+          btn.className = 'btn btn-slate';
           btn.innerHTML = '⏹️ Parar Gravação';
           document.getElementById('recordingStatus').style.display = 'flex';
-          showToast('A escutar... Fale as informações.');
         } catch (e) {
           console.error(e);
         }
-      } else {
-        stopListeningUI();
       }
     }
 
     function stopListeningUI() {
-      if (recognition && isListening) {
-        try { recognition.stop(); } catch(e) {}
-      }
       isListening = false;
       const btn = document.getElementById('btnMicToggle');
       if (btn) {
@@ -1310,7 +1293,10 @@
         return;
       }
 
-      stopListeningUI();
+      if (isListening && recognition) {
+        recognition.stop();
+        stopListeningUI();
+      }
 
       const btnProcess = document.getElementById('btnProcessVoice');
       btnProcess.disabled = true;
@@ -1320,6 +1306,7 @@
       let parsedData = null;
 
       try {
+        // Chamada POST para a sua API FastAPI
         const response = await fetch(AI_API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1336,11 +1323,13 @@
         console.warn("Aviso: Não foi possível conectar ao servidor Python local. Usando fallback Regex local.", err);
       }
 
+      // Prepara os dados extraídos (ou usa fallback se a API não estiver ligada)
       const condoName = (parsedData && parsedData.name) ? parsedData.name : (extractPattern(rawText, /(?:condomínio|condominio|nome)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9]+?)(?=\s+(?:rua|avenida|av|alameda|modem|dvr|ip|senha|wi-fi|$))/i) || 'Condomínio via Voz');
       const condoAddress = (parsedData && parsedData.address) ? parsedData.address : (extractPattern(rawText, /(?:rua|avenida|av\.|alameda|endereço|endereco)\s+([a-zA-a-áàâãéèêíïóôõöúçñ\s0-9,]+?)(?=\s+(?:número|numero|nº|n°|modem|dvr|ip|senha|wi-fi|$))/i) || 'Endereço não especificado');
       const condoNumber = (parsedData && parsedData.number) ? parsedData.number : (extractPattern(rawText, /(?:número|numero|nº|n°|,)\s*([0-9]+)/i) || 'S/N');
       const condoNotes = (parsedData && parsedData.notes) ? parsedData.notes : 'Cadastrado e preenchido via I.A. Inteligente.';
 
+      // Mapeia os modems retornados pela I.A. e criptografa para salvar no banco
       let encModems = [];
       if (parsedData && parsedData.modems && parsedData.modems.length > 0) {
         encModems = parsedData.modems.map(m => ({
@@ -1355,8 +1344,25 @@
           wifi5gPass: encryptData(m.wifi5gPass || ''),
           extra: encryptData(m.extra || rawText)
         }));
+      } else {
+        const modemIpMatch = extractPattern(rawText, /(?:modem|roteador).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i) || extractPattern(rawText, /ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
+        if (modemIpMatch) {
+          encModems.push({
+            operadora: encryptData('Principal'),
+            ip: encryptData(modemIpMatch),
+            http: encryptData('80'),
+            user: encryptData(extractPattern(rawText, /(?:usuário|usuario|user).*?\s+([a-zA-Z0-9_.-]+)/i) || 'admin'),
+            pass: encryptData(extractPattern(rawText, /(?:senha|pass|password).*?\s+([a-zA-Z0-9@#$_.-]+)/i) || ''),
+            wifi2gSsid: encryptData(''),
+            wifi2gPass: encryptData(''),
+            wifi5gSsid: encryptData(''),
+            wifi5gPass: encryptData(''),
+            extra: encryptData(rawText)
+          });
+        }
       }
 
+      // Mapeia os DVRs retornados pela I.A. e criptografa para salvar no banco
       let encDvrs = [];
       if (parsedData && parsedData.dvrs && parsedData.dvrs.length > 0) {
         encDvrs = parsedData.dvrs.map(d => ({
@@ -1364,10 +1370,24 @@
           ip: encryptData(d.ip || ''),
           http: encryptData(d.http || '80'),
           servicePort: encryptData(d.servicePort || '37777'),
-          rtsp: encryptData(d.rtsp || '554'),
+          rtsp: encryptData('554'),
           user: encryptData(d.user || 'admin'),
           pass: encryptData(d.pass || '')
         }));
+      } else {
+        const dvrIpMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?ip\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i);
+        const dvrPortMatch = extractPattern(rawText, /(?:dvr|gravador|nvr).*?porta\s*([0-9]+)/i);
+        if (dvrIpMatch || dvrPortMatch) {
+          encDvrs.push({
+            name: encryptData('DVR Principal'),
+            ip: encryptData(dvrIpMatch || ''),
+            http: encryptData(dvrPortMatch || '80'),
+            servicePort: encryptData('37777'),
+            rtsp: encryptData('554'),
+            user: encryptData('admin'),
+            pass: encryptData('')
+          });
+        }
       }
 
       const newCondoData = {
@@ -1741,7 +1761,7 @@
         currentUser = cred.user;
         if (userRole === 'owner') {
           const companyName = document.getElementById('regCompanyName').value.trim() || 'Minha Empresa';
-          db.collection("empresas").doc(email).set({ companyName: companyName, ownerEmail: email, companyLogo: '' });
+          db.collection("empresas").doc(email).set({ companyName: companyName, ownerEmail: email, companyLogo: '', whatsappNumber: '' });
           db.collection("usuarios").doc(email).set({ role: 'owner', companyOwnerEmail: email, name: email.split('@')[0] });
           ownerEmail = email;
           showMainApp(companyName, '', email);
@@ -1886,6 +1906,13 @@
         document.getElementById('companySettingsSection').style.display = 'none';
       } else {
         document.getElementById('companySettingsSection').style.display = 'block';
+        db.collection("empresas").doc(ownerEmail).get().then(doc => {
+          if (doc.exists && doc.data().whatsappNumber) {
+            document.getElementById('settingsWhatsappInput').value = doc.data().whatsappNumber;
+          } else {
+            document.getElementById('settingsWhatsappInput').value = '';
+          }
+        });
       }
 
       document.getElementById('settingsModal').classList.remove('hidden');
@@ -1956,6 +1983,27 @@
         currentCompanyName = newName;
         updateHeaderBrandDisplay();
         showToast('Nome da empresa atualizado!');
+      });
+    }
+
+    function saveCompanyWhatsapp() {
+      if (userRole !== 'owner') { 
+        alert('Apenas o Proprietário pode alterar o WhatsApp da empresa.'); 
+        return; 
+      }
+      const newNumber = document.getElementById('settingsWhatsappInput').value.trim();
+      if (!newNumber) return;
+
+      db.collection("empresas").doc(ownerEmail).update({ 
+        whatsappNumber: newNumber 
+      }).then(() => {
+        showToast('Número de WhatsApp atualizado!');
+      }).catch(err => {
+        db.collection("empresas").doc(ownerEmail).set({ 
+          whatsappNumber: newNumber 
+        }, { merge: true }).then(() => {
+          showToast('Número de WhatsApp cadastrado!');
+        });
       });
     }
 
